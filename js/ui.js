@@ -47,88 +47,143 @@ class UIManager {
     }
 
     /**
-     * Vector SVG definitions for chess pieces (Asset-Free, Consistent Rendering)
+     * Vector SVG definitions for chess pieces matching the reference design
+     * High-contrast, iconic silhouettes with crisp detail lines & authentic crowns
      */
     getPieceSVG(type, color) {
         const isWhite = color === 'w';
-        const fill = isWhite ? 'url(#whitePieceGrad)' : 'url(#blackPieceGrad)';
-        const stroke = isWhite ? '#cbd5e1' : '#475569';
-        const aura = isWhite ? '#fef08a' : '#c084fc';
-
-        const defs = `
-            <defs>
-                <linearGradient id="whitePieceGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#ffffff"/>
-                    <stop offset="60%" stop-color="#e2e8f0"/>
-                    <stop offset="100%" stop-color="#94a3b8"/>
-                </linearGradient>
-                <linearGradient id="blackPieceGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#334155"/>
-                    <stop offset="50%" stop-color="#1e293b"/>
-                    <stop offset="100%" stop-color="#090d16"/>
-                </linearGradient>
-            </defs>
-        `;
+        const mainFill = isWhite ? '#ffffff' : '#111726';
+        const lineStroke = isWhite ? '#111726' : '#ffffff';
+        const strokeW = 3.2;
+        const innerDetail = isWhite ? '#111726' : '#ffffff';
 
         let paths = '';
         switch (type) {
-            case 'p': // Pawn - Fire Core
+            case 'p': // Pawn
                 paths = `
-                    <circle cx="25" cy="14" r="7" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>
-                    <path d="M17 38 C17 28 33 28 33 38 Z" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>
-                    <rect x="13" y="38" width="24" height="4" rx="2" fill="${fill}" stroke="${stroke}" stroke-width="1.2"/>
-                    <rect x="10" y="42" width="30" height="4" rx="2" fill="${fill}" stroke="${stroke}" stroke-width="1.2"/>
+                    <!-- Head Sphere -->
+                    <circle cx="50" cy="24" r="14.5" fill="${mainFill}" stroke="${lineStroke}" stroke-width="${strokeW}"/>
+                    <!-- Collar Ring -->
+                    <path d="M36 39.5 C36 37 64 37 64 39.5 C64 42 36 42 36 39.5 Z" fill="${mainFill}" stroke="${lineStroke}" stroke-width="2.5"/>
+                    <!-- Flared Curved Body -->
+                    <path d="M41 42 C44 60 25 76 22 83 L78 83 C75 76 56 60 59 42 Z" fill="${mainFill}" stroke="${lineStroke}" stroke-width="${strokeW}" stroke-linejoin="round"/>
+                    <!-- Stepped Base Tier 1 -->
+                    <rect x="18" y="83" width="64" height="6" rx="2.5" fill="${mainFill}" stroke="${lineStroke}" stroke-width="${strokeW}"/>
+                    <!-- Stepped Base Tier 2 -->
+                    <rect x="13" y="89" width="74" height="6.5" rx="2.5" fill="${mainFill}" stroke="${lineStroke}" stroke-width="${strokeW}"/>
                 `;
                 break;
-            case 'n': // Knight - Lightning Core
+
+            case 'r': // Rook
                 paths = `
-                    <path d="M14 42 L36 42 L36 38 C36 34 33 32 30 30 C33 28 35 23 34 18 C33 13 28 10 24 10 C21 10 19 12 18 14 C17 12 15 11 13 13 C11 15 12 19 13 21 C11 23 11 27 13 30 L16 38 Z" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>
-                    <circle cx="21" cy="19" r="1.5" fill="${aura}"/>
-                    <rect x="11" y="42" width="28" height="4" rx="2" fill="${fill}" stroke="${stroke}" stroke-width="1.2"/>
+                    <!-- Rampart Battlements (3 Crenels) -->
+                    <path d="M23 15 L35 15 L35 24 L45 24 L45 15 L55 15 L55 24 L65 24 L65 15 L77 15 L77 31 L23 31 Z" fill="${mainFill}" stroke="${lineStroke}" stroke-width="${strokeW}" stroke-linejoin="miter"/>
+                    <!-- Upper Rim Band -->
+                    <rect x="20" y="31" width="60" height="7" rx="1.5" fill="${mainFill}" stroke="${lineStroke}" stroke-width="${strokeW}"/>
+                    <!-- Inset Tower Body -->
+                    <path d="M26 38 L29 73 L71 73 L74 38 Z" fill="${mainFill}" stroke="${lineStroke}" stroke-width="${strokeW}"/>
+                    <!-- Tower Horizontal Grooves -->
+                    <line x1="28" y1="49" x2="72" y2="49" stroke="${lineStroke}" stroke-width="3"/>
+                    <line x1="29" y1="61" x2="71" y2="61" stroke="${lineStroke}" stroke-width="3"/>
+                    <!-- Stepped Base Tier 1 -->
+                    <rect x="23" y="73" width="54" height="7" rx="1.5" fill="${mainFill}" stroke="${lineStroke}" stroke-width="${strokeW}"/>
+                    <!-- Stepped Base Tier 2 -->
+                    <rect x="18" y="80" width="64" height="7" rx="1.5" fill="${mainFill}" stroke="${lineStroke}" stroke-width="${strokeW}"/>
+                    <!-- Stepped Base Tier 3 -->
+                    <rect x="12" y="87" width="76" height="8" rx="2" fill="${mainFill}" stroke="${lineStroke}" stroke-width="${strokeW}"/>
                 `;
                 break;
-            case 'b': // Bishop - Wind Core
+
+            case 'n': // Knight
                 paths = `
-                    <circle cx="25" cy="10" r="3" fill="${aura}"/>
-                    <path d="M18 38 C17 24 33 24 32 38 Z" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>
-                    <path d="M25 15 L25 34 M20 22 L30 22" stroke="${stroke}" stroke-width="1.5"/>
-                    <rect x="14" y="38" width="22" height="4" rx="2" fill="${fill}" stroke="${stroke}" stroke-width="1.2"/>
-                    <rect x="11" y="42" width="28" height="4" rx="2" fill="${fill}" stroke="${stroke}" stroke-width="1.2"/>
+                    <!-- Horse Body & Head Profile -->
+                    <path d="M24 85 C23 75 26 65 31 57 C33 54 33 50 30 48 C26 46 21 48 18 43 C15 39 15 32 17 28 C19 24 24 23 29 24 C31 22 34 18 37 14 C38 12 41 13 41 15 C41 17 40 21 42 22 C46 20 51 16 55 11 C57 9 60 10 60 13 C59 17 56 21 58 25 C66 29 74 37 77 46 C80 56 80 72 74 85 Z" fill="${mainFill}" stroke="${lineStroke}" stroke-width="${strokeW}" stroke-linejoin="round"/>
+                    <!-- Eye -->
+                    <ellipse cx="30" cy="32" rx="3.5" ry="2" transform="rotate(-15 30 32)" fill="${innerDetail}"/>
+                    <!-- Nostril -->
+                    <path d="M21 36 C21 34 24 35 24 37" stroke="${lineStroke}" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                    <!-- Mouth Slit -->
+                    <path d="M23 43 C26 45 30 44 32 41" stroke="${lineStroke}" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                    <!-- Mane Grooves -->
+                    <path d="M62 33 C60 40 64 45 68 49" stroke="${lineStroke}" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                    <path d="M68 53 C67 61 70 66 74 70" stroke="${lineStroke}" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                    <!-- Stepped Base -->
+                    <rect x="17" y="85" width="66" height="5.5" rx="2" fill="${mainFill}" stroke="${lineStroke}" stroke-width="${strokeW}"/>
+                    <rect x="12" y="90.5" width="76" height="6" rx="2" fill="${mainFill}" stroke="${lineStroke}" stroke-width="${strokeW}"/>
                 `;
                 break;
-            case 'r': // Rook - Earth Core
+
+            case 'b': // Bishop
                 paths = `
-                    <path d="M14 16 L14 20 L17 20 L17 16 L21 16 L21 20 L25 20 L25 16 L29 16 L29 20 L33 20 L33 16 L36 16 L34 26 L16 26 Z" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>
-                    <path d="M16 26 L17 38 L33 38 L34 26 Z" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>
-                    <rect x="13" y="38" width="24" height="4" rx="2" fill="${fill}" stroke="${stroke}" stroke-width="1.2"/>
-                    <rect x="10" y="42" width="30" height="4" rx="2" fill="${fill}" stroke="${stroke}" stroke-width="1.2"/>
+                    <!-- Top Finial Ball -->
+                    <circle cx="50" cy="11" r="3.5" fill="${mainFill}" stroke="${lineStroke}" stroke-width="2.5"/>
+                    <!-- Mitre Headpiece -->
+                    <path d="M50 14 C36 24 32 44 34 56 C34 59 66 59 66 56 C68 44 64 24 50 14 Z" fill="${mainFill}" stroke="${lineStroke}" stroke-width="${strokeW}"/>
+                    <!-- Inset Cross on Mitre Face -->
+                    <line x1="50" y1="24" x2="50" y2="44" stroke="${lineStroke}" stroke-width="3.5" stroke-linecap="square"/>
+                    <line x1="42" y1="32" x2="58" y2="32" stroke="${lineStroke}" stroke-width="3.5" stroke-linecap="square"/>
+                    <!-- Mitre Base Collar -->
+                    <rect x="32" y="58" width="36" height="6" rx="2" fill="${mainFill}" stroke="${lineStroke}" stroke-width="2.5"/>
+                    <!-- Lower Body -->
+                    <path d="M38 64 C40 73 38 77 36 81 L64 81 C62 77 60 73 62 64 Z" fill="${mainFill}" stroke="${lineStroke}" stroke-width="${strokeW}"/>
+                    <!-- Signature Curved Ribbons/Wings Spreading Outward -->
+                    <path d="M37 81 C26 81 16 83 13 87 C9 91 18 93 25 88 C30 85 35 83 40 83 Z" fill="${mainFill}" stroke="${lineStroke}" stroke-width="2.5"/>
+                    <path d="M63 81 C74 81 84 83 87 87 C91 91 82 93 75 88 C70 85 65 83 60 83 Z" fill="${mainFill}" stroke="${lineStroke}" stroke-width="2.5"/>
+                    <!-- Pedestal Base -->
+                    <rect x="22" y="88" width="56" height="7.5" rx="2.5" fill="${mainFill}" stroke="${lineStroke}" stroke-width="${strokeW}"/>
                 `;
                 break;
-            case 'q': // Queen - Ice / Arcane Core
+
+            case 'q': // Queen
                 paths = `
-                    <circle cx="12" cy="14" r="2.5" fill="${aura}"/>
-                    <circle cx="18" cy="11" r="2.5" fill="${aura}"/>
-                    <circle cx="25" cy="9" r="3" fill="${aura}"/>
-                    <circle cx="32" cy="11" r="2.5" fill="${aura}"/>
-                    <circle cx="38" cy="14" r="2.5" fill="${aura}"/>
-                    <path d="M12 17 L16 34 L34 34 L38 17 L30 25 L25 14 L20 25 Z" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>
-                    <rect x="14" y="34" width="22" height="4" rx="2" fill="${fill}" stroke="${stroke}" stroke-width="1.2"/>
-                    <rect x="11" y="38" width="28" height="4" rx="2" fill="${fill}" stroke="${stroke}" stroke-width="1.2"/>
-                    <rect x="9" y="42" width="32" height="4" rx="2" fill="${fill}" stroke="${stroke}" stroke-width="1.2"/>
+                    <!-- 5 Crown Spheres / Pearls -->
+                    <circle cx="17" cy="22" r="3.2" fill="${mainFill}" stroke="${lineStroke}" stroke-width="2.2"/>
+                    <circle cx="32" cy="15" r="3.2" fill="${mainFill}" stroke="${lineStroke}" stroke-width="2.2"/>
+                    <circle cx="50" cy="11" r="3.8" fill="${mainFill}" stroke="${lineStroke}" stroke-width="2.4"/>
+                    <circle cx="68" cy="15" r="3.2" fill="${mainFill}" stroke="${lineStroke}" stroke-width="2.2"/>
+                    <circle cx="83" cy="22" r="3.2" fill="${mainFill}" stroke="${lineStroke}" stroke-width="2.2"/>
+                    <!-- 5-Pointed Crown Radiating Spikes & Cup -->
+                    <path d="M17 25 L26 49 L37 30 L50 47 L63 30 L74 49 L83 25 C79 57 75 65 68 69 L32 69 C25 65 21 57 17 25 Z" fill="${mainFill}" stroke="${lineStroke}" stroke-width="${strokeW}" stroke-linejoin="round"/>
+                    <!-- Ornate Crown Jewel Band -->
+                    <path d="M26 62 L74 62 L71 69 L29 69 Z" fill="${mainFill}" stroke="${lineStroke}" stroke-width="2.5"/>
+                    <circle cx="37" cy="65.5" r="2" fill="${innerDetail}"/>
+                    <circle cx="50" cy="65.5" r="2.5" fill="${innerDetail}"/>
+                    <circle cx="63" cy="65.5" r="2" fill="${innerDetail}"/>
+                    <!-- Stem -->
+                    <path d="M35 69 L34 79 L66 79 L65 69 Z" fill="${mainFill}" stroke="${lineStroke}" stroke-width="${strokeW}"/>
+                    <!-- Stepped Base Tier 1 -->
+                    <rect x="23" y="79" width="54" height="7" rx="2" fill="${mainFill}" stroke="${lineStroke}" stroke-width="${strokeW}"/>
+                    <!-- Stepped Base Tier 2 -->
+                    <rect x="15" y="86" width="70" height="8.5" rx="2.5" fill="${mainFill}" stroke="${lineStroke}" stroke-width="${strokeW}"/>
                 `;
                 break;
-            case 'k': // King - Sacred Light Core
+
+            case 'k': // King
                 paths = `
-                    <path d="M23 6 L27 6 L27 9 L30 9 L30 13 L27 13 L27 16 L23 16 L23 13 L20 13 L20 9 L23 9 Z" fill="${aura}" stroke="${stroke}" stroke-width="1"/>
-                    <path d="M15 19 C18 17 32 17 35 19 C37 28 35 34 33 36 L17 36 C15 34 13 28 15 19 Z" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>
-                    <circle cx="25" cy="27" r="3" fill="${aura}"/>
-                    <rect x="13" y="36" width="24" height="4" rx="2" fill="${fill}" stroke="${stroke}" stroke-width="1.2"/>
-                    <rect x="10" y="40" width="30" height="4" rx="2" fill="${fill}" stroke="${stroke}" stroke-width="1.2"/>
+                    <!-- Finial Cross on Top -->
+                    <path d="M46 7 L54 7 L54 11 L58 11 L58 17 L54 17 L54 22 L46 22 L46 17 L42 17 L42 11 L46 11 Z" fill="${mainFill}" stroke="${lineStroke}" stroke-width="2.2"/>
+                    <rect x="48" y="12" width="4" height="4" fill="${innerDetail}"/>
+                    <!-- Lobed Trefoil Crown Body -->
+                    <path d="M50 22 C42 22 34 26 27 32 C19 39 15 52 23 64 L77 64 C85 52 81 39 73 32 C66 26 58 22 50 22 Z" fill="${mainFill}" stroke="${lineStroke}" stroke-width="${strokeW}"/>
+                    <!-- Crown Lobes Internal Curved Ribs -->
+                    <path d="M50 22 C45 36 38 52 27 64" stroke="${lineStroke}" stroke-width="2.8" stroke-linecap="round" fill="none"/>
+                    <path d="M50 22 C55 36 62 52 73 64" stroke="${lineStroke}" stroke-width="2.8" stroke-linecap="round" fill="none"/>
+                    <!-- Ornate Crown Belt with Geometric Accents -->
+                    <rect x="22" y="64" width="56" height="8" rx="1.5" fill="${mainFill}" stroke="${lineStroke}" stroke-width="2.5"/>
+                    <rect x="32" y="66" width="4" height="4" fill="${innerDetail}"/>
+                    <circle cx="50" cy="68" r="2.5" fill="${innerDetail}"/>
+                    <rect x="64" y="66" width="4" height="4" fill="${innerDetail}"/>
+                    <!-- Stem -->
+                    <path d="M33 72 L31 81 L69 81 L67 72 Z" fill="${mainFill}" stroke="${lineStroke}" stroke-width="${strokeW}"/>
+                    <!-- Stepped Base Tier 1 -->
+                    <rect x="21" y="81" width="58" height="6.5" rx="2" fill="${mainFill}" stroke="${lineStroke}" stroke-width="${strokeW}"/>
+                    <!-- Stepped Base Tier 2 -->
+                    <rect x="13" y="87.5" width="74" height="8" rx="2.5" fill="${mainFill}" stroke="${lineStroke}" stroke-width="${strokeW}"/>
                 `;
                 break;
         }
 
-        return `<svg viewBox="0 0 50 50" class="piece-svg">${defs}${paths}</svg>`;
+        return `<svg viewBox="0 0 100 100" class="piece-svg">${paths}</svg>`;
     }
 
     initDOM() {
