@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Mahō no Chesu (Elemental Chess) - Master the Board. Command the Elements. A dark fantasy browser chess game combining traditional chess strategy with cinematic elemental magic combat effects.">
+    <meta name="theme-color" content="#0b0e14">
+    <title>Mahō no Chesu | Elemental Chess</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><polygon points='50,5 95,25 95,75 50,95 5,75 5,25' fill='%23121927' stroke='%23d4af37' stroke-width='6'/><circle cx='50' cy='50' r='24' fill='none' stroke='%2338bdf8' stroke-width='4'/><path d='M50 26 L50 74 M26 50 L74 50' stroke='%23f97316' stroke-width='4'/></svg>">
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body class="theme-dark">
+    <!-- Ambient Canvas for Background Particles -->
+    <canvas id="ambient-canvas" class="ambient-canvas"></canvas>
+
+    <!-- Main Container -->
+    <div id="app" class="app-container">
+        
+        <!-- Top Navigation Bar -->
+        <header class="app-header">
+            <div class="brand">
+                <button id="btn-home" class="btn-icon" title="Main Menu" aria-label="Main Menu">
+                    <svg viewBox="0 0 24 24" class="icon-svg"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                </button>
+                <div class="brand-titles">
+                    <h1 class="logo-title">MAHŌ NO CHESU</h1>
+                    <span class="logo-subtitle">ELEMENTAL CHESS</span>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <button id="btn-sound-toggle" class="btn-icon" title="Toggle Sound" aria-label="Toggle Sound">
+                    <svg id="icon-sound-on" viewBox="0 0 24 24" class="icon-svg"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                    <svg id="icon-sound-off" viewBox="0 0 24 24" class="icon-svg hidden"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
+                </button>
+                <button id="btn-open-settings" class="btn-icon" title="Settings" aria-label="Settings">
+                    <svg viewBox="0 0 24 24" class="icon-svg"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+                </button>
+                <button id="btn-guide-toggle" class="btn-icon" title="Element Guide" aria-label="Element Guide">
+                    <svg viewBox="0 0 24 24" class="icon-svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 16h-2v-2h2v2zm1.07-7.75l-.9.92C12.45 11.9 12 12.5 12 14h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H7c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.04-.42 1.99-1.07 2.75z"/></svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Gameplay View -->
+        <main id="game-view" class="game-view">
+            
+            <!-- Side Panel Left: Black Player Info & Captures -->
+            <section class="player-card player-black" id="player-black-card" aria-label="Black Player Status">
+                <div class="player-header">
+                    <div class="player-avatar black-avatar">
+                        <span class="avatar-piece">♚</span>
+                    </div>
+                    <div class="player-meta">
+                        <span class="player-name" id="black-player-name">Black (Shadow Core)</span>
+                        <span class="player-role" id="black-player-type">Human</span>
+                    </div>
+                    <div class="turn-gem" id="black-turn-indicator" title="Turn Active Indicator"></div>
+                </div>
+                <div class="captured-box" id="black-captured-box">
+                    <span class="captured-label">Captures:</span>
+                    <div class="captured-list" id="black-captured-pieces" aria-label="Pieces captured by Black"></div>
+                </div>
+            </section>
+
+            <!-- Chess Battlefield Arena (Center) -->
+            <section class="board-arena" id="board-arena">
+                <!-- Attack Banner / Announcement Overlay -->
+                <div id="attack-banner" class="attack-banner" aria-live="assertive"></div>
+                <div id="combo-banner" class="combo-banner"></div>
+
+                <!-- Screen Shake Wrapper -->
+                <div id="board-wrapper" class="board-wrapper">
+                    <!-- 8x8 Chess Board Grid -->
+                    <div id="chess-board" class="chess-board" role="grid" aria-label="Elemental Chess Board" tabindex="0">
+                        <!-- 64 Squares injected by ui.js -->
+                    </div>
+
+                    <!-- FX Canvas Overlay directly matching board dimensions -->
+                    <canvas id="effects-canvas" class="effects-canvas"></canvas>
+                </div>
+
+                <!-- Floating Game Status Badge -->
+                <div id="game-status-bar" class="game-status-bar" aria-live="polite">
+                    <span id="game-status-text">White to move</span>
+                    <span id="ai-thinking-spinner" class="thinking-spinner hidden"></span>
+                </div>
+            </section>
+
+            <!-- Side Panel Right: White Player Info & Captures -->
+            <section class="player-card player-white" id="player-white-card" aria-label="White Player Status">
+                <div class="player-header">
+                    <div class="player-avatar white-avatar">
+                        <span class="avatar-piece">♔</span>
+                    </div>
+                    <div class="player-meta">
+                        <span class="player-name" id="white-player-name">White (Light Core)</span>
+                        <span class="player-role" id="white-player-type">Human</span>
+                    </div>
+                    <div class="turn-gem active" id="white-turn-indicator" title="Turn Active Indicator"></div>
+                </div>
+                <div class="captured-box" id="white-captured-box">
+                    <span class="captured-label">Captures:</span>
+                    <div class="captured-list" id="white-captured-pieces" aria-label="Pieces captured by White"></div>
+                </div>
+            </section>
+
+            <!-- Game Control Panel & Move History -->
+            <aside class="game-sidebar">
+                <!-- Action Controls -->
+                <div class="action-bar">
+                    <button id="btn-undo" class="btn-action" title="Undo Move (Z)">
+                        <svg viewBox="0 0 24 24" class="btn-svg"><path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/></svg>
+                        <span>Undo</span>
+                    </button>
+                    <button id="btn-flip" class="btn-action" title="Flip Board (F)">
+                        <svg viewBox="0 0 24 24" class="btn-svg"><path d="M16 17.01V10h-2v7.01h-3L15 21l4-3.99h-3zM9 3L5 6.99h3V14h2V6.99h3L9 3z"/></svg>
+                        <span>Flip</span>
+                    </button>
+                    <button id="btn-draw" class="btn-action" title="Offer Draw">
+                        <svg viewBox="0 0 24 24" class="btn-svg"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94A5.01 5.01 0 0 0 11 15.9V19H7v2h10v-2h-4v-3.1a5.01 5.01 0 0 0 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>
+                        <span>Draw</span>
+                    </button>
+                    <button id="btn-resign" class="btn-action btn-danger" title="Resign Match">
+                        <svg viewBox="0 0 24 24" class="btn-svg"><path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z"/></svg>
+                        <span>Resign</span>
+                    </button>
+                    <button id="btn-restart" class="btn-action" title="Restart Match">
+                        <svg viewBox="0 0 24 24" class="btn-svg"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+                        <span>Restart</span>
+                    </button>
+                </div>
+
+                <!-- Move History Log Table -->
+                <div class="history-panel">
+                    <div class="history-header">
+                        <h3>Chronicles of War</h3>
+                        <span id="move-count-badge" class="count-badge">0 moves</span>
+                    </div>
+                    <div class="history-table-wrapper" id="history-scroll-container">
+                        <table class="history-table" id="move-history-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>White</th>
+                                    <th>Black</th>
+                                </tr>
+                            </thead>
+                            <tbody id="move-history-body">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Live Screen Reader Announcement Zone -->
+                <div id="sr-announcements" class="sr-only" aria-live="polite"></div>
+            </aside>
+        </main>
+
+        <!-- Developer Mode Drawer (Collapsible) -->
+        <details id="dev-panel" class="dev-panel">
+            <summary class="dev-summary">Developer & Perft Console</summary>
+            <div class="dev-content">
+                <div class="dev-row">
+                    <input type="text" id="fen-input" class="dev-input" placeholder="Paste FEN position...">
+                    <button id="btn-load-fen" class="btn-small">Load FEN</button>
+                    <button id="btn-export-fen" class="btn-small">Export FEN</button>
+                </div>
+                <div class="dev-row">
+                    <button id="btn-run-perft" class="btn-small btn-perft">Run Perft (Depths 1-4)</button>
+                    <button id="btn-toggle-eval" class="btn-small">Eval Gauge</button>
+                    <span id="eval-score" class="eval-score">+0.00</span>
+                </div>
+                <pre id="dev-console" class="dev-console">Perft output & engine diagnostics ready.</pre>
+            </div>
+        </details>
+    </div>
+
+    <!-- ================= MODALS & OVERLAYS ================= -->
+
+    <!-- Main Menu Modal -->
+    <div id="modal-main-menu" class="modal-overlay active">
+        <div class="modal-card menu-card">
+            <div class="menu-brand">
+                <div class="crest-emblem">
+                    <svg viewBox="0 0 100 100" class="crest-svg">
+                        <polygon points="50,5 95,25 95,75 50,95 5,75 5,25" fill="none" stroke="currentColor" stroke-width="2"/>
+                        <circle cx="50" cy="50" r="30" fill="none" stroke="currentColor" stroke-dasharray="4 2" stroke-width="1.5"/>
+                        <path d="M50 20 L50 80 M20 50 L80 50" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                </div>
+                <h1 class="menu-title">MAHŌ NO CHESU</h1>
+                <h2 class="menu-subtitle">ELEMENTAL CHESS</h2>
+                <p class="menu-tagline">MASTER THE BOARD. COMMAND THE ELEMENTS.</p>
+            </div>
+
+            <nav class="menu-nav">
+                <button id="menu-btn-play" class="btn-menu btn-primary">
+                    <span class="btn-glow"></span>
+                    <span>ENTER BATTLE</span>
+                </button>
+                <button id="menu-btn-guide" class="btn-menu">
+                    <span>ELEMENT GUIDE</span>
+                </button>
+                <button id="menu-btn-how-to-play" class="btn-menu">
+                    <span>HOW TO PLAY</span>
+                </button>
+                <button id="menu-btn-settings" class="btn-menu">
+                    <span>SETTINGS</span>
+                </button>
+                <button id="menu-btn-about" class="btn-menu">
+                    <span>ABOUT</span>
+                </button>
+            </nav>
+
+            <footer class="menu-footer">
+                <span>Authentic Chess Engine &bull; Cinematic FX &bull; Zero External Assets</span>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Mode Selection Modal -->
+    <div id="modal-mode-select" class="modal-overlay">
+        <div class="modal-card mode-card">
+            <h2 class="modal-title">CHOOSE GAME MODE</h2>
+            <div class="mode-options">
+                <button id="btn-mode-pvp" class="mode-card-btn">
+                    <div class="mode-icon">⚔️</div>
+                    <div class="mode-info">
+                        <h3>Player vs Player</h3>
+                        <p>Local 2-player clash on one device with auto-rotate & manual flip.</p>
+                    </div>
+                </button>
+
+                <button id="btn-mode-pvc" class="mode-card-btn">
+                    <div class="mode-icon">🔮</div>
+                    <div class="mode-info">
+                        <h3>Player vs Computer</h3>
+                        <p>Face the Arcane AI powered by Minimax & Alpha-Beta pruning.</p>
+                    </div>
+                </button>
+            </div>
+
+            <!-- AI Settings Sub-view -->
+            <div id="ai-sub-config" class="ai-config hidden">
+                <h3>AI Difficulty</h3>
+                <div class="difficulty-group">
+                    <button class="btn-diff active" data-diff="easy">Apprentice (Easy)</button>
+                    <button class="btn-diff" data-diff="normal">Mage (Normal)</button>
+                    <button class="btn-diff" data-diff="hard">Archmage (Hard)</button>
+                </div>
+
+                <h3>Choose Your Legion</h3>
+                <div class="side-group">
+                    <button class="btn-side active" data-side="white">White (Light)</button>
+                    <button class="btn-side" data-side="random">Random</button>
+                    <button class="btn-side" data-side="black">Black (Shadow)</button>
+                </div>
+
+                <button id="btn-start-ai-game" class="btn-menu btn-primary mt-4">
+                    <span>START MATCH</span>
+                </button>
+            </div>
+
+            <button id="btn-back-to-menu" class="btn-secondary mt-4">Back to Menu</button>
+        </div>
+    </div>
+
+    <!-- Element Guide Modal -->
+    <div id="modal-element-guide" class="modal-overlay">
+        <div class="modal-card guide-card">
+            <div class="modal-header">
+                <h2 class="modal-title">ELEMENTAL CODEX</h2>
+                <button class="btn-close modal-close">&times;</button>
+            </div>
+            
+            <div class="guide-grid">
+                <!-- Pawn -->
+                <div class="element-box box-pawn">
+                    <div class="element-glyph">🔥</div>
+                    <div class="element-details">
+                        <h4>PAWN &bull; FIRE</h4>
+                        <p class="attack-title">Attack: <strong>Fire Blast</strong></p>
+                        <p class="attack-desc">Surrounds target in blazing flame, hurling incinerating fireballs with explosive sparks and smoke.</p>
+                    </div>
+                </div>
+
+                <!-- Knight -->
+                <div class="element-box box-knight">
+                    <div class="element-glyph">⚡</div>
+                    <div class="element-details">
+                        <h4>KNIGHT &bull; LIGHTNING</h4>
+                        <p class="attack-title">Attack: <strong>Thunder Strike</strong></p>
+                        <p class="attack-desc">Charges across the board with electric arcs before summoning a devastating thunderbolt from the heavens.</p>
+                    </div>
+                </div>
+
+                <!-- Bishop -->
+                <div class="element-box box-bishop">
+                    <div class="element-glyph">🌪️</div>
+                    <div class="element-details">
+                        <h4>BISHOP &bull; WIND</h4>
+                        <p class="attack-title">Attack: <strong>Wind Slash</strong></p>
+                        <p class="attack-desc">Channels sharp vacuum blades across diagonals, cleaving targets with swift aerodynamic motion lines.</p>
+                    </div>
+                </div>
+
+                <!-- Rook -->
+                <div class="element-box box-rook">
+                    <div class="element-glyph">🪨</div>
+                    <div class="element-details">
+                        <h4>ROOK &bull; EARTH</h4>
+                        <p class="attack-title">Attack: <strong>Earth Breaker</strong></p>
+                        <p class="attack-desc">Shatters tectonic plates beneath the victim, erupting stone spikes and rock fragments with violent tremor.</p>
+                    </div>
+                </div>
+
+                <!-- Queen -->
+                <div class="element-box box-queen">
+                    <div class="element-glyph">❄️</div>
+                    <div class="element-details">
+                        <h4>QUEEN &bull; ICE &amp; ARCANE</h4>
+                        <p class="attack-title">Attack: <strong>Frozen Dominion</strong></p>
+                        <p class="attack-desc">Summons an arcane runic circle, encasing enemies in absolute zero frost crystals before shattering them into crystalline dust.</p>
+                    </div>
+                </div>
+
+                <!-- King -->
+                <div class="element-box box-king">
+                    <div class="element-glyph">✨</div>
+                    <div class="element-details">
+                        <h4>KING &bull; LIGHT</h4>
+                        <p class="attack-title">Attack: <strong>Judgment of Light</strong></p>
+                        <p class="attack-desc">Radiates divine solar energy, calling down a pure sacred beam and concentric shockwaves that dissolve foes.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="guide-note">
+                <p>Elemental powers trigger on movements, captures, checks, castling (Fortress), and promotions (Ascension) while preserving 100% authentic chess rules.</p>
+            </div>
+            
+            <button class="btn-secondary modal-close mt-4">Close Codex</button>
+        </div>
+    </div>
+
+    <!-- How To Play Modal -->
+    <div id="modal-how-to-play" class="modal-overlay">
+        <div class="modal-card info-card">
+            <div class="modal-header">
+                <h2 class="modal-title">RULES OF COMBAT</h2>
+                <button class="btn-close modal-close">&times;</button>
+            </div>
+
+            <div class="info-content">
+                <h3>1. Standard Chess Rules</h3>
+                <p>Every rule of orthodox chess applies: castling, en passant, pawn promotion, check, checkmate, stalemate, threefold repetition, and the 50-move rule.</p>
+
+                <h3>2. Elemental Combat Feedback</h3>
+                <p>Pieces do not deal health-point damage; captures are real chess captures accompanied by elemental spell animations and Web Audio soundscapes.</p>
+
+                <h3>3. Controls</h3>
+                <ul>
+                    <li><strong>Mouse / Touch:</strong> Click or tap a piece to highlight legal moves (dots) and attack targets (rings). Click again to deselect or click destination to move.</li>
+                    <li><strong>Keyboard:</strong> Arrow keys to navigate squares, <kbd>Enter</kbd> or <kbd>Space</kbd> to select / move, <kbd>Escape</kbd> to cancel.</li>
+                    <li><strong>Hotkeys:</strong> <kbd>Z</kbd> to Undo, <kbd>F</kbd> to Flip Board, <kbd>R</kbd> to Restart.</li>
+                </ul>
+
+                <h3>4. Combo System &amp; Critical Finishers</h3>
+                <p>Consecutive captures build an Elemental Combo streak with dramatic visual intensity without altering chess mechanics.</p>
+            </div>
+
+            <button class="btn-secondary modal-close mt-4">Understood</button>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="modal-settings" class="modal-overlay">
+        <div class="modal-card settings-card">
+            <div class="modal-header">
+                <h2 class="modal-title">SYSTEM SETTINGS</h2>
+                <button class="btn-close modal-close">&times;</button>
+            </div>
+
+            <div class="settings-form">
+                <!-- Sound Effects -->
+                <div class="setting-row">
+                    <label for="setting-sfx">Sound Effects</label>
+                    <input type="checkbox" id="setting-sfx" checked>
+                </div>
+
+                <!-- Ambient Synthesizer Music -->
+                <div class="setting-row">
+                    <label for="setting-music">Ambient Fantasy Synth</label>
+                    <input type="checkbox" id="setting-music" checked>
+                </div>
+
+                <!-- Master Volume Slider -->
+                <div class="setting-row">
+                    <label for="setting-volume">Master Volume (<span id="volume-val">75%</span>)</label>
+                    <input type="range" id="setting-volume" min="0" max="100" value="75">
+                </div>
+
+                <!-- Animation Speed -->
+                <div class="setting-row">
+                    <label for="setting-speed">Animation Speed</label>
+                    <select id="setting-speed">
+                        <option value="fast">Fast (Tournament)</option>
+                        <option value="normal" selected>Normal (Standard FX)</option>
+                        <option value="cinematic">Cinematic (Epic Delays)</option>
+                    </select>
+                </div>
+
+                <!-- Particle Density -->
+                <div class="setting-row">
+                    <label for="setting-particles">Particle Density</label>
+                    <select id="setting-particles">
+                        <option value="high" selected>High (150 max)</option>
+                        <option value="medium">Medium (80 max)</option>
+                        <option value="low">Low (40 max)</option>
+                        <option value="off">Off (Zero particles)</option>
+                    </select>
+                </div>
+
+                <!-- Screen Shake -->
+                <div class="setting-row">
+                    <label for="setting-shake">Screen Shake</label>
+                    <input type="checkbox" id="setting-shake" checked>
+                </div>
+
+                <!-- Move Hints -->
+                <div class="setting-row">
+                    <label for="setting-hints">Legal Move Highlights</label>
+                    <input type="checkbox" id="setting-hints" checked>
+                </div>
+
+                <!-- Board Rotation (Auto rotate in PvP) -->
+                <div class="setting-row">
+                    <label for="setting-autorotate">Auto-Rotate Board in PvP</label>
+                    <input type="checkbox" id="setting-autorotate">
+                </div>
+
+                <!-- Photosensitivity Mode -->
+                <div class="setting-row">
+                    <label for="setting-photosensitivity">
+                        <span>Photosensitivity Mode</span>
+                        <small class="sub-label">Disables bright flashes, intense shakes &amp; rapid strobes</small>
+                    </label>
+                    <input type="checkbox" id="setting-photosensitivity">
+                </div>
+
+                <!-- Reduced Motion -->
+                <div class="setting-row">
+                    <label for="setting-reduced-motion">Reduced Motion</label>
+                    <input type="checkbox" id="setting-reduced-motion">
+                </div>
+            </div>
+
+            <button class="btn-primary modal-close mt-4">Save &amp; Return</button>
+        </div>
+    </div>
+
+    <!-- About Modal -->
+    <div id="modal-about" class="modal-overlay">
+        <div class="modal-card info-card">
+            <div class="modal-header">
+                <h2 class="modal-title">ABOUT MAHŌ NO CHESU</h2>
+                <button class="btn-close modal-close">&times;</button>
+            </div>
+            <div class="info-content">
+                <p><strong>Mahō no Chesu (魔法のチェス) &bull; Elemental Chess</strong></p>
+                <p><em>Master the Board. Command the Elements.</em></p>
+                <p>Crafted as an asset-free, self-contained, zero-dependency dark fantasy chess experience. Runs everywhere on GitHub Pages, mobile, and desktop browsers with 100% pure HTML5, CSS3, Vanilla JS, Canvas, and Web Audio API.</p>
+                <p>Engine features verified perft test suites, minimax with alpha-beta search, en passant, castling, promotion, threefold repetition, and 50-move draw detection.</p>
+            </div>
+            <button class="btn-secondary modal-close mt-4">Close</button>
+        </div>
+    </div>
+
+    <!-- Pawn Promotion Modal -->
+    <div id="modal-promotion" class="modal-overlay">
+        <div class="modal-card promo-card">
+            <h2 class="promo-title">ASCENSION</h2>
+            <p class="promo-sub">Choose your pawn's elevated elemental form:</p>
+            <div class="promo-choices" id="promo-choices-container">
+                <!-- Injected dynamically with Queen, Rook, Bishop, Knight -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Draw Offer Modal -->
+    <div id="modal-draw-offer" class="modal-overlay">
+        <div class="modal-card prompt-card">
+            <h2 class="modal-title">DRAW PROPOSAL</h2>
+            <p id="draw-offer-text">Your opponent has proposed a peaceful truce. Do you accept?</p>
+            <div class="modal-actions">
+                <button id="btn-draw-accept" class="btn-primary">Accept Draw</button>
+                <button id="btn-draw-decline" class="btn-secondary">Decline</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Over Modal -->
+    <div id="modal-game-over" class="modal-overlay">
+        <div class="modal-card victory-card">
+            <div class="victory-crown" id="victory-crown">♚</div>
+            <h2 class="victory-title" id="victory-title">CHECKMATE</h2>
+            <p class="victory-subtitle" id="victory-subtitle">WHITE WINS BY SUPREME CONQUEST</p>
+            <p class="victory-reason" id="victory-reason">All enemy paths are extinguished.</p>
+            
+            <div class="modal-actions mt-4">
+                <button id="btn-game-over-rematch" class="btn-primary">REMATCH</button>
+                <button id="btn-game-over-new" class="btn-secondary">NEW GAME</button>
+                <button id="btn-game-over-menu" class="btn-secondary">MAIN MENU</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts (Ordered for GitHub Pages static execution) -->
+    <script src="./js/chess.js"></script>
+    <script src="./js/audio.js"></script>
+    <script src="./js/effects.js"></script>
+    <script src="./js/settings.js"></script>
+    <script src="./js/ui.js"></script>
+    <script src="./js/ai.js"></script>
+    <script src="./js/main.js"></script>
+</body>
+</html>
