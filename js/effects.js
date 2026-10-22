@@ -12,6 +12,7 @@ class EffectsManager {
         this.ambientCtx = this.ambientCanvas ? this.ambientCanvas.getContext('2d') : null;
 
         this.boardWrapper = document.getElementById('board-wrapper');
+        this.boardFrame = document.getElementById('board-frame') || this.boardWrapper;
         this.attackBanner = document.getElementById('attack-banner');
         this.comboBanner = document.getElementById('combo-banner');
 
@@ -121,13 +122,14 @@ class EffectsManager {
     }
 
     screenShake(intensity = 'md') {
-        if (!this.screenShakeEnabled || this.photosensitive || !this.boardWrapper) return;
+        const target = this.boardFrame || this.boardWrapper;
+        if (!this.screenShakeEnabled || this.photosensitive || !target) return;
         const cls = `shake-${intensity}`;
-        this.boardWrapper.classList.remove('shake-sm', 'shake-md', 'shake-lg');
-        void this.boardWrapper.offsetWidth;
-        this.boardWrapper.classList.add(cls);
+        target.classList.remove('shake-sm', 'shake-md', 'shake-lg');
+        void target.offsetWidth;
+        target.classList.add(cls);
         setTimeout(() => {
-            this.boardWrapper?.classList.remove(cls);
+            target?.classList.remove(cls);
         }, 500);
     }
 

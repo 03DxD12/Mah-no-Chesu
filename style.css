@@ -20,14 +20,20 @@
     --text-muted: #64748b;
     --text-gold: #fbbf24;
 
-    /* Chess Board Squares */
-    --sq-light: #2c384d;
-    --sq-dark: #121927;
-    --sq-coord-light: #64748b;
-    --sq-coord-dark: #475569;
-    --sq-selected: rgba(212, 175, 55, 0.35);
-    --sq-last-move: rgba(56, 189, 248, 0.22);
-    --sq-check: rgba(239, 68, 68, 0.55);
+    /* Chess Board Default: Tournament Mineral Slate (Matches Reference) */
+    --sq-light-start: #f4f7fa;
+    --sq-light-end: #dee4ea;
+    --sq-dark-start: #9bb0c1;
+    --sq-dark-end: #849ab0;
+    --sq-coord-light: #526374;
+    --sq-coord-dark: #f8fafc;
+    --board-frame-bg: linear-gradient(145deg, #1b2332 0%, #0d121c 100%);
+    --board-frame-border: #d4af37;
+    --board-inner-glow: rgba(212, 175, 55, 0.28);
+    --board-inner-rim: rgba(212, 175, 55, 0.45);
+    --sq-selected: rgba(212, 175, 55, 0.45);
+    --sq-last-move: rgba(56, 189, 248, 0.32);
+    --sq-check: rgba(239, 68, 68, 0.65);
 
     /* Elemental Identity Colors */
     --el-fire: #f97316;
@@ -54,6 +60,59 @@
     /* Transitions */
     --transition-fast: 0.15s ease;
     --transition-normal: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Board Theme Presets */
+body[data-board-theme="obsidian"] {
+    --sq-light-start: #334155;
+    --sq-light-end: #1e293b;
+    --sq-dark-start: #141c2a;
+    --sq-dark-end: #0b1018;
+    --sq-coord-light: #94a3b8;
+    --sq-coord-dark: #64748b;
+    --board-frame-bg: linear-gradient(145deg, #161e2e 0%, #080b12 100%);
+    --board-frame-border: #38bdf8;
+    --board-inner-glow: rgba(56, 189, 248, 0.25);
+    --board-inner-rim: rgba(56, 189, 248, 0.4);
+}
+
+body[data-board-theme="emerald"] {
+    --sq-light-start: #e8f4ed;
+    --sq-light-end: #d1e4d8;
+    --sq-dark-start: #6f957e;
+    --sq-dark-end: #547b64;
+    --sq-coord-light: #315840;
+    --sq-coord-dark: #f0fdf4;
+    --board-frame-bg: linear-gradient(145deg, #13241b 0%, #08120d 100%);
+    --board-frame-border: #10b981;
+    --board-inner-glow: rgba(16, 185, 129, 0.25);
+    --board-inner-rim: rgba(16, 185, 129, 0.4);
+}
+
+body[data-board-theme="wood"] {
+    --sq-light-start: #f1e2c8;
+    --sq-light-end: #decdb0;
+    --sq-dark-start: #a37248;
+    --sq-dark-end: #84532b;
+    --sq-coord-light: #573319;
+    --sq-coord-dark: #fffbeb;
+    --board-frame-bg: linear-gradient(145deg, #2b1a10 0%, #150a04 100%);
+    --board-frame-border: #f59e0b;
+    --board-inner-glow: rgba(245, 158, 11, 0.25);
+    --board-inner-rim: rgba(245, 158, 11, 0.4);
+}
+
+body[data-board-theme="ice"] {
+    --sq-light-start: #e0f2fe;
+    --sq-light-end: #bae6fd;
+    --sq-dark-start: #60a5fa;
+    --sq-dark-end: #3b82f6;
+    --sq-coord-light: #0369a1;
+    --sq-coord-dark: #f0f9ff;
+    --board-frame-bg: linear-gradient(145deg, #0f243d 0%, #061120 100%);
+    --board-frame-border: #38bdf8;
+    --board-inner-glow: rgba(56, 189, 248, 0.35);
+    --board-inner-rim: rgba(56, 189, 248, 0.45);
 }
 
 /* Base Reset & Box Sizing */
@@ -321,17 +380,70 @@ html, body {
     width: 100%;
 }
 
-.board-wrapper {
+/* Grandmaster Bezel Frame */
+.board-frame {
     position: relative;
-    width: min(88vh, 600px);
+    width: min(84vh, 610px);
     max-width: 100%;
     aspect-ratio: 1 / 1;
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-board);
-    border: 2px solid var(--border-gold);
+    padding: 12px;
+    background: var(--board-frame-bg);
+    border-radius: var(--radius-lg);
+    border: 2px solid var(--board-frame-border);
+    box-shadow: 
+        0 25px 60px -10px rgba(0, 0, 0, 0.95),
+        0 0 35px var(--board-inner-glow),
+        inset 0 1px 2px rgba(255, 255, 255, 0.18),
+        inset 0 -2px 6px rgba(0, 0, 0, 0.6);
+    transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.05s ease-out;
+}
+
+/* 4 Ornate Brass/Gold Fantasy Corner Accents */
+.board-corner {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.board-corner::before,
+.board-corner::after {
+    content: '';
+    position: absolute;
+    background: var(--board-frame-border);
+    box-shadow: 0 0 6px var(--board-inner-glow);
+    border-radius: 1px;
+}
+
+.corner-tl { top: 5px; left: 5px; }
+.corner-tl::before { top: 0; left: 0; width: 14px; height: 2.5px; }
+.corner-tl::after { top: 0; left: 0; width: 2.5px; height: 14px; }
+
+.corner-tr { top: 5px; right: 5px; }
+.corner-tr::before { top: 0; right: 0; width: 14px; height: 2.5px; }
+.corner-tr::after { top: 0; right: 0; width: 2.5px; height: 14px; }
+
+.corner-bl { bottom: 5px; left: 5px; }
+.corner-bl::before { bottom: 0; left: 0; width: 14px; height: 2.5px; }
+.corner-bl::after { bottom: 0; left: 0; width: 2.5px; height: 14px; }
+
+.corner-br { bottom: 5px; right: 5px; }
+.corner-br::before { bottom: 0; right: 0; width: 14px; height: 2.5px; }
+.corner-br::after { bottom: 0; right: 0; width: 2.5px; height: 14px; }
+
+/* Inset Chess Board Recess */
+.board-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: var(--radius-sm);
+    box-shadow: 
+        inset 0 0 14px rgba(0, 0, 0, 0.75),
+        0 0 0 1px rgba(0, 0, 0, 0.8),
+        0 0 0 2px var(--board-inner-rim);
     overflow: hidden;
     background: #090d15;
-    transition: transform 0.05s ease-out;
 }
 
 /* 8x8 Chess Board Grid */
@@ -344,7 +456,7 @@ html, body {
     position: relative;
 }
 
-/* Square State Overlays */
+/* Square State Overlays & Tactile Finishes */
 .square {
     position: relative;
     display: flex;
@@ -352,53 +464,111 @@ html, body {
     justify-content: center;
     cursor: pointer;
     overflow: hidden;
-    transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+    transition: background 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, filter 0.15s ease;
 }
 
 .square.light {
-    background-color: var(--sq-light);
+    background: linear-gradient(135deg, var(--sq-light-start) 0%, var(--sq-light-end) 100%);
+    box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.65), inset -1px -1px 0 rgba(0, 0, 0, 0.06);
 }
 
 .square.dark {
-    background-color: var(--sq-dark);
+    background: linear-gradient(135deg, var(--sq-dark-start) 0%, var(--sq-dark-end) 100%);
+    box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.25), inset -1px -1px 0 rgba(0, 0, 0, 0.15);
 }
 
 .square:hover {
-    background-color: rgba(255, 255, 255, 0.05);
+    filter: brightness(1.06);
 }
 
+/* Typographic Rank and File Coordinates */
+.square-coord-rank {
+    position: absolute;
+    top: 3px;
+    left: 4px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    line-height: 1;
+    pointer-events: none;
+    z-index: 2;
+    transition: color var(--transition-normal);
+}
+
+.square-coord-file {
+    position: absolute;
+    bottom: 3px;
+    right: 4px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    line-height: 1;
+    pointer-events: none;
+    z-index: 2;
+    transition: color var(--transition-normal);
+}
+
+.square.light .square-coord-rank,
+.square.light .square-coord-file {
+    color: var(--sq-coord-light);
+}
+
+.square.dark .square-coord-rank,
+.square.dark .square-coord-file {
+    color: var(--sq-coord-dark);
+}
+
+/* Selected Square Illuminated Aura */
 .square.selected {
-    background: radial-gradient(circle at center, rgba(212, 175, 55, 0.35) 0%, rgba(19, 27, 39, 0.8) 100%) !important;
+    background: radial-gradient(circle at center, rgba(245, 158, 11, 0.45) 0%, rgba(217, 119, 6, 0.65) 100%) !important;
     outline: 2px solid var(--border-gold);
     outline-offset: -2px;
-    box-shadow: inset 0 0 20px rgba(251, 191, 36, 0.45), 0 0 15px rgba(212, 175, 55, 0.3);
+    box-shadow: inset 0 0 16px rgba(251, 191, 36, 0.6), 0 0 15px rgba(212, 175, 55, 0.4) !important;
     z-index: 2;
 }
 
-/* Subtle Corner Runes for Selected Square */
+/* Corner Filigree Bracket for Selected Square */
 .square.selected::before {
     content: '';
     position: absolute;
     inset: 3px;
-    border: 1px solid rgba(251, 191, 36, 0.4);
+    border: 1.5px solid rgba(251, 191, 36, 0.7);
+    box-shadow: inset 0 0 6px rgba(245, 158, 11, 0.4);
     pointer-events: none;
     border-radius: 2px;
+    animation: selected-border-pulse 1.8s infinite ease-in-out;
 }
 
+@keyframes selected-border-pulse {
+    0%, 100% { opacity: 0.7; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.02); }
+}
+
+/* Last Move Translucent Cyan Aura */
 .square.last-move {
-    background: radial-gradient(circle at center, rgba(56, 189, 248, 0.25) 0%, rgba(14, 23, 42, 0.4) 100%) !important;
-    box-shadow: inset 0 0 12px rgba(56, 189, 248, 0.3);
+    background: radial-gradient(circle at center, rgba(56, 189, 248, 0.32) 0%, rgba(14, 165, 233, 0.45) 100%) !important;
+    box-shadow: inset 0 0 12px rgba(56, 189, 248, 0.45) !important;
 }
 
+.square.last-move::after {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    border: 1.5px solid rgba(56, 189, 248, 0.4);
+    border-radius: 2px;
+    pointer-events: none;
+}
+
+/* King In-Check Warning Pulsation */
 .square.in-check {
-    background: radial-gradient(circle at center, rgba(239, 68, 68, 0.6) 0%, rgba(15, 23, 42, 0.8) 100%) !important;
+    background: radial-gradient(circle at center, rgba(239, 68, 68, 0.7) 0%, rgba(185, 28, 28, 0.85) 100%) !important;
     animation: check-pulse 1.2s infinite ease-in-out;
     z-index: 2;
 }
 
 @keyframes check-pulse {
-    0%, 100% { box-shadow: inset 0 0 18px #ef4444, 0 0 12px rgba(239, 68, 68, 0.5); }
-    50% { box-shadow: inset 0 0 35px #dc2626, 0 0 24px rgba(220, 38, 38, 0.8); }
+    0%, 100% { box-shadow: inset 0 0 20px #ef4444, 0 0 14px rgba(239, 68, 68, 0.6); }
+    50% { box-shadow: inset 0 0 35px #dc2626, 0 0 24px rgba(220, 38, 38, 0.9); }
 }
 
 /* Advanced Move Markers */
@@ -1480,9 +1650,11 @@ html, body {
         font-size: 0.6rem;
     }
 
-    .board-wrapper {
-        width: 95vw;
-        height: 95vw;
+    .board-frame {
+        width: 96vw;
+        height: 96vw;
+        padding: 6px;
+        border-radius: var(--radius-md);
     }
 
     .guide-grid {

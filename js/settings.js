@@ -16,7 +16,8 @@ class SettingsManager {
             moveHints: true,
             autoRotate: false,
             photosensitivity: false,
-            reducedMotion: false
+            reducedMotion: false,
+            boardTheme: 'slate' // 'slate' | 'obsidian' | 'emerald' | 'wood' | 'ice'
         };
 
         this.settings = { ...this.defaults };
@@ -24,6 +25,7 @@ class SettingsManager {
 
         this.loadSettings();
         this.checkSystemReducedMotion();
+        this.applySettingsToDOM();
         this.initUI();
     }
 
@@ -62,6 +64,7 @@ class SettingsManager {
         } else {
             document.body.classList.remove('reduced-motion');
         }
+        document.body.dataset.boardTheme = this.settings.boardTheme || 'slate';
     }
 
     onChange(callback) {
@@ -80,6 +83,7 @@ class SettingsManager {
         const musicCheckbox = document.getElementById('setting-music');
         const volumeRange = document.getElementById('setting-volume');
         const volumeVal = document.getElementById('volume-val');
+        const themeSelect = document.getElementById('setting-board-theme');
         const speedSelect = document.getElementById('setting-speed');
         const particlesSelect = document.getElementById('setting-particles');
         const shakeCheckbox = document.getElementById('setting-shake');
@@ -95,6 +99,7 @@ class SettingsManager {
             volumeRange.value = Math.round(this.settings.volume * 100);
             if (volumeVal) volumeVal.textContent = `${volumeRange.value}%`;
         }
+        if (themeSelect) themeSelect.value = this.settings.boardTheme || 'slate';
         if (speedSelect) speedSelect.value = this.settings.animationSpeed;
         if (particlesSelect) particlesSelect.value = this.settings.particles;
         if (shakeCheckbox) shakeCheckbox.checked = this.settings.screenShake;
@@ -102,6 +107,12 @@ class SettingsManager {
         if (autoRotateCheckbox) autoRotateCheckbox.checked = this.settings.autoRotate;
         if (photoCheckbox) photoCheckbox.checked = this.settings.photosensitivity;
         if (motionCheckbox) motionCheckbox.checked = this.settings.reducedMotion;
+
+        // Event listeners
+        themeSelect?.addEventListener('change', (e) => {
+            this.settings.boardTheme = e.target.value;
+            this.saveSettings();
+        });
 
         // Event listeners
         sfxCheckbox?.addEventListener('change', (e) => {

@@ -7,7 +7,7 @@
     <meta name="theme-color" content="#0b0e14">
     <title>Mahō no Chesu | Elemental Chess</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><polygon points='50,5 95,25 95,75 50,95 5,75 5,25' fill='%23121927' stroke='%23d4af37' stroke-width='6'/><circle cx='50' cy='50' r='24' fill='none' stroke='%2338bdf8' stroke-width='4'/><path d='M50 26 L50 74 M26 50 L74 50' stroke='%23f97316' stroke-width='4'/></svg>">
-    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="./style.css?v=2.0">
 </head>
 <body class="theme-dark">
     <!-- Ambient Canvas for Background Particles -->
@@ -69,15 +69,22 @@
                 <div id="attack-banner" class="attack-banner" aria-live="assertive"></div>
                 <div id="combo-banner" class="combo-banner"></div>
 
-                <!-- Screen Shake Wrapper -->
-                <div id="board-wrapper" class="board-wrapper">
-                    <!-- 8x8 Chess Board Grid -->
-                    <div id="chess-board" class="chess-board" role="grid" aria-label="Elemental Chess Board" tabindex="0">
-                        <!-- 64 Squares injected by ui.js -->
-                    </div>
+                <!-- Screen Shake Wrapper & Grandmaster Fantasy Bezel Frame -->
+                <div id="board-frame" class="board-frame">
+                    <div class="board-corner corner-tl" aria-hidden="true"></div>
+                    <div class="board-corner corner-tr" aria-hidden="true"></div>
+                    <div class="board-corner corner-bl" aria-hidden="true"></div>
+                    <div class="board-corner corner-br" aria-hidden="true"></div>
 
-                    <!-- FX Canvas Overlay directly matching board dimensions -->
-                    <canvas id="effects-canvas" class="effects-canvas"></canvas>
+                    <div id="board-wrapper" class="board-wrapper">
+                        <!-- 8x8 Chess Board Grid -->
+                        <div id="chess-board" class="chess-board" role="grid" aria-label="Elemental Chess Board" tabindex="0">
+                            <!-- 64 Squares injected by ui.js -->
+                        </div>
+
+                        <!-- FX Canvas Overlay directly matching board dimensions -->
+                        <canvas id="effects-canvas" class="effects-canvas"></canvas>
+                    </div>
                 </div>
 
                 <!-- Floating Game Status Badge -->
@@ -400,6 +407,18 @@
                 <div class="setting-row">
                     <label for="setting-volume">Master Volume (<span id="volume-val">75%</span>)</label>
                     <input type="range" id="setting-volume" min="0" max="100" value="75">
+                </div>
+
+                <!-- Board Arena Theme -->
+                <div class="setting-row">
+                    <label for="setting-board-theme">Board Arena Theme</label>
+                    <select id="setting-board-theme">
+                        <option value="slate" selected>Tournament Mineral Slate (Classic Reference)</option>
+                        <option value="obsidian">Arcane Midnight Obsidian</option>
+                        <option value="emerald">Mystic Emerald Realm</option>
+                        <option value="wood">Celestial Royal Walnut</option>
+                        <option value="ice">Glacial Frost</option>
+                    </select>
                 </div>
 
                 <!-- Animation Speed -->
