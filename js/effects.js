@@ -1,6 +1,6 @@
 /**
  * MAHŌ NO CHESU | Elemental Chess
- * js/effects.js - Cinematic Canvas FX, Particle System, Elemental Combat & Screen Shake
+ * js/effects.js - Cinematic Elemental Attacks, Canvas Particle System, Combat FX & Screen Shake
  */
 
 class EffectsManager {
@@ -15,16 +15,19 @@ class EffectsManager {
         this.attackBanner = document.getElementById('attack-banner');
         this.comboBanner = document.getElementById('combo-banner');
 
-        // Particle & Effect Pools
+        // Particle & Effect Entities
         this.particles = [];
         this.ambientParticles = [];
         this.activeLightningArcs = [];
         this.activeMagicRings = [];
         this.activeShockwaves = [];
         this.activeFissures = [];
+        this.activeProjectiles = [];
+        this.activeBeams = [];
+        this.activeStoneSpikes = [];
 
         // Quality Settings
-        this.particleCap = 180;
+        this.particleCap = 200;
         this.quality = 'high';
         this.photosensitive = false;
         this.screenShakeEnabled = true;
@@ -74,9 +77,9 @@ class EffectsManager {
     setQuality(level) {
         this.quality = level;
         if (level === 'off') this.particleCap = 0;
-        else if (level === 'low') this.particleCap = 40;
-        else if (level === 'medium') this.particleCap = 90;
-        else this.particleCap = 180;
+        else if (level === 'low') this.particleCap = 50;
+        else if (level === 'medium') this.particleCap = 100;
+        else this.particleCap = 200;
     }
 
     initAmbientParticles() {
@@ -135,7 +138,7 @@ class EffectsManager {
         if (isCritical) {
             this.attackBanner.style.color = '#f43f5e';
             this.attackBanner.style.borderColor = '#f43f5e';
-            this.attackBanner.style.boxShadow = '0 0 45px rgba(244, 63, 94, 0.85)';
+            this.attackBanner.style.boxShadow = '0 0 50px rgba(244, 63, 94, 0.9)';
         } else {
             this.attackBanner.style.color = 'var(--text-gold)';
             this.attackBanner.style.borderColor = 'var(--border-gold)';
@@ -189,7 +192,7 @@ class EffectsManager {
         });
     }
 
-    addShockwave(x, y, maxRadius, color, lineWidth = 3) {
+    addShockwave(x, y, maxRadius, color, lineWidth = 3.5) {
         this.activeShockwaves.push({
             x,
             y,
@@ -203,7 +206,7 @@ class EffectsManager {
     }
 
     /**
-     * 1. PAWN: FIRE BLAST (Spiraling fireball + Fiery shockwave explosion)
+     * 1. PAWN: FIRE BLAST (Blazing plasma comet + Explosive Fire Nova)
      */
     async fireBlast(fromSq, toSq, color = 'w', isFlipped = false) {
         const from = this.getSquareCenter(fromSq, isFlipped);
@@ -212,74 +215,84 @@ class EffectsManager {
 
         const primaryCol = isWhite ? '#f97316' : '#dc2626';
         const secondaryCol = isWhite ? '#fbbf24' : '#9333ea';
+        const coreCol = isWhite ? '#fef08a' : '#f43f5e';
 
         this.showAttackName('FIRE BLAST');
         this.screenShake('sm');
 
-        // Spiraling dual fireball streams
-        const steps = 15;
-        const dist = Math.hypot(to.x - from.x, to.y - from.y);
+        // Blazing projectile flying across board
+        const steps = 16;
         const angle = Math.atan2(to.y - from.y, to.x - from.x);
 
         for (let i = 0; i <= steps; i++) {
             const t = i / steps;
             const cx = from.x + (to.x - from.x) * t;
             const cy = from.y + (to.y - from.y) * t;
-            const wave = Math.sin(t * Math.PI * 4) * (to.width * 0.25);
 
-            const ox1 = Math.cos(angle + Math.PI / 2) * wave;
-            const oy1 = Math.sin(angle + Math.PI / 2) * wave;
+            // Fiery core particle
+            this.spawnParticle({
+                x: cx,
+                y: cy,
+                vx: -Math.cos(angle) * 2 + (Math.random() - 0.5),
+                vy: -Math.sin(angle) * 2 + (Math.random() - 0.5),
+                radius: 6 + Math.random() * 4,
+                color: coreCol,
+                decay: 0.08
+            });
 
-            for (let p = 0; p < 3; p++) {
+            // Trailing spiral sparks
+            for (let p = 0; p < 4; p++) {
+                const spread = (Math.random() - 0.5) * 14;
                 this.spawnParticle({
-                    x: cx + ox1 + (Math.random() - 0.5) * 8,
-                    y: cy + oy1 + (Math.random() - 0.5) * 8,
-                    vx: -Math.cos(angle) * 1.5 + (Math.random() - 0.5),
-                    vy: -Math.sin(angle) * 1.5 - 0.5,
+                    x: cx + spread,
+                    y: cy + spread,
+                    vx: -Math.cos(angle) * 3 + (Math.random() - 0.5) * 3,
+                    vy: -Math.sin(angle) * 3 + (Math.random() - 0.5) * 3 - 0.5,
                     radius: 3 + Math.random() * 4,
                     color: Math.random() > 0.4 ? primaryCol : secondaryCol,
-                    decay: 0.055
+                    decay: 0.05
                 });
             }
-            await new Promise(r => setTimeout(r, 16));
+            await new Promise(r => setTimeout(r, 14));
         }
 
-        // Fiery shockwave
-        this.addShockwave(to.x, to.y, to.width * 0.85, primaryCol, 4);
+        // Dual expanding shockwave rings on impact
+        this.addShockwave(to.x, to.y, to.width * 0.95, primaryCol, 4.5);
+        this.addShockwave(to.x, to.y, to.width * 0.65, coreCol, 3);
 
-        // Explosive burst on target
-        for (let i = 0; i < 35; i++) {
+        // Exploding fire nova
+        for (let i = 0; i < 45; i++) {
             const a = Math.random() * Math.PI * 2;
-            const speed = 2 + Math.random() * 7;
+            const speed = 2.5 + Math.random() * 8.5;
             this.spawnParticle({
                 x: to.x,
                 y: to.y,
                 vx: Math.cos(a) * speed,
                 vy: Math.sin(a) * speed,
-                radius: 4 + Math.random() * 5,
-                color: Math.random() > 0.3 ? primaryCol : secondaryCol,
-                decay: 0.035,
-                gravity: -0.05 // rise upward
+                radius: 4 + Math.random() * 6,
+                color: Math.random() > 0.35 ? primaryCol : secondaryCol,
+                decay: 0.032,
+                gravity: -0.06 // rising heat
             });
         }
+        await new Promise(r => setTimeout(r, 180));
     }
 
     /**
-     * 2. KNIGHT: THUNDER STRIKE (Branching sky bolts + Electric ground flash)
+     * 2. KNIGHT: THUNDER STRIKE (Fractal Lightning Forks + Plasma Ground Scorch)
      */
     async thunderStrike(fromSq, toSq, color = 'w', isFlipped = false) {
         const to = this.getSquareCenter(toSq, isFlipped);
         const isWhite = color === 'w';
         const arcColor = isWhite ? '#38bdf8' : '#c084fc';
-        const boltColor = isWhite ? '#f0f9ff' : '#fdf4ff';
+        const boltColor = isWhite ? '#ffffff' : '#fdf4ff';
 
         this.showAttackName('THUNDER STRIKE');
         this.screenShake('md');
 
-        // Create Main Bolt + 2 Branching Bolts
-        const createBolt = (targetX, targetY, startX) => {
+        const createBolt = (targetX, targetY, startX, jitter = 45) => {
             const points = [];
-            const segments = 9;
+            const segments = 10;
             const stepY = targetY / segments;
             let cx = startX;
             let cy = 0;
@@ -287,54 +300,53 @@ class EffectsManager {
 
             for (let s = 1; s <= segments; s++) {
                 cy += stepY;
-                cx = (s === segments) ? targetX : targetX + (Math.random() - 0.5) * 55;
+                cx = (s === segments) ? targetX : targetX + (Math.random() - 0.5) * jitter;
                 points.push({ x: cx, y: cy });
             }
             return points;
         };
 
-        // Main bolt
+        // 1 Main central bolt
         this.activeLightningArcs.push({
-            points: createBolt(to.x, to.y, to.x + (Math.random() - 0.5) * 20),
+            points: createBolt(to.x, to.y, to.x + (Math.random() - 0.5) * 15, 45),
             color: boltColor,
             glow: arcColor,
             alpha: 1,
-            decay: 0.08
+            decay: 0.075
         });
 
-        // Branch 1
+        // 2 Branching side bolts
         this.activeLightningArcs.push({
-            points: createBolt(to.x - 15, to.y, to.x - 30),
+            points: createBolt(to.x - 18, to.y, to.x - 35, 35),
             color: boltColor,
             glow: arcColor,
-            alpha: 0.8,
-            decay: 0.1
+            alpha: 0.85,
+            decay: 0.09
         });
-
-        // Branch 2
         this.activeLightningArcs.push({
-            points: createBolt(to.x + 15, to.y, to.x + 30),
+            points: createBolt(to.x + 18, to.y, to.x + 35, 35),
             color: boltColor,
             glow: arcColor,
-            alpha: 0.8,
-            decay: 0.1
+            alpha: 0.85,
+            decay: 0.09
         });
 
-        // Ground shockwave
-        this.addShockwave(to.x, to.y, to.width * 0.9, arcColor, 3);
+        // Ground plasma shockwaves
+        this.addShockwave(to.x, to.y, to.width * 1.05, arcColor, 4);
+        this.addShockwave(to.x, to.y, to.width * 0.7, boltColor, 2.5);
 
-        // Sparks scattering
-        for (let i = 0; i < 40; i++) {
+        // Bursting plasma sparks
+        for (let i = 0; i < 50; i++) {
             const a = Math.random() * Math.PI * 2;
-            const speed = 3 + Math.random() * 9;
+            const speed = 3 + Math.random() * 10;
             this.spawnParticle({
                 x: to.x,
                 y: to.y,
                 vx: Math.cos(a) * speed,
                 vy: Math.sin(a) * speed,
-                radius: 2 + Math.random() * 3,
+                radius: 2.5 + Math.random() * 3.5,
                 color: Math.random() > 0.4 ? boltColor : arcColor,
-                decay: 0.045,
+                decay: 0.042,
                 shape: 'spark'
             });
         }
@@ -342,63 +354,67 @@ class EffectsManager {
     }
 
     /**
-     * 3. BISHOP: WIND SLASH (Twin vacuum scythe blades + Aerodynamic slice)
+     * 3. BISHOP: WIND SLASH (Twin Vacuum Scythe Blades + Aerodynamic Cross Cleave)
      */
     async windSlash(fromSq, toSq, color = 'w', isFlipped = false) {
         const from = this.getSquareCenter(fromSq, isFlipped);
         const to = this.getSquareCenter(toSq, isFlipped);
         const isWhite = color === 'w';
         const windColor = isWhite ? '#34d399' : '#a78bfa';
+        const streakColor = isWhite ? '#ecfdf5' : '#f3e8ff';
 
         this.showAttackName('WIND SLASH');
         this.screenShake('sm');
 
         const angle = Math.atan2(to.y - from.y, to.x - from.x);
-        const steps = 14;
+        const steps = 15;
 
         for (let i = 0; i <= steps; i++) {
             const t = i / steps;
             const cx = from.x + (to.x - from.x) * t;
             const cy = from.y + (to.y - from.y) * t;
 
-            // Two offset vacuum blade arcs
+            // Dual offset vacuum scythe arcs
             for (let side of [-1, 1]) {
-                const ox = Math.cos(angle + Math.PI / 2) * (side * 8);
-                const oy = Math.sin(angle + Math.PI / 2) * (side * 8);
+                const ox = Math.cos(angle + Math.PI / 2) * (side * 10);
+                const oy = Math.sin(angle + Math.PI / 2) * (side * 10);
 
                 this.spawnParticle({
                     x: cx + ox,
                     y: cy + oy,
                     vx: Math.cos(angle) * 5 + (Math.random() - 0.5) * 2,
                     vy: Math.sin(angle) * 5 + (Math.random() - 0.5) * 2,
-                    radius: 3 + Math.random() * 3,
+                    radius: 3.5 + Math.random() * 3.5,
                     color: windColor,
                     decay: 0.065,
                     shape: 'streak'
                 });
             }
-            await new Promise(r => setTimeout(r, 15));
+            await new Promise(r => setTimeout(r, 13));
         }
 
-        // Cross-slice visual burst at target
-        for (let i = 0; i < 30; i++) {
-            const a = angle + (Math.random() - 0.5) * 1.8;
-            const speed = 4 + Math.random() * 7;
+        // Violent cross-slice pressure wave
+        this.addShockwave(to.x, to.y, to.width * 0.9, windColor, 3.5);
+
+        for (let i = 0; i < 40; i++) {
+            const a = angle + (Math.random() - 0.5) * 2.2;
+            const speed = 4 + Math.random() * 8;
             this.spawnParticle({
                 x: to.x,
                 y: to.y,
                 vx: Math.cos(a) * speed,
                 vy: Math.sin(a) * speed,
-                radius: 3,
-                color: '#ecfdf5',
-                decay: 0.045,
+                radius: 3.2,
+                color: streakColor,
+                decay: 0.04,
                 shape: 'streak'
             });
         }
+        await new Promise(r => setTimeout(r, 160));
     }
 
     /**
-     * 4. ROOK: EARTH BREAKER (Tectonic fissure split + Rising stone pillars)
+     * 4. ROOK: EARTH BREAKER (Tectonic Fissures + Massive Rising Stone Spikes)
      */
     async earthBreaker(fromSq, toSq, color = 'w', isFlipped = false) {
         const to = this.getSquareCenter(toSq, isFlipped);
@@ -409,38 +425,54 @@ class EffectsManager {
         this.showAttackName('EARTH BREAKER');
         this.screenShake('lg');
 
-        // Dynamic ground fissure crack
+        // Multi-branching ground fissures
         this.activeFissures.push({
             cx: to.x,
             cy: to.y,
-            length: to.width * 0.7,
+            length: to.width * 0.8,
             alpha: 1,
-            decay: 0.02
+            decay: 0.018
         });
 
-        this.addShockwave(to.x, to.y, to.width * 0.95, earthCol, 5);
+        // 3D rising stone spikes
+        for (let i = 0; i < 4; i++) {
+            const ox = (i - 1.5) * (to.width * 0.2);
+            this.activeStoneSpikes.push({
+                x: to.x + ox,
+                y: to.y + (Math.random() - 0.5) * 10,
+                width: 14 + Math.random() * 6,
+                maxHeight: 28 + Math.random() * 14,
+                currentHeight: 0,
+                color: earthCol,
+                accentColor: rockCol,
+                alpha: 1,
+                decay: 0.02
+            });
+        }
 
-        // Rising rock fragments and falling rubble
-        for (let i = 0; i < 40; i++) {
+        this.addShockwave(to.x, to.y, to.width * 1.1, earthCol, 5);
+
+        // Bouncing rock fragments & pulverized stone
+        for (let i = 0; i < 50; i++) {
             const angle = Math.random() * Math.PI * 2;
-            const speed = 2 + Math.random() * 8;
+            const speed = 2.5 + Math.random() * 9;
             this.spawnParticle({
-                x: to.x + (Math.random() - 0.5) * 24,
-                y: to.y + (Math.random() - 0.5) * 24,
+                x: to.x + (Math.random() - 0.5) * 30,
+                y: to.y + (Math.random() - 0.5) * 30,
                 vx: Math.cos(angle) * speed,
-                vy: -Math.abs(Math.sin(angle) * speed) - 3,
-                radius: 3 + Math.random() * 7,
+                vy: -Math.abs(Math.sin(angle) * speed) - 3.5,
+                radius: 3.5 + Math.random() * 7,
                 color: Math.random() > 0.4 ? earthCol : rockCol,
-                decay: 0.03,
-                gravity: 0.3,
+                decay: 0.028,
+                gravity: 0.35,
                 shape: 'rock'
             });
         }
-        await new Promise(r => setTimeout(r, 240));
+        await new Promise(r => setTimeout(r, 260));
     }
 
     /**
-     * 5. QUEEN: FROZEN DOMINION (Hexagonal runic mandala + Ice shatter)
+     * 5. QUEEN: FROZEN DOMINION (Rotating Arcane Mandala + Crystalline Shatter)
      */
     async frozenDominion(fromSq, toSq, color = 'w', isFlipped = false) {
         const to = this.getSquareCenter(toSq, isFlipped);
@@ -451,33 +483,34 @@ class EffectsManager {
         this.showAttackName('FROZEN DOMINION');
         this.screenShake('lg');
 
-        // Summon rotating arcane runic mandala
+        // Rotating 12-point arcane runic mandala
         this.activeMagicRings.push({
             x: to.x,
             y: to.y,
             radius: 8,
-            maxRadius: to.width * 0.8,
+            maxRadius: to.width * 0.85,
             color: runeCol,
             rotation: 0,
-            vRot: 0.08,
+            vRot: 0.07,
             alpha: 1,
-            decay: 0.03
+            decay: 0.026
         });
 
-        this.addShockwave(to.x, to.y, to.width * 0.9, iceCol, 4);
+        this.addShockwave(to.x, to.y, to.width * 0.95, iceCol, 4.5);
+        this.addShockwave(to.x, to.y, to.width * 0.65, runeCol, 2.5);
 
-        // Explosive frost crystal shatter
-        for (let i = 0; i < 45; i++) {
+        // Frost crystal shatter explosion
+        for (let i = 0; i < 55; i++) {
             const angle = Math.random() * Math.PI * 2;
-            const speed = 2.5 + Math.random() * 8;
+            const speed = 3 + Math.random() * 9;
             this.spawnParticle({
                 x: to.x,
                 y: to.y,
                 vx: Math.cos(angle) * speed,
                 vy: Math.sin(angle) * speed,
-                radius: 3 + Math.random() * 6,
-                color: Math.random() > 0.5 ? iceCol : runeCol,
-                decay: 0.03,
+                radius: 3.5 + Math.random() * 6.5,
+                color: Math.random() > 0.45 ? iceCol : runeCol,
+                decay: 0.028,
                 shape: 'crystal'
             });
         }
@@ -485,45 +518,49 @@ class EffectsManager {
     }
 
     /**
-     * 6. KING: JUDGMENT OF LIGHT (Vertical solar pillar + Radiant halos)
+     * 6. KING: JUDGMENT OF LIGHT (Vertical Solar Pillar + Concentric Sacred Halos)
      */
     async judgmentOfLight(fromSq, toSq, color = 'w', isFlipped = false) {
         const to = this.getSquareCenter(toSq, isFlipped);
         const isWhite = color === 'w';
         const lightCol = isWhite ? '#facc15' : '#f472b6';
-        const beamCol = isWhite ? '#fef9c3' : '#fdf4ff';
+        const beamCol = isWhite ? '#ffffff' : '#fdf4ff';
 
         this.showAttackName('JUDGMENT OF LIGHT');
         this.screenShake('md');
 
-        // Sacred descending beam from sky
-        this.activeShockwaves.push({
+        // Celestial vertical solar pillar from sky to ground
+        this.activeBeams.push({
             x: to.x,
             y: to.y,
-            radius: 5,
-            maxRadius: to.width * 0.85,
+            width: to.width * 0.75,
             color: lightCol,
-            lineWidth: 4,
+            coreColor: beamCol,
             alpha: 1,
-            decay: 0.025
+            decay: 0.028
         });
 
-        // Divine starburst particles
-        for (let i = 0; i < 50; i++) {
+        // Triple concentric sacred shockwave halos
+        this.addShockwave(to.x, to.y, to.width * 1.05, lightCol, 4);
+        this.addShockwave(to.x, to.y, to.width * 0.75, beamCol, 3);
+        this.addShockwave(to.x, to.y, to.width * 0.45, lightCol, 2);
+
+        // Radiant starburst particles
+        for (let i = 0; i < 60; i++) {
             const angle = Math.random() * Math.PI * 2;
-            const speed = 1.5 + Math.random() * 7;
+            const speed = 2 + Math.random() * 8;
             this.spawnParticle({
                 x: to.x,
                 y: to.y,
                 vx: Math.cos(angle) * speed,
                 vy: Math.sin(angle) * speed,
-                radius: 3 + Math.random() * 5,
-                color: Math.random() > 0.3 ? lightCol : beamCol,
-                decay: 0.028,
+                radius: 3.5 + Math.random() * 5.5,
+                color: Math.random() > 0.35 ? lightCol : beamCol,
+                decay: 0.025,
                 shape: 'circle'
             });
         }
-        await new Promise(r => setTimeout(r, 240));
+        await new Promise(r => setTimeout(r, 260));
     }
 
     fortressAura(kingSq, rookSq, isFlipped = false) {
@@ -532,24 +569,24 @@ class EffectsManager {
         const rCenter = this.getSquareCenter(rookSq, isFlipped);
 
         for (let pt of [kCenter, rCenter]) {
-            this.addShockwave(pt.x, pt.y, pt.width * 0.7, '#facc15', 3);
+            this.addShockwave(pt.x, pt.y, pt.width * 0.75, '#facc15', 3.5);
         }
     }
 
     ascensionAura(sq, isFlipped = false) {
         this.showAttackName('ASCENSION');
         const center = this.getSquareCenter(sq, isFlipped);
-        this.addShockwave(center.x, center.y, center.width * 0.9, '#fbbf24', 4);
+        this.addShockwave(center.x, center.y, center.width * 0.95, '#fbbf24', 4.5);
 
-        for (let i = 0; i < 45; i++) {
+        for (let i = 0; i < 50; i++) {
             this.spawnParticle({
                 x: center.x + (Math.random() - 0.5) * 35,
                 y: center.y + (Math.random() - 0.5) * 35,
                 vx: (Math.random() - 0.5) * 3,
-                vy: -2.5 - Math.random() * 5,
-                radius: 3 + Math.random() * 4,
+                vy: -3 - Math.random() * 5.5,
+                radius: 3.5 + Math.random() * 4,
                 color: '#fef08a',
-                decay: 0.028
+                decay: 0.025
             });
         }
     }
@@ -567,7 +604,7 @@ class EffectsManager {
         if (piece.type === 'q') color = '#a855f7';
         if (piece.type === 'k') color = '#facc15';
 
-        const steps = 9;
+        const steps = 10;
         for (let i = 0; i <= steps; i++) {
             const t = i / steps;
             this.spawnParticle({
@@ -583,7 +620,7 @@ class EffectsManager {
     }
 
     /**
-     * Master Render Loop (60 FPS, Canvas Compositing)
+     * Master Render Loop (60 FPS, Multi-Layer Canvas Compositing)
      */
     animate(timestamp) {
         const delta = timestamp - this.lastFrameTime;
@@ -603,7 +640,7 @@ class EffectsManager {
             }
         }
 
-        // 1. Ambient Particles
+        // 1. Ambient Background Particles
         if (this.ambientCtx && this.ambientParticles.length > 0) {
             this.ambientCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
             for (let i = 0; i < this.ambientParticles.length; i++) {
@@ -632,7 +669,33 @@ class EffectsManager {
         if (this.boardCtx && this.boardWidth) {
             this.boardCtx.clearRect(0, 0, this.boardWidth, this.boardHeight);
 
-            // Ground Fissures (Earth)
+            // A. Celestial Light Beams (King)
+            for (let i = this.activeBeams.length - 1; i >= 0; i--) {
+                const bm = this.activeBeams[i];
+                bm.alpha -= bm.decay;
+                if (bm.alpha <= 0) {
+                    this.activeBeams.splice(i, 1);
+                    continue;
+                }
+                this.boardCtx.save();
+                this.boardCtx.globalAlpha = Math.max(0, bm.alpha);
+
+                const grad = this.boardCtx.createLinearGradient(bm.x, 0, bm.x, bm.y);
+                grad.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
+                grad.addColorStop(0.7, bm.color);
+                grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+                this.boardCtx.fillStyle = grad;
+                this.boardCtx.fillRect(bm.x - bm.width / 2, 0, bm.width, bm.y);
+
+                // Central white-hot core
+                this.boardCtx.fillStyle = bm.coreColor;
+                this.boardCtx.globalAlpha = Math.max(0, bm.alpha * 0.85);
+                this.boardCtx.fillRect(bm.x - bm.width / 6, 0, bm.width / 3, bm.y);
+                this.boardCtx.restore();
+            }
+
+            // B. Ground Fissures (Earth Breaker)
             for (let i = this.activeFissures.length - 1; i >= 0; i--) {
                 const fis = this.activeFissures[i];
                 fis.alpha -= fis.decay;
@@ -643,20 +706,53 @@ class EffectsManager {
                 this.boardCtx.save();
                 this.boardCtx.globalAlpha = Math.max(0, fis.alpha);
                 this.boardCtx.strokeStyle = '#b45309';
-                this.boardCtx.lineWidth = 2.5;
+                this.boardCtx.lineWidth = 3;
+                this.boardCtx.shadowColor = '#f59e0b';
+                this.boardCtx.shadowBlur = 10;
                 this.boardCtx.beginPath();
                 this.boardCtx.moveTo(fis.cx - fis.length / 2, fis.cy);
-                this.boardCtx.lineTo(fis.cx - fis.length / 6, fis.cy + 6);
-                this.boardCtx.lineTo(fis.cx + fis.length / 6, fis.cy - 6);
+                this.boardCtx.lineTo(fis.cx - fis.length / 6, fis.cy + 7);
+                this.boardCtx.lineTo(fis.cx + fis.length / 6, fis.cy - 7);
                 this.boardCtx.lineTo(fis.cx + fis.length / 2, fis.cy);
                 this.boardCtx.stroke();
                 this.boardCtx.restore();
             }
 
-            // Shockwave Rings
+            // C. 3D Rising Stone Spikes (Earth Breaker)
+            for (let i = this.activeStoneSpikes.length - 1; i >= 0; i--) {
+                const spk = this.activeStoneSpikes[i];
+                if (spk.currentHeight < spk.maxHeight) {
+                    spk.currentHeight += (spk.maxHeight - spk.currentHeight) * 0.25 + 2;
+                } else {
+                    spk.alpha -= spk.decay;
+                }
+
+                if (spk.alpha <= 0) {
+                    this.activeStoneSpikes.splice(i, 1);
+                    continue;
+                }
+
+                this.boardCtx.save();
+                this.boardCtx.globalAlpha = Math.max(0, spk.alpha);
+                this.boardCtx.fillStyle = spk.color;
+                this.boardCtx.beginPath();
+                this.boardCtx.moveTo(spk.x - spk.width / 2, spk.y);
+                this.boardCtx.lineTo(spk.x, spk.y - spk.currentHeight);
+                this.boardCtx.lineTo(spk.x + spk.width / 2, spk.y);
+                this.boardCtx.closePath();
+                this.boardCtx.fill();
+
+                // Highlight edge
+                this.boardCtx.strokeStyle = spk.accentColor;
+                this.boardCtx.lineWidth = 1.5;
+                this.boardCtx.stroke();
+                this.boardCtx.restore();
+            }
+
+            // D. Shockwave Rings
             for (let i = this.activeShockwaves.length - 1; i >= 0; i--) {
                 const sw = this.activeShockwaves[i];
-                sw.radius += (sw.maxRadius - sw.radius) * 0.16 + 1;
+                sw.radius += (sw.maxRadius - sw.radius) * 0.16 + 1.2;
                 sw.alpha -= sw.decay;
 
                 if (sw.alpha <= 0 || sw.radius >= sw.maxRadius) {
@@ -669,14 +765,14 @@ class EffectsManager {
                 this.boardCtx.strokeStyle = sw.color;
                 this.boardCtx.lineWidth = sw.lineWidth;
                 this.boardCtx.shadowColor = sw.color;
-                this.boardCtx.shadowBlur = 10;
+                this.boardCtx.shadowBlur = 12;
                 this.boardCtx.beginPath();
                 this.boardCtx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
                 this.boardCtx.stroke();
                 this.boardCtx.restore();
             }
 
-            // Magic Circles & Mandalas
+            // E. Magic Arcane Rings & Mandalas (Frozen Dominion)
             for (let i = this.activeMagicRings.length - 1; i >= 0; i--) {
                 const ring = this.activeMagicRings[i];
                 ring.radius += (ring.maxRadius - ring.radius) * 0.12;
@@ -691,18 +787,20 @@ class EffectsManager {
                 this.boardCtx.save();
                 this.boardCtx.globalAlpha = Math.max(0, ring.alpha);
                 this.boardCtx.strokeStyle = ring.color;
-                this.boardCtx.lineWidth = 2;
+                this.boardCtx.lineWidth = 2.2;
+                this.boardCtx.shadowColor = ring.color;
+                this.boardCtx.shadowBlur = 14;
                 this.boardCtx.translate(ring.x, ring.y);
                 if (ring.rotation !== undefined) this.boardCtx.rotate(ring.rotation);
 
-                // Circular perimeter
+                // Circular outer ring
                 this.boardCtx.beginPath();
                 this.boardCtx.arc(0, 0, ring.radius, 0, Math.PI * 2);
                 this.boardCtx.stroke();
 
-                // Hexagram mandala pattern
-                for (let a = 0; a < 6; a++) {
-                    const ang = (a * Math.PI) / 3;
+                // 12-point intricate mandala spokes
+                for (let a = 0; a < 12; a++) {
+                    const ang = (a * Math.PI) / 6;
                     this.boardCtx.beginPath();
                     this.boardCtx.moveTo(0, 0);
                     this.boardCtx.lineTo(Math.cos(ang) * ring.radius, Math.sin(ang) * ring.radius);
@@ -712,7 +810,7 @@ class EffectsManager {
                 this.boardCtx.restore();
             }
 
-            // Lightning Arcs
+            // F. Lightning Bolts (Thunder Strike)
             for (let i = this.activeLightningArcs.length - 1; i >= 0; i--) {
                 const arc = this.activeLightningArcs[i];
                 arc.alpha -= arc.decay;
@@ -724,9 +822,9 @@ class EffectsManager {
                 this.boardCtx.save();
                 this.boardCtx.globalAlpha = Math.max(0, arc.alpha);
                 this.boardCtx.strokeStyle = arc.color;
-                this.boardCtx.lineWidth = 3;
+                this.boardCtx.lineWidth = 3.5;
                 this.boardCtx.shadowColor = arc.glow;
-                this.boardCtx.shadowBlur = 18;
+                this.boardCtx.shadowBlur = 20;
 
                 this.boardCtx.beginPath();
                 for (let p = 0; p < arc.points.length; p++) {
@@ -738,7 +836,7 @@ class EffectsManager {
                 this.boardCtx.restore();
             }
 
-            // Particles
+            // G. Particles (All Elements)
             for (let i = this.particles.length - 1; i >= 0; i--) {
                 const p = this.particles[i];
                 p.x += p.vx;
@@ -761,7 +859,7 @@ class EffectsManager {
                 if (p.shape === 'spark' || p.shape === 'streak') {
                     this.boardCtx.translate(p.x, p.y);
                     this.boardCtx.rotate(p.rotation);
-                    this.boardCtx.fillRect(-p.radius, -1, p.radius * 2, 2);
+                    this.boardCtx.fillRect(-p.radius, -1.2, p.radius * 2, 2.4);
                 } else if (p.shape === 'rock' || p.shape === 'crystal') {
                     this.boardCtx.translate(p.x, p.y);
                     this.boardCtx.rotate(p.rotation);

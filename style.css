@@ -564,6 +564,86 @@ html, body {
     transition: transform cubic-bezier(0.2, 0.85, 0.25, 1);
 }
 
+/* ==========================================================================
+   Elemental Attack Victim Reactions (Cinematic Piece Dissolution)
+   ========================================================================== */
+
+/* 1. Fire Blast: Incineration */
+.piece-target-burning {
+    animation: target-burn 0.55s ease-out forwards !important;
+}
+
+@keyframes target-burn {
+    0% { filter: drop-shadow(0 0 10px #f97316); transform: scale(1); opacity: 1; }
+    40% { filter: drop-shadow(0 0 25px #ea580c) brightness(1.8); transform: scale(1.08) translateY(-4px); opacity: 0.9; }
+    75% { filter: drop-shadow(0 0 35px #dc2626) brightness(0.6); transform: scale(0.9) translateY(-10px); opacity: 0.5; }
+    100% { filter: drop-shadow(0 0 45px #7f1d1d) brightness(0.2); transform: scale(0.6) translateY(-16px); opacity: 0; }
+}
+
+/* 2. Thunder Strike: High-Voltage Electrocution */
+.piece-target-electrocuted {
+    animation: target-zap 0.45s ease-out forwards !important;
+}
+
+@keyframes target-zap {
+    0% { filter: drop-shadow(0 0 8px #38bdf8); transform: translate3d(0, 0, 0); opacity: 1; }
+    20% { filter: brightness(3) drop-shadow(0 0 30px #ffffff); transform: translate3d(-4px, 2px, 0); }
+    40% { filter: brightness(2.5) drop-shadow(0 0 40px #06b6d4); transform: translate3d(5px, -3px, 0); opacity: 0.85; }
+    60% { filter: brightness(3.5) drop-shadow(0 0 50px #38bdf8); transform: translate3d(-5px, 4px, 0); opacity: 0.6; }
+    80% { filter: brightness(1.5) drop-shadow(0 0 30px #0284c7); transform: translate3d(3px, -2px, 0) scale(1.15); opacity: 0.3; }
+    100% { filter: brightness(0.1); transform: scale(0.4); opacity: 0; }
+}
+
+/* 3. Wind Slash: Vacuum Blade Cleave */
+.piece-target-slashed {
+    animation: target-slash 0.45s ease-out forwards !important;
+}
+
+@keyframes target-slash {
+    0% { filter: drop-shadow(0 0 8px #34d399); transform: scale(1); opacity: 1; }
+    30% { filter: drop-shadow(0 0 25px #10b981) brightness(1.7); transform: skewX(-14deg) scale(1.05); }
+    60% { filter: drop-shadow(0 0 30px #059669); transform: translate3d(12px, -8px, 0) skewX(-20deg); opacity: 0.6; }
+    100% { filter: drop-shadow(0 0 40px #047857); transform: translate3d(24px, -16px, 0) scale(0.5); opacity: 0; }
+}
+
+/* 4. Earth Breaker: Tectonic Pulverization */
+.piece-target-crushed {
+    animation: target-crush 0.5s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards !important;
+}
+
+@keyframes target-crush {
+    0% { filter: drop-shadow(0 0 8px #d97706); transform: translateY(0); opacity: 1; }
+    25% { transform: translate3d(-3px, 3px, 0) scale(1.04); filter: brightness(1.4); }
+    50% { transform: translate3d(4px, -2px, 0) scaleY(0.8); filter: drop-shadow(0 0 20px #b45309); opacity: 0.85; }
+    75% { transform: translate3d(0, 10px, 0) scaleY(0.4) scaleX(1.3); filter: brightness(0.5); opacity: 0.5; }
+    100% { transform: translate3d(0, 18px, 0) scaleY(0.1) scaleX(1.5); filter: brightness(0.2); opacity: 0; }
+}
+
+/* 5. Frozen Dominion: Glacial Freeze & Shatter */
+.piece-target-frozen {
+    animation: target-freeze 0.55s ease-out forwards !important;
+}
+
+@keyframes target-freeze {
+    0% { filter: drop-shadow(0 0 10px #38bdf8); transform: scale(1); opacity: 1; }
+    30% { filter: drop-shadow(0 0 25px #818cf8) brightness(1.6) contrast(1.5); transform: scale(1.02); }
+    65% { filter: drop-shadow(0 0 40px #c084fc) brightness(2.2); transform: translate3d(2px, -2px, 0); opacity: 0.9; }
+    85% { filter: brightness(3) drop-shadow(0 0 50px #ffffff); transform: scale(1.2); opacity: 0.6; }
+    100% { filter: brightness(4); transform: scale(1.4); opacity: 0; }
+}
+
+/* 6. Judgment of Light: Sacred Solar Vaporization */
+.piece-target-dissolved {
+    animation: target-dissolve 0.55s ease-out forwards !important;
+}
+
+@keyframes target-dissolve {
+    0% { filter: drop-shadow(0 0 12px #facc15); transform: scale(1); opacity: 1; }
+    35% { filter: brightness(3.5) drop-shadow(0 0 35px #ffffff); transform: scale(1.1) translateY(-6px); opacity: 0.95; }
+    70% { filter: brightness(5) drop-shadow(0 0 60px #fde047); transform: scale(1.25) translateY(-14px); opacity: 0.6; }
+    100% { filter: brightness(6); transform: scale(1.4) translateY(-22px); opacity: 0; }
+}
+
 /* Visual FX Canvas Layer on Board */
 .effects-canvas {
     position: absolute;

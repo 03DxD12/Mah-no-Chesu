@@ -590,6 +590,25 @@ class UIManager {
     }
 
     /**
+     * Trigger dramatic elemental dissolution / reaction on target piece
+     */
+    triggerPieceTargetReaction(sq, reactionClass) {
+        let targetEl = null;
+        for (let i = 0; i < 64; i++) {
+            const el = this.boardEl.children[i];
+            if (parseInt(el.dataset.square, 10) === sq) {
+                targetEl = el;
+                break;
+            }
+        }
+        if (!targetEl) return;
+        const wrapper = targetEl.querySelector('.piece-svg-wrapper');
+        if (wrapper) {
+            wrapper.classList.add(reactionClass);
+        }
+    }
+
+    /**
      * Keyboard Navigation Controls
      */
     initKeyboardControls() {

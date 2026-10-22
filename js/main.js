@@ -343,29 +343,37 @@ class MahoNoChesuApp {
                 this.effects.incrementCombo();
             }
 
+            const targetSq = move.isEnPassant ? (Math.floor(move.from / 8) * 8 + (move.to % 8)) : move.to;
+
             // Route elemental attack based on piece type
             switch (piece.type) {
                 case 'p':
+                    this.ui.triggerPieceTargetReaction(targetSq, 'piece-target-burning');
                     this.audio.playFireBlast();
                     await this.effects.fireBlast(move.from, move.to, piece.color, this.ui.isFlipped);
                     break;
                 case 'n':
+                    this.ui.triggerPieceTargetReaction(targetSq, 'piece-target-electrocuted');
                     this.audio.playThunderStrike();
                     await this.effects.thunderStrike(move.from, move.to, piece.color, this.ui.isFlipped);
                     break;
                 case 'b':
+                    this.ui.triggerPieceTargetReaction(targetSq, 'piece-target-slashed');
                     this.audio.playWindSlash();
                     await this.effects.windSlash(move.from, move.to, piece.color, this.ui.isFlipped);
                     break;
                 case 'r':
+                    this.ui.triggerPieceTargetReaction(targetSq, 'piece-target-crushed');
                     this.audio.playEarthBreaker();
                     await this.effects.earthBreaker(move.from, move.to, piece.color, this.ui.isFlipped);
                     break;
                 case 'q':
+                    this.ui.triggerPieceTargetReaction(targetSq, 'piece-target-frozen');
                     this.audio.playFrozenDominion();
                     await this.effects.frozenDominion(move.from, move.to, piece.color, this.ui.isFlipped);
                     break;
                 case 'k':
+                    this.ui.triggerPieceTargetReaction(targetSq, 'piece-target-dissolved');
                     this.audio.playJudgmentOfLight();
                     await this.effects.judgmentOfLight(move.from, move.to, piece.color, this.ui.isFlipped);
                     break;
