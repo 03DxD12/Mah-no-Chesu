@@ -94,22 +94,20 @@ class UIManager {
                 `;
                 break;
 
-            case 'n': // Knight
+            case 'n': // Knight (Stylized modern emblem matching reference)
                 paths = `
-                    <!-- Horse Body & Head Profile -->
-                    <path d="M24 85 C23 75 26 65 31 57 C33 54 33 50 30 48 C26 46 21 48 18 43 C15 39 15 32 17 28 C19 24 24 23 29 24 C31 22 34 18 37 14 C38 12 41 13 41 15 C41 17 40 21 42 22 C46 20 51 16 55 11 C57 9 60 10 60 13 C59 17 56 21 58 25 C66 29 74 37 77 46 C80 56 80 72 74 85 Z" fill="${mainFill}" stroke="${lineStroke}" stroke-width="${strokeW}" stroke-linejoin="round"/>
-                    <!-- Eye -->
-                    <ellipse cx="30" cy="32" rx="3.5" ry="2" transform="rotate(-15 30 32)" fill="${innerDetail}"/>
-                    <!-- Nostril -->
-                    <path d="M21 36 C21 34 24 35 24 37" stroke="${lineStroke}" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-                    <!-- Mouth Slit -->
-                    <path d="M23 43 C26 45 30 44 32 41" stroke="${lineStroke}" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-                    <!-- Mane Grooves -->
-                    <path d="M62 33 C60 40 64 45 68 49" stroke="${lineStroke}" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-                    <path d="M68 53 C67 61 70 66 74 70" stroke="${lineStroke}" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-                    <!-- Stepped Base -->
-                    <rect x="17" y="85" width="66" height="5.5" rx="2" fill="${mainFill}" stroke="${lineStroke}" stroke-width="${strokeW}"/>
-                    <rect x="12" y="90.5" width="76" height="6" rx="2" fill="${mainFill}" stroke="${lineStroke}" stroke-width="${strokeW}"/>
+                    <!-- Outer Horse Silhouette -->
+                    <path d="M44 12 L48 23 L33 42 C30 46 34 48 38 45 L44 40 C46 38 49 39 51 40 C47 48 42 58 38 68 L38 74 L56 74 C58 68 62 60 66 52 C71 42 71 31 66 22 L44 12 Z" fill="${mainFill}" stroke="${lineStroke}" stroke-width="${strokeW}" stroke-linejoin="round"/>
+                    
+                    <!-- Back Neck Arched Crest & Foot Spur -->
+                    <path d="M44 12 C58 20 73 34 74 52 C75 62 74 68 76 68 L76 74 L62 74 L62 68 C66 68 67 62 67 52 C67 38 58 24 44 12 Z" fill="${mainFill}" stroke="${lineStroke}" stroke-width="${strokeW}" stroke-linejoin="round"/>
+
+                    <!-- Inner Contour / Ribbon Line -->
+                    <path d="M51 40 C58 48 62 58 55 68 L49 74" fill="none" stroke="${lineStroke}" stroke-width="${strokeW}" stroke-linecap="round"/>
+
+                    <!-- Stepped Two-Tier Pedestal Bars -->
+                    <rect x="26" y="81" width="48" height="5.5" rx="2.5" fill="${mainFill}" stroke="${lineStroke}" stroke-width="${strokeW}"/>
+                    <rect x="18" y="88.5" width="64" height="5.5" rx="2.5" fill="${mainFill}" stroke="${lineStroke}" stroke-width="${strokeW}"/>
                 `;
                 break;
 
