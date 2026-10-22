@@ -69,12 +69,13 @@
                 <div id="attack-banner" class="attack-banner" aria-live="assertive"></div>
                 <div id="combo-banner" class="combo-banner"></div>
 
-                <!-- Screen Shake Wrapper & Grandmaster Fantasy Bezel Frame -->
+                <!-- Grandmaster Board Frame with 4-Sided Coordinates (Matching Reference Layout) -->
                 <div id="board-frame" class="board-frame">
-                    <div class="board-corner corner-tl" aria-hidden="true"></div>
-                    <div class="board-corner corner-tr" aria-hidden="true"></div>
-                    <div class="board-corner corner-bl" aria-hidden="true"></div>
-                    <div class="board-corner corner-br" aria-hidden="true"></div>
+                    <div class="coord-corner corner-tl" aria-hidden="true"></div>
+                    <div class="board-coords board-coords-top" id="board-coords-top" aria-hidden="true"></div>
+                    <div class="coord-corner corner-tr" aria-hidden="true"></div>
+
+                    <div class="board-coords board-coords-left" id="board-coords-left" aria-hidden="true"></div>
 
                     <div id="board-wrapper" class="board-wrapper">
                         <!-- 8x8 Chess Board Grid -->
@@ -85,6 +86,12 @@
                         <!-- FX Canvas Overlay directly matching board dimensions -->
                         <canvas id="effects-canvas" class="effects-canvas"></canvas>
                     </div>
+
+                    <div class="board-coords board-coords-right" id="board-coords-right" aria-hidden="true"></div>
+
+                    <div class="coord-corner corner-bl" aria-hidden="true"></div>
+                    <div class="board-coords board-coords-bottom" id="board-coords-bottom" aria-hidden="true"></div>
+                    <div class="coord-corner corner-br" aria-hidden="true"></div>
                 </div>
 
                 <!-- Floating Game Status Badge -->

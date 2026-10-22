@@ -222,9 +222,32 @@ class UIManager {
     }
 
     /**
+     * Render 4-sided coordinate margins (top, bottom, left, right)
+     */
+    renderCoordinates() {
+        const topEl = document.getElementById('board-coords-top');
+        const bottomEl = document.getElementById('board-coords-bottom');
+        const leftEl = document.getElementById('board-coords-left');
+        const rightEl = document.getElementById('board-coords-right');
+
+        const files = this.isFlipped ? ['H', 'G', 'F', 'E', 'D', 'C', 'B', 'A'] : ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+        const ranks = this.isFlipped ? ['1', '2', '3', '4', '5', '6', '7', '8'] : ['8', '7', '6', '5', '4', '3', '2', '1'];
+
+        const filesHTML = files.map(f => `<span class="coord-cell">${f}</span>`).join('');
+        const ranksHTML = ranks.map(r => `<span class="coord-cell">${r}</span>`).join('');
+
+        if (topEl) topEl.innerHTML = filesHTML;
+        if (bottomEl) bottomEl.innerHTML = filesHTML;
+        if (leftEl) leftEl.innerHTML = ranksHTML;
+        if (rightEl) rightEl.innerHTML = ranksHTML;
+    }
+
+    /**
      * Render entire board according to engine state and flipped status
      */
     renderBoard() {
+        this.renderCoordinates();
+
         const board = this.engine.board;
         const kingInCheckSq = this.engine.isKingInCheck(this.engine.turn) ? this.engine.findKing(this.engine.turn) : -1;
 
@@ -243,16 +266,6 @@ class UIManager {
             const isLight = (file + rank) % 2 !== 0;
             sqEl.className = `square ${isLight ? 'light' : 'dark'}`;
 
-            // Coordinates
-            let coordHTML = '';
-            if (visualRow === 7) {
-                const fileLetter = String.fromCharCode('a'.charCodeAt(0) + file);
-                coordHTML += `<span class="square-coord-file">${fileLetter}</span>`;
-            }
-            if (visualCol === 0) {
-                coordHTML += `<span class="square-coord-rank">${rank + 1}</span>`;
-            }
-
             // Piece
             const piece = board[sq];
             let pieceHTML = '';
@@ -260,7 +273,7 @@ class UIManager {
                 pieceHTML = `<div class="piece-svg-wrapper piece-${piece.type}">${this.getPieceSVG(piece.type, piece.color)}</div>`;
             }
 
-            sqEl.innerHTML = `${coordHTML}${pieceHTML}`;
+            sqEl.innerHTML = pieceHTML;
 
             // Selection state
             if (this.selectedSquare === sq) {

@@ -20,17 +20,16 @@
     --text-muted: #64748b;
     --text-gold: #fbbf24;
 
-    /* Chess Board Default: Tournament Mineral Slate (Matches Reference) */
-    --sq-light-start: #f4f7fa;
-    --sq-light-end: #dee4ea;
-    --sq-dark-start: #9bb0c1;
-    --sq-dark-end: #849ab0;
-    --sq-coord-light: #526374;
-    --sq-coord-dark: #f8fafc;
-    --board-frame-bg: linear-gradient(145deg, #1b2332 0%, #0d121c 100%);
+    /* Chess Board Default: Classic Dark Fantasy (Original Game Colors) */
+    --sq-light-start: #313e54;
+    --sq-light-end: #253143;
+    --sq-dark-start: #141b29;
+    --sq-dark-end: #0c111c;
+    --board-frame-bg: #111724;
     --board-frame-border: #d4af37;
-    --board-inner-glow: rgba(212, 175, 55, 0.28);
-    --board-inner-rim: rgba(212, 175, 55, 0.45);
+    --board-coord-color: #fbbf24;
+    --board-inner-glow: rgba(212, 175, 55, 0.25);
+    --board-inner-rim: #d4af37;
     --sq-selected: rgba(212, 175, 55, 0.45);
     --sq-last-move: rgba(56, 189, 248, 0.32);
     --sq-check: rgba(239, 68, 68, 0.65);
@@ -380,68 +379,77 @@ html, body {
     width: 100%;
 }
 
-/* Grandmaster Bezel Frame */
+/* Grandmaster Bezel Frame with 4-Sided Coordinate Margins (Matching Reference Board) */
 .board-frame {
+    --border-w: 28px;
     position: relative;
-    width: min(84vh, 610px);
+    width: min(84vh, 620px);
     max-width: 100%;
     aspect-ratio: 1 / 1;
-    padding: 12px;
+    display: grid;
+    grid-template-columns: var(--border-w) 1fr var(--border-w);
+    grid-template-rows: var(--border-w) 1fr var(--border-w);
     background: var(--board-frame-bg);
-    border-radius: var(--radius-lg);
-    border: 2px solid var(--board-frame-border);
+    border-radius: var(--radius-sm);
     box-shadow: 
         0 25px 60px -10px rgba(0, 0, 0, 0.95),
-        0 0 35px var(--board-inner-glow),
-        inset 0 1px 2px rgba(255, 255, 255, 0.18),
-        inset 0 -2px 6px rgba(0, 0, 0, 0.6);
+        0 0 35px var(--board-inner-glow);
+    overflow: hidden;
     transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.05s ease-out;
 }
 
-/* 4 Ornate Brass/Gold Fantasy Corner Accents */
-.board-corner {
-    position: absolute;
-    width: 20px;
-    height: 20px;
+/* Coordinate Rows & Columns along Perimeter */
+.board-coords {
+    display: grid;
+    align-items: center;
+    justify-items: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    color: var(--board-coord-color);
+    letter-spacing: 0.04em;
+    user-select: none;
     pointer-events: none;
-    z-index: 10;
 }
 
-.board-corner::before,
-.board-corner::after {
-    content: '';
-    position: absolute;
-    background: var(--board-frame-border);
-    box-shadow: 0 0 6px var(--board-inner-glow);
-    border-radius: 1px;
+.board-coords-top,
+.board-coords-bottom {
+    grid-template-columns: repeat(8, 1fr);
+    width: 100%;
+    height: 100%;
 }
 
-.corner-tl { top: 5px; left: 5px; }
-.corner-tl::before { top: 0; left: 0; width: 14px; height: 2.5px; }
-.corner-tl::after { top: 0; left: 0; width: 2.5px; height: 14px; }
+.board-coords-left,
+.board-coords-right {
+    grid-template-rows: repeat(8, 1fr);
+    width: 100%;
+    height: 100%;
+}
 
-.corner-tr { top: 5px; right: 5px; }
-.corner-tr::before { top: 0; right: 0; width: 14px; height: 2.5px; }
-.corner-tr::after { top: 0; right: 0; width: 2.5px; height: 14px; }
+.coord-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+}
 
-.corner-bl { bottom: 5px; left: 5px; }
-.corner-bl::before { bottom: 0; left: 0; width: 14px; height: 2.5px; }
-.corner-bl::after { bottom: 0; left: 0; width: 2.5px; height: 14px; }
+.coord-corner {
+    background: transparent;
+}
 
-.corner-br { bottom: 5px; right: 5px; }
-.corner-br::before { bottom: 0; right: 0; width: 14px; height: 2.5px; }
-.corner-br::after { bottom: 0; right: 0; width: 2.5px; height: 14px; }
-
-/* Inset Chess Board Recess */
+/* Inset Chess Board Recess with Dividing Border Line */
 .board-wrapper {
     position: relative;
     width: 100%;
     height: 100%;
-    border-radius: var(--radius-sm);
+    grid-column: 2;
+    grid-row: 2;
+    border: 2px solid var(--border-gold);
     box-shadow: 
-        inset 0 0 14px rgba(0, 0, 0, 0.75),
-        0 0 0 1px rgba(0, 0, 0, 0.8),
-        0 0 0 2px var(--board-inner-rim);
+        inset 0 0 12px rgba(0, 0, 0, 0.75),
+        0 0 12px rgba(212, 175, 55, 0.25);
     overflow: hidden;
     background: #090d15;
 }
@@ -469,53 +477,16 @@ html, body {
 
 .square.light {
     background: linear-gradient(135deg, var(--sq-light-start) 0%, var(--sq-light-end) 100%);
-    box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.65), inset -1px -1px 0 rgba(0, 0, 0, 0.06);
+    box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.08), inset -1px -1px 0 rgba(0, 0, 0, 0.2);
 }
 
 .square.dark {
     background: linear-gradient(135deg, var(--sq-dark-start) 0%, var(--sq-dark-end) 100%);
-    box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.25), inset -1px -1px 0 rgba(0, 0, 0, 0.15);
+    box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.03), inset -1px -1px 0 rgba(0, 0, 0, 0.35);
 }
 
 .square:hover {
-    filter: brightness(1.06);
-}
-
-/* Typographic Rank and File Coordinates */
-.square-coord-rank {
-    position: absolute;
-    top: 3px;
-    left: 4px;
-    font-size: 0.72rem;
-    font-weight: 700;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    line-height: 1;
-    pointer-events: none;
-    z-index: 2;
-    transition: color var(--transition-normal);
-}
-
-.square-coord-file {
-    position: absolute;
-    bottom: 3px;
-    right: 4px;
-    font-size: 0.72rem;
-    font-weight: 700;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    line-height: 1;
-    pointer-events: none;
-    z-index: 2;
-    transition: color var(--transition-normal);
-}
-
-.square.light .square-coord-rank,
-.square.light .square-coord-file {
-    color: var(--sq-coord-light);
-}
-
-.square.dark .square-coord-rank,
-.square.dark .square-coord-file {
-    color: var(--sq-coord-dark);
+    filter: brightness(1.12);
 }
 
 /* Selected Square Illuminated Aura */
@@ -1651,10 +1622,13 @@ html, body {
     }
 
     .board-frame {
+        --border-w: 18px;
         width: 96vw;
         height: 96vw;
-        padding: 6px;
-        border-radius: var(--radius-md);
+    }
+
+    .board-coords {
+        font-size: 0.62rem;
     }
 
     .guide-grid {
