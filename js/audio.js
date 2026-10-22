@@ -164,17 +164,30 @@ class AudioManager {
         this.initContext();
         const t = this.ctx.currentTime;
 
+        // Low impact boom
+        const boom = this.ctx.createOscillator();
+        const boomGain = this.ctx.createGain();
+        boom.type = 'sine';
+        boom.frequency.setValueAtTime(140, t);
+        boom.frequency.exponentialRampToValueAtTime(30, t + 0.45);
+        boomGain.gain.setValueAtTime(0.6, t);
+        boomGain.gain.exponentialRampToValueAtTime(0.01, t + 0.45);
+        boom.connect(boomGain);
+        boomGain.connect(this.sfxGain);
+        boom.start(t);
+        boom.stop(t + 0.45);
+
         // Noise burst with lowpass filter
         const noise = this.ctx.createBufferSource();
-        noise.buffer = this.createNoiseBuffer(0.6);
+        noise.buffer = this.createNoiseBuffer(0.65);
         const filter = this.ctx.createBiquadFilter();
         filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(800, t);
-        filter.frequency.exponentialRampToValueAtTime(120, t + 0.55);
+        filter.frequency.setValueAtTime(1100, t);
+        filter.frequency.exponentialRampToValueAtTime(90, t + 0.6);
 
         const gain = this.ctx.createGain();
-        gain.gain.setValueAtTime(0.5, t);
-        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.55);
+        gain.gain.setValueAtTime(0.55, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.6);
 
         noise.connect(filter);
         filter.connect(gain);
@@ -190,31 +203,46 @@ class AudioManager {
         this.initContext();
         const t = this.ctx.currentTime;
 
-        // High crackle
-        const osc = this.ctx.createOscillator();
-        const oscGain = this.ctx.createGain();
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(1400, t);
-        osc.frequency.exponentialRampToValueAtTime(80, t + 0.4);
-        oscGain.gain.setValueAtTime(0.4, t);
-        oscGain.gain.exponentialRampToValueAtTime(0.01, t + 0.4);
-        osc.connect(oscGain);
-        oscGain.connect(this.sfxGain);
-        osc.start(t);
-        osc.stop(t + 0.4);
+        // Sharp crack transient
+        const snap = this.ctx.createOscillator();
+        const snapGain = this.ctx.createGain();
+        snap.type = 'sawtooth';
+        snap.frequency.setValueAtTime(3200, t);
+        snap.frequency.exponentialRampToValueAtTime(200, t + 0.12);
+        snapGain.gain.setValueAtTime(0.5, t);
+        snapGain.gain.exponentialRampToValueAtTime(0.01, t + 0.12);
+        snap.connect(snapGain);
+        snapGain.connect(this.sfxGain);
+        snap.start(t);
+        snap.stop(t + 0.12);
 
-        // Thunder rumble
+        // Electric arc sizzling noise
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = this.createNoiseBuffer(0.4);
+        const bpf = this.ctx.createBiquadFilter();
+        bpf.type = 'bandpass';
+        bpf.frequency.setValueAtTime(2400, t);
+        bpf.Q.value = 5.0;
+        const nGain = this.ctx.createGain();
+        nGain.gain.setValueAtTime(0.4, t);
+        nGain.gain.exponentialRampToValueAtTime(0.01, t + 0.4);
+        noise.connect(bpf);
+        bpf.connect(nGain);
+        nGain.connect(this.sfxGain);
+        noise.start(t);
+
+        // Heavy sub thunder rumble
         const sub = this.ctx.createOscillator();
         const subGain = this.ctx.createGain();
         sub.type = 'triangle';
-        sub.frequency.setValueAtTime(95, t);
-        sub.frequency.exponentialRampToValueAtTime(35, t + 0.65);
-        subGain.gain.setValueAtTime(0.5, t);
-        subGain.gain.exponentialRampToValueAtTime(0.01, t + 0.65);
+        sub.frequency.setValueAtTime(110, t);
+        sub.frequency.exponentialRampToValueAtTime(28, t + 0.75);
+        subGain.gain.setValueAtTime(0.65, t);
+        subGain.gain.exponentialRampToValueAtTime(0.01, t + 0.75);
         sub.connect(subGain);
         subGain.connect(this.sfxGain);
         sub.start(t);
-        sub.stop(t + 0.65);
+        sub.stop(t + 0.75);
     }
 
     /**
@@ -225,46 +253,77 @@ class AudioManager {
         this.initContext();
         const t = this.ctx.currentTime;
 
+        // Dual sweeping razor wind filters
         const noise = this.ctx.createBufferSource();
         noise.buffer = this.createNoiseBuffer(0.5);
         const filter = this.ctx.createBiquadFilter();
         filter.type = 'bandpass';
-        filter.frequency.setValueAtTime(400, t);
-        filter.frequency.exponentialRampToValueAtTime(2400, t + 0.15);
-        filter.frequency.exponentialRampToValueAtTime(300, t + 0.45);
-        filter.Q.value = 4.0;
+        filter.frequency.setValueAtTime(300, t);
+        filter.frequency.exponentialRampToValueAtTime(3200, t + 0.14);
+        filter.frequency.exponentialRampToValueAtTime(250, t + 0.45);
+        filter.Q.value = 5.0;
 
         const gain = this.ctx.createGain();
-        gain.gain.setValueAtTime(0.45, t);
+        gain.gain.setValueAtTime(0.5, t);
         gain.gain.exponentialRampToValueAtTime(0.01, t + 0.45);
 
         noise.connect(filter);
         filter.connect(gain);
         gain.connect(this.sfxGain);
         noise.start(t);
+
+        // Whistle blade harmonic
+        const osc = this.ctx.createOscillator();
+        const oscGain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(950, t);
+        osc.frequency.exponentialRampToValueAtTime(1600, t + 0.15);
+        osc.frequency.exponentialRampToValueAtTime(400, t + 0.35);
+        oscGain.gain.setValueAtTime(0.2, t);
+        oscGain.gain.exponentialRampToValueAtTime(0.01, t + 0.35);
+        osc.connect(oscGain);
+        oscGain.connect(this.sfxGain);
+        osc.start(t);
+        osc.stop(t + 0.35);
     }
 
     /**
-     * ROOK: Earth Breaker (Heavy Ground Quake Thump)
+     * ROOK: Earth Breaker (Heavy Ground Quake Thump & Rubble)
      */
     playEarthBreaker() {
         if (!this.sfxEnabled || !this.ctx) return;
         this.initContext();
         const t = this.ctx.currentTime;
 
+        // Sub bass tectonic drop
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(120, t);
-        osc.frequency.exponentialRampToValueAtTime(25, t + 0.6);
+        osc.frequency.setValueAtTime(140, t);
+        osc.frequency.exponentialRampToValueAtTime(22, t + 0.65);
 
-        gain.gain.setValueAtTime(0.6, t);
-        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.6);
+        gain.gain.setValueAtTime(0.75, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.65);
 
         osc.connect(gain);
         gain.connect(this.sfxGain);
         osc.start(t);
-        osc.stop(t + 0.6);
+        osc.stop(t + 0.65);
+
+        // Crushing rock debris rattle
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = this.createNoiseBuffer(0.5);
+        const lpf = this.ctx.createBiquadFilter();
+        lpf.type = 'lowpass';
+        lpf.frequency.setValueAtTime(450, t);
+        lpf.frequency.exponentialRampToValueAtTime(80, t + 0.5);
+        const nGain = this.ctx.createGain();
+        nGain.gain.setValueAtTime(0.4, t);
+        nGain.gain.exponentialRampToValueAtTime(0.01, t + 0.5);
+        noise.connect(lpf);
+        lpf.connect(nGain);
+        nGain.connect(this.sfxGain);
+        noise.start(t);
     }
 
     /**
@@ -275,42 +334,42 @@ class AudioManager {
         this.initContext();
         const t = this.ctx.currentTime;
 
-        // Dual shimmering high sines
-        [1760, 2637].forEach(freq => {
+        // Triple crystalline icy overtones
+        [1864, 2349, 3729].forEach((freq, idx) => {
             const osc = this.ctx.createOscillator();
             const gain = this.ctx.createGain();
             osc.type = 'sine';
             osc.frequency.setValueAtTime(freq, t);
-            osc.frequency.exponentialRampToValueAtTime(freq * 1.5, t + 0.5);
-            gain.gain.setValueAtTime(0.25, t);
-            gain.gain.exponentialRampToValueAtTime(0.01, t + 0.5);
+            osc.frequency.exponentialRampToValueAtTime(freq * 1.35, t + 0.55);
+            gain.gain.setValueAtTime(0.25 - idx * 0.05, t);
+            gain.gain.exponentialRampToValueAtTime(0.005, t + 0.55);
             osc.connect(gain);
             gain.connect(this.sfxGain);
             osc.start(t);
-            osc.stop(t + 0.5);
+            osc.stop(t + 0.55);
         });
     }
 
     /**
-     * KING: Judgment of Light (Holy Radiant Chord)
+     * KING: Judgment of Light (Holy Radiant Chord & Bell Resonance)
      */
     playJudgmentOfLight() {
         if (!this.sfxEnabled || !this.ctx) return;
         this.initContext();
         const t = this.ctx.currentTime;
 
-        // Major triad chord
-        [523.25, 659.25, 783.99, 1046.5].forEach(freq => {
+        // Radiant harmonic choir stack
+        [523.25, 659.25, 783.99, 1046.5, 1318.5].forEach((freq, idx) => {
             const osc = this.ctx.createOscillator();
             const gain = this.ctx.createGain();
-            osc.type = 'triangle';
+            osc.type = idx % 2 === 0 ? 'sine' : 'triangle';
             osc.frequency.setValueAtTime(freq, t);
-            gain.gain.setValueAtTime(0.18, t);
-            gain.gain.exponentialRampToValueAtTime(0.01, t + 0.7);
+            gain.gain.setValueAtTime(0.2 - idx * 0.02, t);
+            gain.gain.exponentialRampToValueAtTime(0.005, t + 0.75);
             osc.connect(gain);
             gain.connect(this.sfxGain);
             osc.start(t);
-            osc.stop(t + 0.7);
+            osc.stop(t + 0.75);
         });
     }
 

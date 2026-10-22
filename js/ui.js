@@ -204,7 +204,7 @@ class UIManager {
             const piece = board[sq];
             let pieceHTML = '';
             if (piece) {
-                pieceHTML = `<div class="piece-svg-wrapper">${this.getPieceSVG(piece.type, piece.color)}</div>`;
+                pieceHTML = `<div class="piece-svg-wrapper piece-${piece.type}">${this.getPieceSVG(piece.type, piece.color)}</div>`;
             }
 
             sqEl.innerHTML = `${coordHTML}${pieceHTML}`;
@@ -480,6 +480,60 @@ class UIManager {
         }
 
         modal.classList.add('active');
+    }
+
+    /**
+     * Smoothly animate a piece gliding from fromSq to toSq across the board
+     */
+    async animatePieceMove(fromSq, toSq, duration = 240) {
+        if (this.settings.settings.reducedMotion) return;
+
+        let fromEl = null;
+        let toEl = null;
+        for (let i = 0; i < 64; i++) {
+            const el = this.boardEl.children[i];
+            const sq = parseInt(el.dataset.square, 10);
+            if (sq === fromSq) fromEl = el;
+            if (sq === toSq) toEl = el;
+        }
+
+        if (!fromEl || !toEl || !this.boardWrapper) return;
+
+        const pieceWrapper = fromEl.querySelector('.piece-svg-wrapper');
+        if (!pieceWrapper) return;
+
+        const fromRect = fromEl.getBoundingClientRect();
+        const toRect = toEl.getBoundingClientRect();
+        const boardRect = this.boardWrapper.getBoundingClientRect();
+
+        const dx = toRect.left - fromRect.left;
+        const dy = toRect.top - fromRect.top;
+
+        // Create floating piece
+        const floating = document.createElement('div');
+        floating.className = 'floating-piece';
+        floating.innerHTML = pieceWrapper.innerHTML;
+        floating.style.width = `${fromRect.width * 0.86}px`;
+        floating.style.height = `${fromRect.height * 0.86}px`;
+        floating.style.left = `${fromRect.left - boardRect.left + (fromRect.width * 0.07)}px`;
+        floating.style.top = `${fromRect.top - boardRect.top + (fromRect.height * 0.07)}px`;
+        floating.style.transitionDuration = `${duration}ms`;
+
+        // Hide original during slide
+        pieceWrapper.style.visibility = 'hidden';
+        this.boardWrapper.appendChild(floating);
+
+        // Force reflow
+        void floating.offsetWidth;
+
+        // Slide to destination
+        floating.style.transform = `translate3d(${dx}px, ${dy}px, 0)`;
+
+        await new Promise(resolve => setTimeout(resolve, duration));
+
+        if (floating.parentNode) {
+            floating.parentNode.removeChild(floating);
+        }
     }
 
     /**

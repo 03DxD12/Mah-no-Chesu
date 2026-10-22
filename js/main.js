@@ -332,7 +332,11 @@ class MahoNoChesuApp {
         // Generate SAN notation before committing move
         const san = this.engine.generateSAN(move);
 
-        // 1. Play Elemental Attack FX
+        // Determine smooth movement animation duration
+        const animSpeed = this.settings.settings.animationSpeed;
+        const slideDuration = animSpeed === 'fast' ? 140 : (animSpeed === 'cinematic' ? 360 : 220);
+
+        // 1. Play Elemental Attack FX & Smooth Movement
         if (isCapture) {
             this.consecutiveCaptures++;
             if (this.consecutiveCaptures >= 2) {
@@ -366,14 +370,19 @@ class MahoNoChesuApp {
                     await this.effects.judgmentOfLight(move.from, move.to, piece.color, this.ui.isFlipped);
                     break;
             }
+
+            // Smooth gliding advance into conquered square
+            await this.ui.animatePieceMove(move.from, move.to, slideDuration);
         } else if (move.isCastling) {
             this.audio.playCastling();
             this.effects.fortressAura(move.from, move.to, this.ui.isFlipped);
+            await this.ui.animatePieceMove(move.from, move.to, slideDuration);
         } else {
             this.consecutiveCaptures = 0;
             this.effects.resetCombo();
             this.audio.playMoveSound();
             this.effects.moveTrail(piece, move.from, move.to, this.ui.isFlipped);
+            await this.ui.animatePieceMove(move.from, move.to, slideDuration);
         }
 
         // 2. Commit move in chess engine
