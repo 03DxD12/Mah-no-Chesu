@@ -204,11 +204,25 @@ class UIManager {
         document.getElementById('btn-restart')?.addEventListener('click', () => this.onRestartRequest && this.onRestartRequest());
         document.getElementById('btn-draw')?.addEventListener('click', () => this.onDrawOfferRequest && this.onDrawOfferRequest());
         document.getElementById('btn-resign')?.addEventListener('click', () => this.onResignRequest && this.onResignRequest());
+
+        const historyPanel = document.getElementById('history-panel');
+        document.getElementById('btn-history')?.addEventListener('click', () => {
+            this.audio.playUiClick();
+            historyPanel?.classList.toggle('history-open');
+        });
+        document.getElementById('btn-close-history')?.addEventListener('click', () => {
+            this.audio.playUiClick();
+            historyPanel?.classList.remove('history-open');
+        });
     }
 
     toggleFlip() {
         this.isFlipped = !this.isFlipped;
         this.audio.playUiClick();
+        const gameView = document.getElementById('game-view');
+        if (gameView) {
+            gameView.classList.toggle('flipped', this.isFlipped);
+        }
         this.renderBoard();
         this.effects.initCanvasSize();
     }
@@ -216,6 +230,10 @@ class UIManager {
     setFlipped(flipped) {
         if (this.isFlipped !== flipped) {
             this.isFlipped = flipped;
+            const gameView = document.getElementById('game-view');
+            if (gameView) {
+                gameView.classList.toggle('flipped', this.isFlipped);
+            }
             this.renderBoard();
             this.effects.initCanvasSize();
         }
