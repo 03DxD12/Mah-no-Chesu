@@ -140,6 +140,10 @@ const ELEMENTS = {
  * 60 Distinct Piece-Specific Attack Names Matrix
  * pieceType: { element: attackName }
  */
+/**
+ * 60 Distinct Piece-Specific Attack Names Matrix (Specs 133 - 143)
+ * pieceType: { element: attackName }
+ */
 const ELEMENT_ATTACKS = {
     p: { // Pawn
         fire: 'Fire Blast',
@@ -159,64 +163,154 @@ const ELEMENT_ATTACKS = {
         wind: 'Tempest Leap',
         earth: 'Seismic Charge',
         ice: 'Frozen Charge',
-        water: 'Tidal Rush',
+        water: 'Tidal Charge',
         light: 'Radiant Charge',
         shadow: 'Phantom Strike',
         nature: 'Wild Charge',
-        arcane: 'Arcane Leap'
+        arcane: 'Mystic Leap'
     },
     b: { // Bishop
-        fire: 'Inferno Slash',
+        fire: 'Inferno Crescent',
         lightning: 'Volt Slash',
         wind: 'Wind Slash',
-        earth: 'Terran Cleave',
-        ice: 'Glacial Pierce',
-        water: 'Torrent Siphon',
-        light: 'Solar Ray',
+        earth: 'Stone Spear',
+        ice: 'Glacial Slash',
+        water: 'Tidal Slash',
+        light: 'Sacred Slash',
         shadow: 'Void Slash',
-        nature: 'Bramble Sever',
-        arcane: 'Mystic Surge'
+        nature: 'Verdant Slash',
+        arcane: 'Rune Slash'
     },
     r: { // Rook
-        fire: 'Volcanic Crash',
+        fire: 'Volcanic Fortress',
         lightning: 'Thunder Crash',
-        wind: 'Cyclone Pillar',
+        wind: 'Cyclone Breaker',
         earth: 'Earth Breaker',
-        ice: 'Permafrost Rampart',
-        water: 'Tsunami Impact',
-        light: 'Dawn Bastion',
-        shadow: 'Abyssal Crush',
-        nature: 'Overgrowth Slam',
-        arcane: 'Aether Oblivion'
+        ice: 'Frozen Fortress',
+        water: 'Tsunami Breaker',
+        light: 'Holy Fortress',
+        shadow: 'Abyss Breaker',
+        nature: 'Root Breaker',
+        arcane: 'Arcane Breaker'
     },
     q: { // Queen
         fire: 'Infernal Dominion',
         lightning: 'Tempest Dominion',
-        wind: 'Vortex Dominion',
-        earth: 'Tectonic Empress',
+        wind: 'Tempest Dominion',
+        earth: 'Titanic Dominion',
         ice: 'Frozen Dominion',
-        water: 'Oceanic Sovereign',
+        water: 'Ocean Dominion',
         light: 'Radiant Dominion',
         shadow: 'Abyssal Dominion',
-        nature: 'Primordial Bloom',
-        arcane: 'Arcane Singularity'
+        nature: 'Verdant Dominion',
+        arcane: 'Arcane Dominion'
     },
     k: { // King
         fire: 'Royal Inferno',
         lightning: 'Divine Thunder',
-        wind: 'Zephyr Crown',
-        earth: 'Mountain Sovereign',
-        ice: 'Glacial Majesty',
-        water: 'Abyssal Tide',
+        wind: 'Sovereign Gale',
+        earth: "King's Fortress",
+        ice: 'Absolute Judgment',
+        water: 'Royal Tsunami',
         light: 'Judgment of Light',
-        shadow: 'Eclipse Monarch',
-        nature: 'Verdant Judgment',
-        arcane: 'Cosmic Decree'
+        shadow: 'Sovereign Eclipse',
+        nature: "Nature's Judgment",
+        arcane: 'Sovereign Arcana'
     }
 };
 
 /**
- * Built-in Preset Army Formations (Spec 117)
+ * 60 Distinct Piece Ability Details & Canonical Visual Behavior (Specs 134 - 143)
+ */
+const ABILITY_DETAILS = {
+    p: {
+        style: 'projectile',
+        motionTrail: 'Linear forward spark trail',
+        fire: { name: 'Fire Blast', desc: 'Small projectile followed by an ember explosion.', impact: 'Ember Nova' },
+        lightning: { name: 'Spark Shot', desc: 'Small electric projectile darting straight into the foe.', impact: 'Shock Spark' },
+        wind: { name: 'Gale Shot', desc: 'Small compressed-air projectile piercing forward.', impact: 'Air Vortex' },
+        earth: { name: 'Stone Burst', desc: 'Small rocks erupt beneath the target upon impact.', impact: 'Rock Shards' },
+        ice: { name: 'Frost Shot', desc: 'Small frozen projectile leaving sub-zero crystals.', impact: 'Frost Burst' },
+        water: { name: 'Aqua Burst', desc: 'Small high-pressure water projectile splashing target.', impact: 'Water Splash' },
+        light: { name: 'Radiant Shot', desc: 'Small concentrated beam of sacred light.', impact: 'Holy Flash' },
+        shadow: { name: 'Dark Bolt', desc: 'Small shadow projectile dissolving into dark mist.', impact: 'Dark Wisp' },
+        nature: { name: 'Thorn Shot', desc: 'Sharp thorns launch swiftly toward the enemy.', impact: 'Thorn Pierce' },
+        arcane: { name: 'Arcane Bolt', desc: 'Small magical projectile shimmering with arcane energy.', impact: 'Runic Spark' }
+    },
+    n: {
+        style: 'leap',
+        motionTrail: 'High-arched jumping trajectory',
+        fire: { name: 'Blazing Charge', desc: 'Knight jumps through flames and crashes into destination.', impact: 'Fire Crater' },
+        lightning: { name: 'Thunder Strike', desc: 'Knight jumps while lightning strikes the target from above.', impact: 'Thunderbolt' },
+        wind: { name: 'Tempest Leap', desc: 'Knight becomes surrounded by a cyclone during its jump.', impact: 'Cyclone Slam' },
+        earth: { name: 'Seismic Charge', desc: 'Knight lands with a ground-breaking seismic impact.', impact: 'Ground Fissure' },
+        ice: { name: 'Frozen Charge', desc: 'Knight leaves frost behind before creating an ice impact.', impact: 'Glacial Pillar' },
+        water: { name: 'Tidal Charge', desc: 'Knight surges through a wave-like aquatic arc.', impact: 'Torrent Crash' },
+        light: { name: 'Radiant Charge', desc: 'Knight transforms briefly into a streak of holy light.', impact: 'Solar Flare' },
+        shadow: { name: 'Phantom Strike', desc: 'Knight temporarily disappears and reappears near the target.', impact: 'Void Rift' },
+        nature: { name: 'Wild Charge', desc: 'Knight jumps while surrounded by leaves, roots and vines.', impact: 'Bramble Slam' },
+        arcane: { name: 'Mystic Leap', desc: 'Knight jumps through a luminous mystical warp portal.', impact: 'Astral Supernova' }
+    },
+    b: {
+        style: 'slash',
+        motionTrail: 'Diagonal sweeping razor blade',
+        fire: { name: 'Inferno Crescent', desc: 'A burning diagonal blade travels toward the enemy.', impact: 'Flame Cleave' },
+        lightning: { name: 'Volt Slash', desc: 'Diagonal electrical blade shocking target at impact.', impact: 'Arc Sever' },
+        wind: { name: 'Wind Slash', desc: 'Long diagonal air blade slicing across the Bishop’s path.', impact: 'Vacuum Blade' },
+        earth: { name: 'Stone Spear', desc: 'Diagonal stone spikes travel rapidly toward the enemy.', impact: 'Spike Cleave' },
+        ice: { name: 'Glacial Slash', desc: 'Razor diagonal blade crafted from sub-zero permafrost.', impact: 'Ice Shard Cleave' },
+        water: { name: 'Tidal Slash', desc: 'High-pressure diagonal water blade cutting through defenses.', impact: 'Hydro Blade' },
+        light: { name: 'Sacred Slash', desc: 'Diagonal golden holy beam illuminating the battlefield.', impact: 'Divine Sever' },
+        shadow: { name: 'Void Slash', desc: 'Diagonal dark-energy blade dissolving enemy essence.', impact: 'Abyssal Tear' },
+        nature: { name: 'Verdant Slash', desc: 'Diagonal leaf-and-vine blade with razor floral edges.', impact: 'Petal Cleave' },
+        arcane: { name: 'Rune Slash', desc: 'A diagonal magical rune cuts through the target.', impact: 'Rune Sever' }
+    },
+    r: {
+        style: 'breaker',
+        motionTrail: 'Heavy linear rolling tremor',
+        fire: { name: 'Volcanic Fortress', desc: 'The ground cracks and a volcanic eruption strikes destination.', impact: 'Magma Eruption' },
+        lightning: { name: 'Thunder Crash', desc: 'Heavy straight-line electrical shockwave roaring forward.', impact: 'Plasma Detonation' },
+        wind: { name: 'Cyclone Breaker', desc: 'Powerful tornado rushes along the Rook’s path.', impact: 'Whirlwind Blast' },
+        earth: { name: 'Earth Breaker', desc: 'Massive ground crack and stone eruption crushing target.', impact: 'Tectonic Rampart' },
+        ice: { name: 'Frozen Fortress', desc: 'Large ice pillars erupt underneath the enemy.', impact: 'Permafrost Wall' },
+        water: { name: 'Tsunami Breaker', desc: 'A massive tidal wave travels in a straight line.', impact: 'Tsunami Crash' },
+        light: { name: 'Holy Fortress', desc: 'A colossal pillar of light erupts from the destination.', impact: 'Sacred Bastion' },
+        shadow: { name: 'Abyss Breaker', desc: 'Dark fissures spread across destination, consuming all.', impact: 'Void Collapse' },
+        nature: { name: 'Root Breaker', desc: 'Colossal primordial roots erupt beneath the enemy.', impact: 'Overgrowth Rampart' },
+        arcane: { name: 'Arcane Breaker', desc: 'Large mystical symbols detonate beneath the enemy.', impact: 'Aether Oblivion' }
+    },
+    q: {
+        style: 'dominion',
+        motionTrail: 'Global mandala & pulsing aura',
+        fire: { name: 'Infernal Dominion', desc: 'A large magical fire circle surrounds enemy before exploding.', impact: 'Cataclysmic Supernova' },
+        lightning: { name: 'Tempest Dominion', desc: 'Multiple lightning bolts surround and strike the enemy.', impact: 'Storm Cataclysm' },
+        wind: { name: 'Tempest Dominion', desc: 'Large colossal vortex surrounds the target with razor winds.', impact: 'Hurricane Eye' },
+        earth: { name: 'Titanic Dominion', desc: 'Massive rock pillars imprison and crush the target.', impact: 'Tectonic Tomb' },
+        ice: { name: 'Frozen Dominion', desc: 'Target freezes completely into deep crystal before shattering.', impact: 'Absolute Shatter' },
+        water: { name: 'Ocean Dominion', desc: 'A magical oceanic vortex envelops and submerges the enemy.', impact: 'Abyssal Whirlpool' },
+        light: { name: 'Radiant Dominion', desc: 'Several divine beams surround and strike the enemy in unison.', impact: 'Solar Cataclysm' },
+        shadow: { name: 'Abyssal Dominion', desc: 'Dark abyssal portal surrounds and completely consumes target.', impact: 'Singularity Void' },
+        nature: { name: 'Verdant Dominion', desc: 'Primordial vines surround and completely crush the target.', impact: 'Eternal Overgrowth' },
+        arcane: { name: 'Arcane Dominion', desc: 'Multiple magical circles surround enemy before detonating.', impact: 'Cosmic Singularity' }
+    },
+    k: {
+        style: 'sovereign',
+        motionTrail: 'Royal celestial aura & heavenly beam',
+        fire: { name: 'Royal Inferno', desc: 'A golden-red sovereign pillar of fire consumes the target.', impact: 'Sovereign Pyre' },
+        lightning: { name: 'Divine Thunder', desc: 'A royal lightning pillar crashes onto target with thunderous fury.', impact: 'Judgment Bolt' },
+        wind: { name: 'Sovereign Gale', desc: 'Royal wind shockwave pulverizes the enemy in a tempest blast.', impact: 'Crown of Gales' },
+        earth: { name: "King's Fortress", desc: 'A huge royal stone monolith descends to crush the enemy.', impact: 'Mountain Monolith' },
+        ice: { name: 'Absolute Judgment', desc: 'A massive royal ice crystal traps and destroys the target.', impact: 'Glacial Monolith' },
+        water: { name: 'Royal Tsunami', desc: 'A powerful royal wave crashes onto target with sovereign weight.', impact: 'Sovereign Deluge' },
+        light: { name: 'Judgment of Light', desc: 'A huge divine beam of pure light descends from the heavens.', impact: 'Sacred Verdict' },
+        shadow: { name: 'Sovereign Eclipse', desc: 'A dark royal eclipse manifests before annihilating the enemy.', impact: 'Eclipse Oblivion' },
+        nature: { name: "Nature's Judgment", desc: 'Massive ancient roots and golden leaves destroy the target.', impact: 'Verdant Verdict' },
+        arcane: { name: 'Sovereign Arcana', desc: 'A large royal rune summons a powerful cosmic beam.', impact: 'Imperial Aether' }
+    }
+};
+
+/**
+ * Built-in Preset Army Formations (Spec 117 & 130)
  */
 const PRESETS = {
     classic: {
@@ -226,12 +320,12 @@ const PRESETS = {
     },
     inferno: {
         name: 'Inferno Legion',
-        desc: 'All pieces command raging fire, magma explosions & ember storms',
+        desc: 'Pure Fire Army: All 6 pieces command magma, blazing charges & fiery nova blasts',
         loadout: { p: 'fire', n: 'fire', b: 'fire', r: 'fire', q: 'fire', k: 'fire' }
     },
     storm: {
         name: 'Tempest Storm',
-        desc: 'Rapid thunderbolts and razor wind gales',
+        desc: 'Lightning and Wind army delivering devastating thunderbolts and razor gales',
         loadout: { p: 'wind', n: 'lightning', b: 'wind', r: 'lightning', q: 'lightning', k: 'wind' }
     },
     frozen_kingdom: {
@@ -241,18 +335,32 @@ const PRESETS = {
     },
     dark_legion: {
         name: 'Dark Legion',
-        desc: 'Abyssal void shadows and forbidden arcane sorcery',
+        desc: 'Pure Shadow & Arcane sorcery devouring foes in abyssal voids',
         loadout: { p: 'shadow', n: 'shadow', b: 'arcane', r: 'shadow', q: 'arcane', k: 'shadow' }
     },
     natures_guard: {
         name: "Nature's Guard",
-        desc: 'Earth tremors, verdant overgrowth and celestial solar light',
+        desc: 'Living fortress of earth, verdant overgrowth and radiant solar light',
         loadout: { p: 'nature', n: 'earth', b: 'nature', r: 'earth', q: 'nature', k: 'light' }
     }
 };
 
 /**
- * Loadout Manager class
+ * Hybrid Elemental Affinities (Spec 152)
+ */
+const HYBRID_COMBINATIONS = [
+    { elements: ['fire', 'lightning', 'wind'], name: 'Tempest Flame', desc: 'Infernal firestorms laced with lightning arcs' },
+    { elements: ['fire', 'wind'], name: 'Firestorm', desc: 'Raging flames amplified by gale force winds' },
+    { elements: ['water', 'lightning'], name: 'Storm Surge', desc: 'Electrified tidal waves and conductible current' },
+    { elements: ['water', 'ice'], name: 'Frozen Tide', desc: 'Sub-zero arctic glaciers surging with tidal force' },
+    { elements: ['earth', 'nature'], name: 'Living Fortress', desc: 'Ancient stone bastion reinforced by primordial roots' },
+    { elements: ['light', 'arcane'], name: 'Celestial Magic', desc: 'Transcendent holy runes and radiant starlight' },
+    { elements: ['shadow', 'arcane'], name: 'Void Magic', desc: 'Forbidden dark sorcery and abyssal dimensional rifts' },
+    { elements: ['fire', 'earth'], name: 'Volcanic Force', desc: 'Molten magma surging through tectonic fissures' }
+];
+
+/**
+ * Loadout Manager class (Specs 101 - 162)
  */
 class LoadoutManager {
     constructor() {
@@ -343,7 +451,7 @@ class LoadoutManager {
     }
 
     /**
-     * Get attack name for piece + element combo
+     * Get attack name for piece + element combo (Spec 133)
      */
     getAttackName(pieceType, element) {
         const type = (pieceType || '').toLowerCase();
@@ -354,8 +462,131 @@ class LoadoutManager {
         return `${pieceType.toUpperCase()} ${elem.toUpperCase()} STRIKE`;
     }
 
+    /**
+     * Get complete canonical ability details for piece + element (Specs 134 - 143)
+     */
+    getAbilityDetails(pieceType, element) {
+        const type = (pieceType || 'p').toLowerCase();
+        const elem = (element || 'fire').toLowerCase();
+        const pieceDetails = ABILITY_DETAILS[type] || ABILITY_DETAILS.p;
+        const specific = pieceDetails[elem] || {
+            name: this.getAttackName(type, elem),
+            desc: 'Powerful elemental attack unleashing devastating force.',
+            impact: 'Elemental Nova'
+        };
+
+        const elemMeta = this.getElementMeta(elem);
+
+        return {
+            name: specific.name,
+            desc: specific.desc,
+            impact: specific.impact,
+            style: pieceDetails.style || 'projectile',
+            motionTrail: pieceDetails.motionTrail || elemMeta.trailName,
+            elementMeta: elemMeta
+        };
+    }
+
     getElementMeta(element) {
         return ELEMENTS[element] || ELEMENTS.fire;
+    }
+
+    /**
+     * Calculate Element Synergies, Dominions & Pure Armies (Specs 144 - 153, 160)
+     * @param {Object} loadout - { p, n, b, r, q, k }
+     */
+    calculateElementSynergies(loadout) {
+        const counts = {};
+        const pieces = ['p', 'n', 'b', 'r', 'q', 'k'];
+        
+        pieces.forEach(p => {
+            const el = (loadout[p] || 'fire').toLowerCase();
+            counts[el] = (counts[el] || 0) + 1;
+        });
+
+        const uniqueElements = Object.keys(counts);
+        const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+        const dominant = entries[0] || ['fire', 0];
+        const dominantElement = dominant[0];
+        const dominantCount = dominant[1];
+
+        // Determine Level: 1 to 5 (Spec 145)
+        let synergyLevel = 0;
+        let synergyTitle = '';
+        let synergyDesc = '';
+        let isPureArmy = false;
+
+        const elemMeta = this.getElementMeta(dominantElement);
+        const elemUpper = elemMeta.name.toUpperCase();
+
+        if (dominantCount === 6) {
+            synergyLevel = 5;
+            isPureArmy = true;
+            synergyTitle = `PURE ${elemUpper} ARMY`;
+            synergyDesc = `Maximum Synergy! Full army commanded by ${elemMeta.name}. Board aura, themed check & victory finishers activated.`;
+        } else if (dominantCount === 5) {
+            synergyLevel = 4;
+            synergyTitle = `${elemUpper} DOMINION`;
+            synergyDesc = `5 / 6 Pieces. Elemental battlefield aura, amplified attacks & high-density particles.`;
+        } else if (dominantCount === 4) {
+            synergyLevel = 3;
+            synergyTitle = `${elemUpper} MASTERY`;
+            synergyDesc = `4 / 6 Pieces. Special impact effects, screen tremor & upgraded attack power.`;
+        } else if (dominantCount === 3) {
+            synergyLevel = 2;
+            synergyTitle = `${elemUpper} SYNERGY`;
+            synergyDesc = `3 / 6 Pieces. Enhanced movement trails and stronger elemental particle density.`;
+        } else if (dominantCount === 2) {
+            synergyLevel = 1;
+            synergyTitle = `${elemUpper} BOND`;
+            synergyDesc = `2 / 6 Pieces. Shared elemental piece aura enhancement.`;
+        }
+
+        // Elemental Balance Check (Spec 150 - 151)
+        const isBalanced = uniqueElements.length === 6;
+        if (isBalanced) {
+            synergyTitle = 'ELEMENTAL BALANCE';
+            synergyDesc = 'All 6 pieces command unique elements. Balanced prismatic magical harmony.';
+        }
+
+        // Detect Hybrid Affinities (Spec 152)
+        const activeHybrids = [];
+        HYBRID_COMBINATIONS.forEach(hybrid => {
+            const hasAll = hybrid.elements.every(el => uniqueElements.includes(el));
+            if (hasAll) {
+                activeHybrids.push(hybrid);
+            }
+        });
+
+        return {
+            counts,
+            dominantElement,
+            dominantCount,
+            synergyLevel,
+            synergyTitle,
+            synergyDesc,
+            isPureArmy,
+            isBalanced,
+            activeHybrids,
+            uniqueCount: uniqueElements.length
+        };
+    }
+
+    /**
+     * Get theme CSS class for board frame based on active synergy
+     */
+    getBoardThemeClass(loadout) {
+        const syn = this.calculateElementSynergies(loadout);
+        if (syn.isPureArmy) {
+            return `pure-army-${syn.dominantElement}`;
+        }
+        if (syn.isBalanced) {
+            return 'elemental-balance';
+        }
+        if (syn.synergyLevel >= 3) {
+            return `synergy-theme-${syn.dominantElement}`;
+        }
+        return '';
     }
 
     /**
@@ -402,4 +633,7 @@ class LoadoutManager {
 window.LoadoutManager = LoadoutManager;
 window.ELEMENTS = ELEMENTS;
 window.ELEMENT_ATTACKS = ELEMENT_ATTACKS;
+window.ABILITY_DETAILS = ABILITY_DETAILS;
 window.LOADOUT_PRESETS = PRESETS;
+window.HYBRID_COMBINATIONS = HYBRID_COMBINATIONS;
+

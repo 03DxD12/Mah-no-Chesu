@@ -20,6 +20,7 @@ class MahoNoChesuApp {
         this.moveHistoryLog = []; // { san, move }
         this.isAnimating = false;
         this.consecutiveCaptures = 0;
+        this.comboTracker = { player: null, lastElement: null, streak: 0, sameStreak: 0 };
 
         // Custom Element Loadout State
         this.loadoutActiveSide = 'white'; // 'white' | 'black'
@@ -327,8 +328,10 @@ class MahoNoChesuApp {
             this.ui.setFlipped(false);
         }
 
+        this.comboTracker = { player: null, lastElement: null, streak: 0, sameStreak: 0 };
         this.ui.lastMove = null;
         this.ui.clearSelection();
+        this.updateBoardSynergyTheme();
         this.ui.renderBoard();
         this.ui.renderMoveHistory(this.moveHistoryLog);
         this.ui.renderCapturedPieces();
@@ -337,6 +340,27 @@ class MahoNoChesuApp {
         // If PvC and AI plays White, trigger AI first move
         if (this.gameMode === 'pvc' && this.playerColor === 'b') {
             setTimeout(() => this.triggerAIMove(), 600);
+        }
+    }
+
+    /**
+     * Update Grandmaster Board Frame Glow and Theming based on Active Army Synergy (Specs 146 - 151)
+     */
+    updateBoardSynergyTheme() {
+        const frame = document.getElementById('board-frame');
+        if (!frame) return;
+
+        // Clear existing synergy/pure army classes
+        const classesToRemove = Array.from(frame.classList).filter(c => 
+            c.startsWith('pure-army-') || c.startsWith('synergy-theme-') || c === 'elemental-balance'
+        );
+        classesToRemove.forEach(c => frame.classList.remove(c));
+
+        const turnColor = this.engine ? this.engine.turn : 'w';
+        const currentLoadout = turnColor === 'w' ? this.loadout.whiteLoadout : this.loadout.blackLoadout;
+        const themeCls = this.loadout.getBoardThemeClass(currentLoadout);
+        if (themeCls) {
+            frame.classList.add(themeCls);
         }
     }
 
@@ -368,11 +392,36 @@ class MahoNoChesuApp {
         const element = this.loadout.getElementForPiece(piece.type, piece.color);
         const attackName = this.loadout.getAttackName(piece.type, element);
 
+        // Army synergy for moving player (Specs 144 - 153)
+        const activeArmyLoadout = piece.color === 'w' ? this.loadout.whiteLoadout : this.loadout.blackLoadout;
+        const synergyInfo = this.loadout.calculateElementSynergies(activeArmyLoadout);
+
         // 1. Play Elemental Attack FX & Smooth Movement
         if (isCapture) {
             this.consecutiveCaptures++;
-            if (this.consecutiveCaptures >= 2) {
-                this.effects.incrementCombo();
+
+            // Track same-element and cross-element combos (Specs 154 - 155)
+            if (this.comboTracker.player === piece.color) {
+                this.comboTracker.streak++;
+                if (this.comboTracker.lastElement === element) {
+                    this.comboTracker.sameStreak++;
+                } else {
+                    this.comboTracker.sameStreak = 1;
+                }
+            } else {
+                this.comboTracker.player = piece.color;
+                this.comboTracker.streak = 1;
+                this.comboTracker.sameStreak = 1;
+            }
+            this.comboTracker.lastElement = element;
+
+            if (this.comboTracker.streak >= 2) {
+                const isSame = this.comboTracker.sameStreak >= 2;
+                this.effects.showComboChain({
+                    streak: isSame ? this.comboTracker.sameStreak : this.comboTracker.streak,
+                    element,
+                    isSameElement: isSame
+                });
             }
 
             const targetSq = move.isEnPassant ? (Math.floor(move.from / 8) * 8 + (move.to % 8)) : move.to;
@@ -400,17 +449,20 @@ class MahoNoChesuApp {
                 fromSq: move.from,
                 toSq: move.to,
                 color: piece.color,
-                isFlipped: this.ui.isFlipped
+                isFlipped: this.ui.isFlipped,
+                synergyInfo
             });
 
             // Smooth gliding advance into conquered square
             await this.ui.animatePieceMove(move.from, move.to, slideDuration);
         } else if (move.isCastling) {
+            this.comboTracker = { player: null, lastElement: null, streak: 0, sameStreak: 0 };
             this.audio.playCastling();
             this.effects.fortressAura(move.from, move.to, this.ui.isFlipped);
             await this.ui.animatePieceMove(move.from, move.to, slideDuration);
         } else {
             this.consecutiveCaptures = 0;
+            this.comboTracker = { player: null, lastElement: null, streak: 0, sameStreak: 0 };
             this.effects.resetCombo();
             this.audio.playMoveSound();
             this.effects.moveTrail(piece, move.from, move.to, this.ui.isFlipped, element);
@@ -443,8 +495,16 @@ class MahoNoChesuApp {
 
         if (status.inCheck && !status.gameOver) {
             this.audio.playCheck();
-            this.effects.showAttackName('CHECK');
-            this.effects.screenShake('sm');
+            const checkingColor = this.engine.turn === 'w' ? 'b' : 'w';
+            const checkLoadout = checkingColor === 'w' ? this.loadout.whiteLoadout : this.loadout.blackLoadout;
+            const checkSyn = this.loadout.calculateElementSynergies(checkLoadout);
+
+            if (checkSyn.isPureArmy) {
+                this.effects.playPureArmyCheckEffect(checkSyn.dominantElement, false);
+            } else {
+                this.effects.showAttackName('CHECK');
+                this.effects.screenShake('sm');
+            }
         }
 
         // 7. Auto-Rotate board in local PvP mode if enabled
@@ -452,11 +512,20 @@ class MahoNoChesuApp {
             this.ui.setFlipped(this.engine.turn === 'b');
         }
 
+        this.updateBoardSynergyTheme();
         this.ui.renderBoard();
         this.updateStatusDisplay();
 
         if (status.gameOver) {
             this.audio.playVictory();
+            if (status.checkmate) {
+                const winningColor = this.engine.turn === 'w' ? 'b' : 'w';
+                const winLoadout = winningColor === 'w' ? this.loadout.whiteLoadout : this.loadout.blackLoadout;
+                const winSyn = this.loadout.calculateElementSynergies(winLoadout);
+                if (winSyn.isPureArmy) {
+                    this.effects.playPureArmyCheckEffect(winSyn.dominantElement, true);
+                }
+            }
             this.ui.showGameOver(status);
             this.isAnimating = false;
             this.ui.isAnimating = false;
@@ -669,6 +738,7 @@ class MahoNoChesuApp {
         this.renderLoadoutPieceRoster();
         this.renderLoadoutElementsGrid();
         this.renderLoadoutPreview();
+        this.renderLoadoutSynergies();
         this.renderLoadoutPresets();
         this.populateCustomPresetsDropdown();
     }
@@ -718,6 +788,7 @@ class MahoNoChesuApp {
                 this.renderLoadoutPieceRoster();
                 this.renderLoadoutElementsGrid();
                 this.renderLoadoutPreview();
+                this.renderLoadoutSynergies();
             });
 
             container.appendChild(btn);
@@ -779,6 +850,7 @@ class MahoNoChesuApp {
                 this.renderLoadoutPieceRoster();
                 this.renderLoadoutElementsGrid();
                 this.renderLoadoutPreview();
+                this.renderLoadoutSynergies();
             });
 
             container.appendChild(btn);
@@ -786,12 +858,13 @@ class MahoNoChesuApp {
     }
 
     /**
-     * Live Combat Preview Card (Spec 107)
+     * Live Combat Preview Card (Specs 107, 131, 157)
      */
     renderLoadoutPreview() {
         const svgContainer = document.getElementById('preview-svg-container');
         const badgeEl = document.getElementById('preview-elem-badge');
         const attackEl = document.getElementById('preview-attack-name');
+        const descEl = document.getElementById('preview-desc-val');
         const trailEl = document.getElementById('preview-trail-val');
         const captureEl = document.getElementById('preview-capture-val');
         const auraEl = document.getElementById('preview-aura-val');
@@ -801,7 +874,7 @@ class MahoNoChesuApp {
         const pType = this.loadoutActivePiece;
         const elemKey = activeLoadout[pType] || 'fire';
         const elemMeta = this.loadout.getElementMeta(elemKey);
-        const attackName = this.loadout.getAttackName(pType, elemKey);
+        const abilityDetails = this.loadout.getAbilityDetails(pType, elemKey);
 
         if (svgContainer) {
             svgContainer.innerHTML = this.ui.getPieceSVG(pType, color);
@@ -816,14 +889,87 @@ class MahoNoChesuApp {
         }
 
         if (attackEl) {
-            attackEl.textContent = attackName;
+            attackEl.textContent = abilityDetails.name;
             attackEl.style.color = elemMeta.color;
             attackEl.style.textShadow = `0 0 14px ${elemMeta.color}`;
         }
 
-        if (trailEl) trailEl.textContent = elemMeta.trailName;
-        if (captureEl) captureEl.textContent = elemMeta.captureFx;
+        if (descEl) {
+            descEl.textContent = abilityDetails.desc;
+        }
+
+        if (trailEl) trailEl.textContent = abilityDetails.motionTrail;
+        if (captureEl) captureEl.textContent = abilityDetails.impact;
         if (auraEl) auraEl.textContent = elemMeta.auraDesc;
+    }
+
+    /**
+     * Render Element Synergies & Army Affinities (Specs 144 - 156, 160)
+     */
+    renderLoadoutSynergies() {
+        const activeLoadout = this.loadoutActiveSide === 'white' ? this.loadout.whiteLoadout : this.loadout.blackLoadout;
+        const syn = this.loadout.calculateElementSynergies(activeLoadout);
+
+        const badgeMain = document.getElementById('synergy-badge-main');
+        const titleEl = document.getElementById('synergy-title-text');
+        const levelEl = document.getElementById('synergy-level-pill');
+        const descEl = document.getElementById('synergy-desc-text');
+        const chipsList = document.getElementById('synergy-chips-list');
+
+        const dominantMeta = this.loadout.getElementMeta(syn.dominantElement);
+
+        if (titleEl) {
+            titleEl.textContent = syn.synergyTitle || 'NO SYNERGY';
+            titleEl.style.color = dominantMeta.color;
+        }
+
+        if (levelEl) {
+            if (syn.isPureArmy) {
+                levelEl.textContent = 'PURE ARMY (Lvl 5)';
+                levelEl.style.background = dominantMeta.color;
+                levelEl.style.color = '#000000';
+            } else if (syn.isBalanced) {
+                levelEl.textContent = 'HARMONY';
+                levelEl.style.background = 'linear-gradient(90deg, #f97316, #38bdf8, #10b981, #ec4899)';
+                levelEl.style.color = '#ffffff';
+            } else if (syn.synergyLevel > 0) {
+                levelEl.textContent = `Level ${syn.synergyLevel} (${syn.dominantCount}/6)`;
+                levelEl.style.background = `rgba(${this.hexToRgb(dominantMeta.color)}, 0.2)`;
+                levelEl.style.color = dominantMeta.color;
+            } else {
+                levelEl.textContent = 'None';
+                levelEl.style.background = 'rgba(255, 255, 255, 0.1)';
+                levelEl.style.color = 'var(--text-muted)';
+            }
+        }
+
+        if (descEl) {
+            descEl.textContent = syn.synergyDesc;
+        }
+
+        if (badgeMain) {
+            badgeMain.style.borderColor = dominantMeta.color;
+            if (syn.isPureArmy) {
+                badgeMain.style.boxShadow = `0 0 20px ${dominantMeta.color}`;
+            } else {
+                badgeMain.style.boxShadow = 'none';
+            }
+        }
+
+        if (chipsList) {
+            chipsList.innerHTML = '';
+            if (syn.activeHybrids && syn.activeHybrids.length > 0) {
+                syn.activeHybrids.forEach(hybrid => {
+                    const chip = document.createElement('span');
+                    chip.className = 'synergy-hybrid-chip';
+                    chip.textContent = hybrid.name;
+                    chip.title = hybrid.desc;
+                    chipsList.appendChild(chip);
+                });
+            } else {
+                chipsList.innerHTML = `<span class="no-hybrids-text">None</span>`;
+            }
+        }
     }
 
     /**

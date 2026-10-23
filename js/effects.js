@@ -133,14 +133,24 @@ class EffectsManager {
         }, 500);
     }
 
-    showAttackName(text, isCritical = false) {
+    showAttackName(text, isCritical = false, isPure = false, element = null) {
         if (!this.attackBanner) return;
         this.attackBanner.textContent = text;
         this.attackBanner.className = 'attack-banner active';
-        if (isCritical) {
+        const elemMeta = element && window.ELEMENTS ? window.ELEMENTS[element] : null;
+
+        if (isPure && elemMeta) {
+            this.attackBanner.style.color = elemMeta.color;
+            this.attackBanner.style.borderColor = elemMeta.color;
+            this.attackBanner.style.boxShadow = `0 0 60px ${elemMeta.color}, inset 0 0 20px ${elemMeta.color}`;
+        } else if (isCritical) {
             this.attackBanner.style.color = '#f43f5e';
             this.attackBanner.style.borderColor = '#f43f5e';
             this.attackBanner.style.boxShadow = '0 0 50px rgba(244, 63, 94, 0.9)';
+        } else if (elemMeta) {
+            this.attackBanner.style.color = elemMeta.color;
+            this.attackBanner.style.borderColor = elemMeta.color;
+            this.attackBanner.style.boxShadow = `0 0 35px ${elemMeta.color}`;
         } else {
             this.attackBanner.style.color = 'var(--text-gold)';
             this.attackBanner.style.borderColor = 'var(--border-gold)';
@@ -150,6 +160,52 @@ class EffectsManager {
         setTimeout(() => {
             this.attackBanner?.classList.remove('active');
         }, 1100);
+    }
+
+    /**
+     * Same-Element and Cross-Element Combo Chain Announcements (Specs 154 - 155)
+     */
+    showComboChain({ streak, element, isSameElement, recentElements = [] }) {
+        if (!this.comboBanner || streak < 2) return;
+        clearTimeout(this.comboTimeout);
+
+        const elemMeta = window.ELEMENTS && element ? window.ELEMENTS[element] : null;
+        const elemName = elemMeta ? elemMeta.name.toUpperCase() : 'ELEMENTAL';
+        const color = elemMeta ? elemMeta.color : '#fbbf24';
+
+        let text = '';
+        if (isSameElement) {
+            if (streak === 2) text = `${elemName} CHAIN x2`;
+            else if (streak === 3) text = `${elemName} SURGE x3`;
+            else if (streak === 4) text = `${elemName} RAMPAGE x4`;
+            else text = `${elemName} DOMINATION x${streak}`;
+        } else {
+            text = `ELEMENTAL CHAIN x${streak}`;
+        }
+
+        this.comboBanner.textContent = text;
+        this.comboBanner.style.borderColor = color;
+        this.comboBanner.style.color = color;
+        this.comboBanner.style.boxShadow = `0 0 35px ${color}`;
+        this.comboBanner.classList.add('active');
+
+        // Spawn combo celebration sparks
+        const cx = this.boardWidth ? this.boardWidth / 2 : 250;
+        for (let i = 0; i < 24; i++) {
+            this.spawnParticle({
+                x: cx + (Math.random() - 0.5) * 160,
+                y: 50 + (Math.random() - 0.5) * 40,
+                vx: (Math.random() - 0.5) * 6,
+                vy: (Math.random() - 0.5) * 6 - 1.5,
+                radius: 3 + Math.random() * 4.5,
+                color: color,
+                decay: 0.035
+            });
+        }
+
+        this.comboTimeout = setTimeout(() => {
+            this.resetCombo();
+        }, 4500);
     }
 
     incrementCombo() {
@@ -762,37 +818,338 @@ class EffectsManager {
     async playArcaneEffect(fromSq, toSq, color, isFlipped, name, piece) { return this.arcaneSingularity(fromSq, toSq, color, isFlipped, name, piece); }
 
     /**
-     * Master Capture Attack Dispatcher (Spec 123)
-     * Piece + Selected Element = Final Attack Animation
+     * Master Capture Attack Dispatcher (Specs 123, 131, 132, 134 - 143, 158 - 159)
+     * Piece + Selected Element + Synergy = Unique Ability & Distinct Animation
      */
-    async playElementalAttack({ pieceType, element, attackName, fromSq, toSq, color, isFlipped }) {
+    async playElementalAttack({ pieceType, element, attackName, fromSq, toSq, color, isFlipped, synergyInfo = null }) {
         const elem = (element || 'fire').toLowerCase();
         const pType = (pieceType || 'p').toLowerCase();
         const aName = attackName || `${pType.toUpperCase()} ${elem.toUpperCase()} STRIKE`;
 
-        switch (elem) {
-            case 'fire':
-                return this.fireBlast(fromSq, toSq, color, isFlipped, aName, pType);
-            case 'lightning':
-                return this.thunderStrike(fromSq, toSq, color, isFlipped, aName, pType);
-            case 'wind':
-                return this.windSlash(fromSq, toSq, color, isFlipped, aName, pType);
-            case 'earth':
-                return this.earthBreaker(fromSq, toSq, color, isFlipped, aName, pType);
-            case 'ice':
-                return this.frozenDominion(fromSq, toSq, color, isFlipped, aName, pType);
-            case 'water':
-                return this.waterCrush(fromSq, toSq, color, isFlipped, aName, pType);
-            case 'light':
-                return this.judgmentOfLight(fromSq, toSq, color, isFlipped, aName, pType);
-            case 'shadow':
-                return this.voidStrike(fromSq, toSq, color, isFlipped, aName, pType);
-            case 'nature':
-                return this.natureBloom(fromSq, toSq, color, isFlipped, aName, pType);
-            case 'arcane':
-                return this.arcaneSingularity(fromSq, toSq, color, isFlipped, aName, pType);
-            default:
-                return this.fireBlast(fromSq, toSq, color, isFlipped, aName, pType);
+        const from = this.getSquareCenter(fromSq, isFlipped);
+        const to = this.getSquareCenter(toSq, isFlipped);
+        const isWhite = color === 'w';
+
+        const elemMeta = window.ELEMENTS ? (window.ELEMENTS[elem] || window.ELEMENTS.fire) : {
+            color: '#f97316', secondaryColor: '#fbbf24', accentColor: '#dc2626'
+        };
+
+        const primaryCol = elemMeta.color;
+        const secondaryCol = elemMeta.secondaryColor || '#ffffff';
+        const accentCol = elemMeta.accentColor || primaryCol;
+
+        const isPure = synergyInfo?.isPureArmy;
+        const synLevel = synergyInfo?.synergyLevel || 0;
+
+        // 1. Show dynamic attack banner with element glow
+        this.showAttackName(aName, false, isPure, elem);
+
+        // Screen shake magnitude
+        const shakeMag = (pType === 'q' || pType === 'k') ? 'lg' : ((pType === 'r' || pType === 'n') ? 'md' : 'sm');
+        this.screenShake(shakeMag);
+
+        // 2. Piece-Specific Delivery Trajectory (Spec 131, 132)
+        if (pType === 'p') {
+            // PAWN: Fast Direct Linear Shot / Projectile
+            const steps = 12;
+            const angle = Math.atan2(to.y - from.y, to.x - from.x);
+            for (let i = 0; i <= steps; i++) {
+                const t = i / steps;
+                const cx = from.x + (to.x - from.x) * t;
+                const cy = from.y + (to.y - from.y) * t;
+
+                this.spawnParticle({
+                    x: cx,
+                    y: cy,
+                    vx: -Math.cos(angle) * 1.5 + (Math.random() - 0.5),
+                    vy: -Math.sin(angle) * 1.5 + (Math.random() - 0.5),
+                    radius: 5 + Math.random() * 3,
+                    color: primaryCol,
+                    decay: 0.08,
+                    shape: elem === 'lightning' || elem === 'arcane' ? 'spark' : 'circle'
+                });
+
+                for (let s = 0; s < 2; s++) {
+                    this.spawnParticle({
+                        x: cx + (Math.random() - 0.5) * 8,
+                        y: cy + (Math.random() - 0.5) * 8,
+                        vx: (Math.random() - 0.5) * 2,
+                        vy: (Math.random() - 0.5) * 2,
+                        radius: 2 + Math.random() * 2.5,
+                        color: secondaryCol,
+                        decay: 0.06
+                    });
+                }
+                await new Promise(r => setTimeout(r, 10));
+            }
+        } else if (pType === 'n') {
+            // KNIGHT: High-Arched Airborne Leap & Landing Crater / Lightning
+            const steps = 18;
+            const arcHeight = Math.min(120, Math.max(65, Math.hypot(to.x - from.x, to.y - from.y) * 0.45));
+            for (let i = 0; i <= steps; i++) {
+                const t = i / steps;
+                const cx = from.x + (to.x - from.x) * t;
+                const cy = from.y + (to.y - from.y) * t - Math.sin(t * Math.PI) * arcHeight;
+
+                // Dense airborne trail
+                for (let k = 0; k < 3; k++) {
+                    this.spawnParticle({
+                        x: cx + (Math.random() - 0.5) * 12,
+                        y: cy + (Math.random() - 0.5) * 12,
+                        vx: (Math.random() - 0.5) * 2.5,
+                        vy: (Math.random() - 0.5) * 2.5,
+                        radius: 4.5 + Math.random() * 3.5,
+                        color: Math.random() > 0.4 ? primaryCol : secondaryCol,
+                        decay: 0.05,
+                        shape: elem === 'lightning' ? 'spark' : (elem === 'nature' || elem === 'wind' ? 'streak' : 'circle')
+                    });
+                }
+                await new Promise(r => setTimeout(r, 12));
+            }
+        } else if (pType === 'b') {
+            // BISHOP: Diagonal Razor Slicing Blade across Path
+            const dist = Math.hypot(to.x - from.x, to.y - from.y);
+            const angle = Math.atan2(to.y - from.y, to.x - from.x);
+            const perpAngle = angle + Math.PI / 2;
+
+            const sliceSteps = 16;
+            for (let i = 0; i <= sliceSteps; i++) {
+                const t = i / sliceSteps;
+                const cx = from.x + (to.x - from.x) * t;
+                const cy = from.y + (to.y - from.y) * t;
+
+                // Slicing wings
+                for (let w = -1; w <= 1; w += 2) {
+                    const wingOffset = w * 16 * Math.sin(t * Math.PI);
+                    this.spawnParticle({
+                        x: cx + Math.cos(perpAngle) * wingOffset,
+                        y: cy + Math.sin(perpAngle) * wingOffset,
+                        vx: Math.cos(angle) * 3 + (Math.random() - 0.5),
+                        vy: Math.sin(angle) * 3 + (Math.random() - 0.5),
+                        radius: 3 + Math.random() * 3,
+                        color: Math.random() > 0.3 ? primaryCol : secondaryCol,
+                        decay: 0.065,
+                        shape: 'streak',
+                        rotation: angle
+                    });
+                }
+                await new Promise(r => setTimeout(r, 9));
+            }
+        } else if (pType === 'r') {
+            // ROOK: Heavy Linear Shockwave / Rolling Tremor along Rank/File
+            const steps = 14;
+            const angle = Math.atan2(to.y - from.y, to.x - from.x);
+            for (let i = 0; i <= steps; i++) {
+                const t = i / steps;
+                const cx = from.x + (to.x - from.x) * t;
+                const cy = from.y + (to.y - from.y) * t;
+
+                // Ground shockwave pulses
+                if (i % 3 === 0) {
+                    this.addShockwave(cx, cy, 26, primaryCol, 2.8);
+                }
+
+                for (let p = 0; p < 3; p++) {
+                    this.spawnParticle({
+                        x: cx + (Math.random() - 0.5) * 18,
+                        y: cy + (Math.random() - 0.5) * 18,
+                        vx: (Math.random() - 0.5) * 3,
+                        vy: (Math.random() - 0.5) * 3 - 0.5,
+                        radius: 4 + Math.random() * 4,
+                        color: Math.random() > 0.4 ? primaryCol : accentCol,
+                        decay: 0.05,
+                        shape: elem === 'earth' ? 'rock' : 'circle'
+                    });
+                }
+                await new Promise(r => setTimeout(r, 13));
+            }
+        } else if (pType === 'q') {
+            // QUEEN: Expanding Arcane Mandala & Cataclysmic Convergence
+            this.activeMagicRings.push({
+                x: to.x,
+                y: to.y,
+                radius: 12,
+                maxRadius: to.width * 1.35,
+                color: primaryCol,
+                rotation: 0,
+                vRot: 0.08,
+                alpha: 1,
+                decay: 0.02
+            });
+
+            // 8 Converging orbital rays from outer periphery
+            for (let r = 0; r < 8; r++) {
+                const ang = (r * Math.PI) / 4;
+                const ox = to.x + Math.cos(ang) * to.width * 1.1;
+                const oy = to.y + Math.sin(ang) * to.width * 1.1;
+                for (let p = 0; p < 4; p++) {
+                    this.spawnParticle({
+                        x: ox + (Math.random() - 0.5) * 10,
+                        y: oy + (Math.random() - 0.5) * 10,
+                        vx: -Math.cos(ang) * 4,
+                        vy: -Math.sin(ang) * 4,
+                        radius: 3.5 + Math.random() * 3,
+                        color: secondaryCol,
+                        decay: 0.04
+                    });
+                }
+            }
+            await new Promise(r => setTimeout(r, 110));
+        } else if (pType === 'k') {
+            // KING: Sovereign Celestial / Royal Beam descending from Above
+            this.activeBeams.push({
+                x: to.x,
+                y: to.y,
+                width: to.width * 1.15,
+                color: primaryCol,
+                coreColor: secondaryCol,
+                alpha: 1,
+                decay: 0.028
+            });
+
+            this.addShockwave(to.x, to.y, to.width * 1.3, '#facc15', 5);
+            await new Promise(r => setTimeout(r, 90));
+        }
+
+        // 3. Elemental Impact Detonation at Target (Spec 108 & 124)
+        const densityMultiplier = synLevel >= 4 ? 1.6 : (synLevel >= 3 ? 1.3 : 1.0);
+        const pCount = Math.floor((pType === 'q' || pType === 'k' || pType === 'r' ? 65 : 45) * densityMultiplier);
+
+        // Expanding elemental shockwaves
+        this.addShockwave(to.x, to.y, to.width * (pType === 'q' || pType === 'k' ? 1.25 : 0.95), primaryCol, 5);
+        this.addShockwave(to.x, to.y, to.width * 0.65, secondaryCol, 3.5);
+
+        // Element-Specific Particle Manifestation
+        for (let i = 0; i < pCount; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const speed = 2.5 + Math.random() * (pType === 'q' || pType === 'k' ? 11 : 8);
+
+            let particleConfig = {
+                x: to.x + (Math.random() - 0.5) * 15,
+                y: to.y + (Math.random() - 0.5) * 15,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                radius: 3 + Math.random() * 5,
+                color: Math.random() > 0.35 ? primaryCol : secondaryCol,
+                decay: 0.032,
+                shape: 'circle',
+                gravity: 0
+            };
+
+            switch (elem) {
+                case 'fire':
+                    particleConfig.gravity = -0.06;
+                    break;
+                case 'lightning':
+                    particleConfig.shape = 'spark';
+                    particleConfig.decay = 0.045;
+                    break;
+                case 'wind':
+                    particleConfig.shape = 'streak';
+                    particleConfig.rotation = angle;
+                    break;
+                case 'earth':
+                    particleConfig.shape = 'rock';
+                    particleConfig.gravity = 0.25;
+                    break;
+                case 'ice':
+                    particleConfig.shape = 'crystal';
+                    particleConfig.gravity = 0.04;
+                    break;
+                case 'water':
+                    particleConfig.gravity = 0.22;
+                    particleConfig.vy = -Math.abs(particleConfig.vy) - 2;
+                    break;
+                case 'light':
+                    particleConfig.shape = 'spark';
+                    particleConfig.gravity = -0.02;
+                    break;
+                case 'shadow':
+                    particleConfig.gravity = -0.04;
+                    particleConfig.color = Math.random() > 0.4 ? primaryCol : '#2e1065';
+                    break;
+                case 'nature':
+                    particleConfig.shape = 'streak';
+                    particleConfig.gravity = -0.04;
+                    break;
+                case 'arcane':
+                    particleConfig.shape = 'spark';
+                    break;
+            }
+
+            this.spawnParticle(particleConfig);
+        }
+
+        // Additional Element Spikes/Arcs
+        if (elem === 'earth' && (pType === 'r' || pType === 'b' || pType === 'k')) {
+            const spikeCols = ['#78350f', '#d97706', '#92400e'];
+            for (let s = -2; s <= 2; s++) {
+                this.activeStoneSpikes.push({
+                    x: to.x + s * 14 + (Math.random() - 0.5) * 6,
+                    y: to.y + 15,
+                    width: 12 + Math.random() * 6,
+                    maxHeight: 25 + Math.random() * 35,
+                    currentHeight: 0,
+                    growSpeed: 7,
+                    alpha: 1,
+                    decay: 0.028,
+                    color: spikeCols[Math.floor(Math.random() * spikeCols.length)],
+                    accentColor: '#fef3c7'
+                });
+            }
+        } else if (elem === 'lightning') {
+            for (let b = 0; b < (pType === 'q' ? 3 : 1); b++) {
+                const points = [];
+                const segments = 8;
+                for (let s = 0; s <= segments; s++) {
+                    const t = s / segments;
+                    points.push({
+                        x: to.x + (Math.random() - 0.5) * 40 * (1 - t),
+                        y: (to.y - to.width * 1.8) + (to.width * 1.8) * t
+                    });
+                }
+                this.activeLightningArcs.push({
+                    points,
+                    color: '#ffffff',
+                    glow: primaryCol,
+                    alpha: 1,
+                    decay: 0.075
+                });
+            }
+        }
+
+        await new Promise(r => setTimeout(r, 220));
+    }
+
+    /**
+     * Pure Element Army Check & Checkmate Finisher (Specs 146 - 149, 162)
+     */
+    playPureArmyCheckEffect(element, isCheckmate = false) {
+        const elemMeta = window.ELEMENTS ? (window.ELEMENTS[element] || window.ELEMENTS.fire) : {
+            name: 'Elemental', color: '#f97316'
+        };
+        const color = elemMeta.color;
+        const elemName = elemMeta.name.toUpperCase();
+
+        const title = isCheckmate ? `PURE ${elemName} CHECKMATE` : `PURE ${elemName} CHECK`;
+        this.showAttackName(title, isCheckmate, true, element);
+        this.screenShake(isCheckmate ? 'lg' : 'md');
+
+        const count = isCheckmate ? 70 : 40;
+        const w = this.boardWidth || 600;
+        const h = this.boardHeight || 600;
+
+        for (let i = 0; i < count; i++) {
+            this.spawnParticle({
+                x: Math.random() * w,
+                y: Math.random() * h,
+                vx: (Math.random() - 0.5) * 5,
+                vy: (Math.random() - 0.5) * 5,
+                radius: 3 + Math.random() * 5.5,
+                color: color,
+                decay: 0.025,
+                shape: element === 'lightning' || element === 'arcane' ? 'spark' : (element === 'nature' || element === 'wind' ? 'streak' : 'circle')
+            });
         }
     }
 

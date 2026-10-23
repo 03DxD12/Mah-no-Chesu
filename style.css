@@ -2426,6 +2426,116 @@ html, body {
     text-shadow: 0 0 10px rgba(251, 191, 36, 0.4);
 }
 
+.preview-field .desc-val {
+    font-size: 0.8rem;
+    font-style: italic;
+    color: #e2e8f0;
+    line-height: 1.35;
+    background: rgba(0, 0, 0, 0.25);
+    padding: 0.25rem 0.45rem;
+    border-radius: var(--radius-sm);
+    border-left: 2px solid var(--border-gold);
+}
+
+/* Active Synergies & Army Affinities Bar (Specs 144 - 156) */
+.loadout-synergies-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.65rem 0.95rem;
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    border-radius: var(--radius-md);
+    margin-top: 0.6rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+    flex-wrap: wrap;
+}
+
+.synergy-status-group {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    flex-wrap: wrap;
+    flex: 1;
+}
+
+.synergy-header-label {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+}
+
+.synergy-badge-main {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.65rem;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--border-gold);
+    border-radius: 999px;
+    transition: all 0.25s ease;
+}
+
+.synergy-title-text {
+    font-family: Georgia, serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--text-gold);
+}
+
+.synergy-level-pill {
+    font-size: 0.68rem;
+    font-weight: 800;
+    padding: 0.15rem 0.45rem;
+    border-radius: 999px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.synergy-desc-text {
+    font-size: 0.76rem;
+    color: #cbd5e1;
+    font-style: italic;
+}
+
+.synergy-hybrids-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.synergy-chips-list {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+}
+
+.synergy-hybrid-chip {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(56, 189, 248, 0.2));
+    border: 1px solid rgba(212, 175, 55, 0.4);
+    color: #fef08a;
+    box-shadow: 0 0 8px rgba(212, 175, 55, 0.2);
+    cursor: default;
+    transition: transform 0.2s ease;
+}
+
+.synergy-hybrid-chip:hover {
+    transform: scale(1.05);
+}
+
+.no-hybrids-text {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
 /* Loadout Modal Footer */
 .loadout-modal-footer {
     display: flex;
@@ -2696,3 +2806,138 @@ html, body {
         flex: 1;
     }
 }
+
+/* ==========================================================================
+   PURE ELEMENT ARMY THEMED BOARD BORDERS & COMBOS (Specs 146 - 155)
+   ========================================================================== */
+
+/* Pure Fire Army: Board Border Aura (Spec 146) */
+.board-frame.pure-army-fire {
+    border-color: #f97316 !important;
+    box-shadow: 0 0 35px rgba(249, 115, 22, 0.45), 0 0 80px rgba(220, 38, 38, 0.25), inset 0 0 25px rgba(249, 115, 22, 0.2) !important;
+    animation: pureFirePulse 2.8s ease-in-out infinite alternate;
+}
+
+@keyframes pureFirePulse {
+    0% { box-shadow: 0 0 30px rgba(249, 115, 22, 0.4), inset 0 0 15px rgba(249, 115, 22, 0.15); }
+    100% { box-shadow: 0 0 50px rgba(249, 115, 22, 0.65), 0 0 90px rgba(251, 191, 36, 0.35), inset 0 0 35px rgba(249, 115, 22, 0.3); }
+}
+
+/* Pure Lightning Army: Board Border Aura (Spec 147) */
+.board-frame.pure-army-lightning {
+    border-color: #38bdf8 !important;
+    box-shadow: 0 0 35px rgba(56, 189, 248, 0.5), 0 0 75px rgba(192, 132, 252, 0.3), inset 0 0 25px rgba(56, 189, 248, 0.2) !important;
+    animation: pureLightningPulse 2.2s ease-in-out infinite alternate;
+}
+
+@keyframes pureLightningPulse {
+    0% { box-shadow: 0 0 25px rgba(56, 189, 248, 0.4), inset 0 0 15px rgba(56, 189, 248, 0.15); }
+    100% { box-shadow: 0 0 55px rgba(56, 189, 248, 0.7), 0 0 95px rgba(255, 255, 255, 0.4), inset 0 0 35px rgba(56, 189, 248, 0.35); }
+}
+
+/* Pure Ice Army: Frosted Board Border (Spec 148) */
+.board-frame.pure-army-ice {
+    border-color: #06b6d4 !important;
+    box-shadow: 0 0 35px rgba(6, 182, 212, 0.45), 0 0 75px rgba(224, 242, 254, 0.3), inset 0 0 30px rgba(6, 182, 212, 0.25) !important;
+    animation: pureIcePulse 3s ease-in-out infinite alternate;
+}
+
+@keyframes pureIcePulse {
+    0% { box-shadow: 0 0 25px rgba(6, 182, 212, 0.35), inset 0 0 15px rgba(6, 182, 212, 0.15); }
+    100% { box-shadow: 0 0 50px rgba(6, 182, 212, 0.65), 0 0 90px rgba(103, 232, 249, 0.35), inset 0 0 35px rgba(6, 182, 212, 0.35); }
+}
+
+/* Pure Shadow Army: Void Board Aura (Spec 149) */
+.board-frame.pure-army-shadow {
+    border-color: #8b5cf6 !important;
+    box-shadow: 0 0 40px rgba(139, 92, 246, 0.5), 0 0 85px rgba(46, 16, 101, 0.5), inset 0 0 30px rgba(139, 92, 246, 0.25) !important;
+    animation: pureShadowPulse 2.6s ease-in-out infinite alternate;
+}
+
+@keyframes pureShadowPulse {
+    0% { box-shadow: 0 0 30px rgba(139, 92, 246, 0.4), inset 0 0 15px rgba(139, 92, 246, 0.15); }
+    100% { box-shadow: 0 0 60px rgba(139, 92, 246, 0.7), 0 0 100px rgba(196, 181, 253, 0.3), inset 0 0 35px rgba(139, 92, 246, 0.35); }
+}
+
+/* Pure Wind Army */
+.board-frame.pure-army-wind {
+    border-color: #34d399 !important;
+    box-shadow: 0 0 35px rgba(52, 211, 153, 0.45), 0 0 70px rgba(236, 253, 245, 0.25), inset 0 0 25px rgba(52, 211, 153, 0.2) !important;
+}
+
+/* Pure Earth Army */
+.board-frame.pure-army-earth {
+    border-color: #d97706 !important;
+    box-shadow: 0 0 35px rgba(217, 119, 6, 0.45), 0 0 75px rgba(120, 53, 15, 0.4), inset 0 0 25px rgba(217, 119, 6, 0.25) !important;
+}
+
+/* Pure Water Army */
+.board-frame.pure-army-water {
+    border-color: #0284c7 !important;
+    box-shadow: 0 0 35px rgba(2, 132, 199, 0.45), 0 0 75px rgba(186, 230, 253, 0.3), inset 0 0 25px rgba(2, 132, 199, 0.2) !important;
+}
+
+/* Pure Light Army */
+.board-frame.pure-army-light {
+    border-color: #facc15 !important;
+    box-shadow: 0 0 40px rgba(250, 204, 21, 0.55), 0 0 85px rgba(255, 255, 255, 0.4), inset 0 0 30px rgba(250, 204, 21, 0.25) !important;
+}
+
+/* Pure Nature Army */
+.board-frame.pure-army-nature {
+    border-color: #10b981 !important;
+    box-shadow: 0 0 35px rgba(16, 185, 129, 0.45), 0 0 75px rgba(4, 120, 87, 0.35), inset 0 0 25px rgba(16, 185, 129, 0.2) !important;
+}
+
+/* Pure Arcane Army */
+.board-frame.pure-army-arcane {
+    border-color: #ec4899 !important;
+    box-shadow: 0 0 40px rgba(236, 72, 153, 0.5), 0 0 85px rgba(168, 85, 247, 0.35), inset 0 0 30px rgba(236, 72, 153, 0.25) !important;
+}
+
+/* Elemental Balance: Subtle Rainbow Prismatic Aura (Spec 150 - 151) */
+.board-frame.elemental-balance {
+    border-image: linear-gradient(135deg, #f97316, #38bdf8, #34d399, #facc15, #8b5cf6, #ec4899) 1 !important;
+    box-shadow: 0 0 35px rgba(250, 204, 21, 0.3), 0 0 70px rgba(56, 189, 248, 0.25), inset 0 0 25px rgba(236, 72, 153, 0.15) !important;
+}
+
+/* Synergy Theme Glow (Level 3 - 4) */
+.board-frame[class*="synergy-theme-"] {
+    transition: box-shadow 0.4s ease, border-color 0.4s ease;
+}
+
+/* Combo Banner Dynamic Popups (Specs 154 - 155) */
+.combo-banner {
+    position: absolute;
+    top: 15%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.6);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 100;
+    font-family: Georgia, serif;
+    font-size: 1.45rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-gold);
+    padding: 0.55rem 1.6rem;
+    background: rgba(10, 15, 29, 0.88);
+    backdrop-filter: blur(12px);
+    border: 2px solid var(--border-gold);
+    border-radius: 999px;
+    box-shadow: 0 0 40px rgba(212, 175, 55, 0.6);
+    transition: opacity 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.combo-banner.active {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+    animation: comboPulse 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes comboPulse {
+    0% { transform: translate(-50%, -50%) scale(1); }
+    100% { transform: translate(-50%, -50%) scale(1.06); }
+}
+
