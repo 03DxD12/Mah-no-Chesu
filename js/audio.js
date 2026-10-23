@@ -374,8 +374,206 @@ class AudioManager {
     }
 
     /**
-     * Castling Sound
+     * WATER: Tidal Crash & Hydro Surge (Fluid Whoosh + Sub Splash)
      */
+    playWaterAttack() {
+        if (!this.sfxEnabled || !this.ctx) return;
+        this.initContext();
+        const t = this.ctx.currentTime;
+
+        // Hydro surging fluid filter
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = this.createNoiseBuffer(0.6);
+        const bpf = this.ctx.createBiquadFilter();
+        bpf.type = 'bandpass';
+        bpf.frequency.setValueAtTime(320, t);
+        bpf.frequency.exponentialRampToValueAtTime(1400, t + 0.2);
+        bpf.frequency.exponentialRampToValueAtTime(180, t + 0.55);
+        bpf.Q.value = 4.0;
+
+        const nGain = this.ctx.createGain();
+        nGain.gain.setValueAtTime(0.55, t);
+        nGain.gain.exponentialRampToValueAtTime(0.01, t + 0.55);
+        noise.connect(bpf);
+        bpf.connect(nGain);
+        nGain.connect(this.sfxGain);
+        noise.start(t);
+
+        // Sub tidal impact wave
+        const sub = this.ctx.createOscillator();
+        const subGain = this.ctx.createGain();
+        sub.type = 'sine';
+        sub.frequency.setValueAtTime(160, t);
+        sub.frequency.exponentialRampToValueAtTime(45, t + 0.5);
+        subGain.gain.setValueAtTime(0.5, t);
+        subGain.gain.exponentialRampToValueAtTime(0.01, t + 0.5);
+        sub.connect(subGain);
+        subGain.connect(this.sfxGain);
+        sub.start(t);
+        sub.stop(t + 0.5);
+    }
+
+    /**
+     * SHADOW: Void Implosion & Abyssal Resonance (Downward Glissando & Dark Drone)
+     */
+    playShadowAttack() {
+        if (!this.sfxEnabled || !this.ctx) return;
+        this.initContext();
+        const t = this.ctx.currentTime;
+
+        // Ominous descending void sink
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(380, t);
+        osc.frequency.exponentialRampToValueAtTime(48, t + 0.6);
+
+        const lpf = this.ctx.createBiquadFilter();
+        lpf.type = 'lowpass';
+        lpf.frequency.setValueAtTime(800, t);
+        lpf.frequency.exponentialRampToValueAtTime(100, t + 0.6);
+
+        gain.gain.setValueAtTime(0.45, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.6);
+
+        osc.connect(lpf);
+        lpf.connect(gain);
+        gain.connect(this.sfxGain);
+        osc.start(t);
+        osc.stop(t + 0.6);
+
+        // Spectral whisper noise
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = this.createNoiseBuffer(0.5);
+        const bpf = this.ctx.createBiquadFilter();
+        bpf.type = 'bandpass';
+        bpf.frequency.setValueAtTime(600, t);
+        bpf.Q.value = 6.0;
+        const nGain = this.ctx.createGain();
+        nGain.gain.setValueAtTime(0.35, t);
+        nGain.gain.exponentialRampToValueAtTime(0.01, t + 0.5);
+        noise.connect(bpf);
+        bpf.connect(nGain);
+        nGain.connect(this.sfxGain);
+        noise.start(t);
+    }
+
+    /**
+     * NATURE: Verdant Bloom & Leaf Gale (Organic Rustle + Harmonic Chime)
+     */
+    playNatureAttack() {
+        if (!this.sfxEnabled || !this.ctx) return;
+        this.initContext();
+        const t = this.ctx.currentTime;
+
+        // Woody snap transient
+        const snap = this.ctx.createOscillator();
+        const snapGain = this.ctx.createGain();
+        snap.type = 'triangle';
+        snap.frequency.setValueAtTime(520, t);
+        snap.frequency.exponentialRampToValueAtTime(80, t + 0.08);
+        snapGain.gain.setValueAtTime(0.6, t);
+        snapGain.gain.exponentialRampToValueAtTime(0.01, t + 0.08);
+        snap.connect(snapGain);
+        snapGain.connect(this.sfxGain);
+        snap.start(t);
+        snap.stop(t + 0.08);
+
+        // High leaf rustle whoosh
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = this.createNoiseBuffer(0.5);
+        const hpf = this.ctx.createBiquadFilter();
+        hpf.type = 'highpass';
+        hpf.frequency.setValueAtTime(1800, t);
+        const nGain = this.ctx.createGain();
+        nGain.gain.setValueAtTime(0.35, t);
+        nGain.gain.exponentialRampToValueAtTime(0.01, t + 0.45);
+        noise.connect(hpf);
+        hpf.connect(nGain);
+        nGain.connect(this.sfxGain);
+        noise.start(t);
+
+        // Pentatonic nature bell resonance
+        [440, 554.37, 659.25].forEach((freq, idx) => {
+            const osc = this.ctx.createOscillator();
+            const g = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, t + idx * 0.04);
+            g.gain.setValueAtTime(0.2, t + idx * 0.04);
+            g.gain.exponentialRampToValueAtTime(0.005, t + idx * 0.04 + 0.4);
+            osc.connect(g);
+            g.connect(this.sfxGain);
+            osc.start(t + idx * 0.04);
+            osc.stop(t + idx * 0.04 + 0.4);
+        });
+    }
+
+    /**
+     * ARCANE: Cosmic Singularity & Astral Burst (Plasma Chimes & Warp Detonation)
+     */
+    playArcaneAttack() {
+        if (!this.sfxEnabled || !this.ctx) return;
+        this.initContext();
+        const t = this.ctx.currentTime;
+
+        // Rapid dual astral pitch sweeps (warp in & out)
+        [880, 1318.5, 1760].forEach((freq, idx) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq * 0.5, t);
+            osc.frequency.exponentialRampToValueAtTime(freq * 1.5, t + 0.18);
+            osc.frequency.exponentialRampToValueAtTime(freq * 0.75, t + 0.5);
+
+            gain.gain.setValueAtTime(0.25 - idx * 0.04, t);
+            gain.gain.exponentialRampToValueAtTime(0.005, t + 0.55);
+
+            osc.connect(gain);
+            gain.connect(this.sfxGain);
+            osc.start(t);
+            osc.stop(t + 0.55);
+        });
+
+        // Ethereal plasma shimmer
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = this.createNoiseBuffer(0.5);
+        const bpf = this.ctx.createBiquadFilter();
+        bpf.type = 'bandpass';
+        bpf.frequency.setValueAtTime(2200, t);
+        bpf.Q.value = 7.0;
+        const nGain = this.ctx.createGain();
+        nGain.gain.setValueAtTime(0.3, t);
+        nGain.gain.exponentialRampToValueAtTime(0.01, t + 0.5);
+        noise.connect(bpf);
+        bpf.connect(nGain);
+        nGain.connect(this.sfxGain);
+        noise.start(t);
+    }
+
+    // Unified Element Audio Dispatcher
+    playFireAttack() { this.playFireBlast(); }
+    playLightningAttack() { this.playThunderStrike(); }
+    playWindAttack() { this.playWindSlash(); }
+    playEarthAttack() { this.playEarthBreaker(); }
+    playIceAttack() { this.playFrozenDominion(); }
+    playLightAttack() { this.playJudgmentOfLight(); }
+
+    playElementSound(element) {
+        const elem = (element || 'fire').toLowerCase();
+        switch (elem) {
+            case 'fire': this.playFireAttack(); break;
+            case 'lightning': this.playLightningAttack(); break;
+            case 'wind': this.playWindAttack(); break;
+            case 'earth': this.playEarthAttack(); break;
+            case 'ice': this.playIceAttack(); break;
+            case 'water': this.playWaterAttack(); break;
+            case 'light': this.playLightAttack(); break;
+            case 'shadow': this.playShadowAttack(); break;
+            case 'nature': this.playNatureAttack(); break;
+            case 'arcane': this.playArcaneAttack(); break;
+            default: this.playFireAttack(); break;
+        }
+    }
     playCastling() {
         if (!this.sfxEnabled || !this.ctx) return;
         this.initContext();

@@ -28,7 +28,9 @@
                 </div>
             </div>
 
-            <div class="header-actions">
+                <button id="btn-loadout-toggle" class="btn-icon" title="Element Loadout" aria-label="Element Loadout">
+                    <svg viewBox="0 0 24 24" class="icon-svg"><path d="M12 2l2.4 6.9 7.1.3-5.5 4.5 1.9 6.8-5.9-4-5.9 4 1.9-6.8-5.5-4.5 7.1-.3z"/></svg>
+                </button>
                 <button id="btn-sound-toggle" class="btn-icon" title="Toggle Sound" aria-label="Toggle Sound">
                     <svg id="icon-sound-on" viewBox="0 0 24 24" class="icon-svg"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
                     <svg id="icon-sound-off" viewBox="0 0 24 24" class="icon-svg hidden"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
@@ -94,10 +96,13 @@
                     <div class="coord-corner corner-br" aria-hidden="true"></div>
                 </div>
 
-                <!-- Floating Game Status Badge -->
+                <!-- Floating Game Status Badge & Selected Piece Element Badge (Spec 120) -->
                 <div id="game-status-bar" class="game-status-bar" aria-live="polite">
-                    <span id="game-status-text">White to move</span>
-                    <span id="ai-thinking-spinner" class="thinking-spinner hidden"></span>
+                    <div class="status-main-row">
+                        <span id="game-status-text">White to move</span>
+                        <span id="ai-thinking-spinner" class="thinking-spinner hidden"></span>
+                    </div>
+                    <div id="selected-piece-element-badge" class="selected-piece-badge hidden"></div>
                 </div>
             </section>
 
@@ -219,6 +224,9 @@
                     <span class="btn-glow"></span>
                     <span>ENTER BATTLE</span>
                 </button>
+                <button id="menu-btn-loadout" class="btn-menu">
+                    <span>ELEMENT LOADOUT</span>
+                </button>
                 <button id="menu-btn-guide" class="btn-menu">
                     <span>ELEMENT GUIDE</span>
                 </button>
@@ -295,69 +303,109 @@
             </div>
             
             <div class="guide-grid">
-                <!-- Pawn -->
-                <div class="element-box box-pawn">
+                <!-- 1. Fire -->
+                <div class="element-box box-fire">
                     <div class="element-glyph">🔥</div>
                     <div class="element-details">
-                        <h4>PAWN &bull; FIRE</h4>
-                        <p class="attack-title">Attack: <strong>Fire Blast</strong></p>
-                        <p class="attack-desc">Surrounds target in blazing flame, hurling incinerating fireballs with explosive sparks and smoke.</p>
+                        <h4>FIRE &bull; FLAME</h4>
+                        <p class="attack-title">Trail: <strong>Flame Trail</strong></p>
+                        <p class="attack-desc">Flames, sparks, embers, heat distortion, and explosive fiery novas.</p>
                     </div>
                 </div>
 
-                <!-- Knight -->
-                <div class="element-box box-knight">
+                <!-- 2. Lightning -->
+                <div class="element-box box-lightning">
                     <div class="element-glyph">⚡</div>
                     <div class="element-details">
-                        <h4>KNIGHT &bull; LIGHTNING</h4>
-                        <p class="attack-title">Attack: <strong>Thunder Strike</strong></p>
-                        <p class="attack-desc">Charges across the board with electric arcs before summoning a devastating thunderbolt from the heavens.</p>
+                        <h4>LIGHTNING &bull; THUNDER</h4>
+                        <p class="attack-title">Trail: <strong>Electric Trail</strong></p>
+                        <p class="attack-desc">Lightning bolts, electrical arcs, plasma crackle, and ground discharge.</p>
                     </div>
                 </div>
 
-                <!-- Bishop -->
-                <div class="element-box box-bishop">
+                <!-- 3. Wind -->
+                <div class="element-box box-wind">
                     <div class="element-glyph">🌪️</div>
                     <div class="element-details">
-                        <h4>BISHOP &bull; WIND</h4>
-                        <p class="attack-title">Attack: <strong>Wind Slash</strong></p>
-                        <p class="attack-desc">Channels sharp vacuum blades across diagonals, cleaving targets with swift aerodynamic motion lines.</p>
+                        <h4>WIND &bull; GALE</h4>
+                        <p class="attack-title">Trail: <strong>Gale Trail</strong></p>
+                        <p class="attack-desc">Air streaks, razor scythe lines, vacuum blades, and swirling breeze.</p>
                     </div>
                 </div>
 
-                <!-- Rook -->
-                <div class="element-box box-rook">
+                <!-- 4. Earth -->
+                <div class="element-box box-earth">
                     <div class="element-glyph">🪨</div>
                     <div class="element-details">
-                        <h4>ROOK &bull; EARTH</h4>
-                        <p class="attack-title">Attack: <strong>Earth Breaker</strong></p>
-                        <p class="attack-desc">Shatters tectonic plates beneath the victim, erupting stone spikes and rock fragments with violent tremor.</p>
+                        <h4>EARTH &bull; TECTONIC</h4>
+                        <p class="attack-title">Trail: <strong>Stone Tremor</strong></p>
+                        <p class="attack-desc">Rock fragments, fissures, seismic tremors, and rising stone spikes.</p>
                     </div>
                 </div>
 
-                <!-- Queen -->
-                <div class="element-box box-queen">
+                <!-- 5. Ice -->
+                <div class="element-box box-ice">
                     <div class="element-glyph">❄️</div>
                     <div class="element-details">
-                        <h4>QUEEN &bull; ICE &amp; ARCANE</h4>
-                        <p class="attack-title">Attack: <strong>Frozen Dominion</strong></p>
-                        <p class="attack-desc">Summons an arcane runic circle, encasing enemies in absolute zero frost crystals before shattering them into crystalline dust.</p>
+                        <h4>ICE &bull; GLACIAL</h4>
+                        <p class="attack-title">Trail: <strong>Frost Trail</strong></p>
+                        <p class="attack-desc">Ice crystals, snow, frozen mist, and crystalline shatter explosions.</p>
                     </div>
                 </div>
 
-                <!-- King -->
-                <div class="element-box box-king">
+                <!-- 6. Water -->
+                <div class="element-box box-water">
+                    <div class="element-glyph">💧</div>
+                    <div class="element-details">
+                        <h4>WATER &bull; TIDAL</h4>
+                        <p class="attack-title">Trail: <strong>Tidal Trail</strong></p>
+                        <p class="attack-desc">Water splashes, ocean waves, droplets, and circular hydro ripples.</p>
+                    </div>
+                </div>
+
+                <!-- 7. Light -->
+                <div class="element-box box-light">
                     <div class="element-glyph">✨</div>
                     <div class="element-details">
-                        <h4>KING &bull; LIGHT</h4>
-                        <p class="attack-title">Attack: <strong>Judgment of Light</strong></p>
-                        <p class="attack-desc">Radiates divine solar energy, calling down a pure sacred beam and concentric shockwaves that dissolve foes.</p>
+                        <h4>LIGHT &bull; RADIANT</h4>
+                        <p class="attack-title">Trail: <strong>Radiant Trail</strong></p>
+                        <p class="attack-desc">Golden particles, sacred solar beams, energy rings, and holy flashes.</p>
+                    </div>
+                </div>
+
+                <!-- 8. Shadow -->
+                <div class="element-box box-shadow">
+                    <div class="element-glyph">🌑</div>
+                    <div class="element-details">
+                        <h4>SHADOW &bull; VOID</h4>
+                        <p class="attack-title">Trail: <strong>Shadow Trail</strong></p>
+                        <p class="attack-desc">Dark smoke, purple energy, void implosions, and abyssal mist.</p>
+                    </div>
+                </div>
+
+                <!-- 9. Nature -->
+                <div class="element-box box-nature">
+                    <div class="element-glyph">🌿</div>
+                    <div class="element-details">
+                        <h4>NATURE &bull; VERDANT</h4>
+                        <p class="attack-title">Trail: <strong>Verdant Trail</strong></p>
+                        <p class="attack-desc">Floating green leaves, vines, floral spores, and entangling roots.</p>
+                    </div>
+                </div>
+
+                <!-- 10. Arcane -->
+                <div class="element-box box-arcane">
+                    <div class="element-glyph">🔮</div>
+                    <div class="element-details">
+                        <h4>ARCANE &bull; COSMIC</h4>
+                        <p class="attack-title">Trail: <strong>Arcane Trail</strong></p>
+                        <p class="attack-desc">Magical runes, energy symbols, astral circles, and cosmic supernovas.</p>
                     </div>
                 </div>
             </div>
 
             <div class="guide-note">
-                <p>Elemental powers trigger on movements, captures, checks, castling (Fortress), and promotions (Ascension) while preserving 100% authentic chess rules.</p>
+                <p><strong>Custom Element Loadout:</strong> You can assign ANY of these 10 elements to ANY chess piece in your army via the Element Loadout menu before entering battle! Traditional chess rules remain 100% authentic and untouched.</p>
             </div>
             
             <button class="btn-secondary modal-close mt-4">Close Codex</button>
@@ -548,8 +596,150 @@
         </div>
     </div>
 
+    <!-- Custom Element Loadout Modal (Specs 101 - 129) -->
+    <div id="modal-loadout" class="modal-overlay">
+        <div class="modal-card loadout-card">
+            <div class="modal-header">
+                <div class="loadout-title-group">
+                    <h2 class="modal-title">ELEMENT LOADOUT</h2>
+                    <span class="loadout-subtitle">Customize Your Elemental Chess Army</span>
+                </div>
+                <button class="btn-close modal-close">&times;</button>
+            </div>
+
+            <!-- Side Tabs (PvP: White vs Black, PvC: Player vs AI Options) -->
+            <div class="loadout-tabs-bar">
+                <div class="loadout-side-tabs" role="tablist">
+                    <button class="loadout-tab-btn active" id="tab-loadout-white" data-target="white" role="tab" aria-selected="true">
+                        <span class="tab-piece">♔</span>
+                        <span class="tab-label">White Army</span>
+                    </button>
+                    <button class="loadout-tab-btn" id="tab-loadout-black" data-target="black" role="tab" aria-selected="false">
+                        <span class="tab-piece">♚</span>
+                        <span class="tab-label">Black Army</span>
+                    </button>
+                </div>
+                
+                <div class="loadout-quick-actions">
+                    <button id="btn-copy-p1-loadout" class="btn-action-small" title="Copy White Loadout to Black">
+                        <span>Copy White Army</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- AI Legion Config Panel (Visible when playing PvC) -->
+            <div id="ai-legion-panel" class="ai-legion-panel hidden">
+                <div class="ai-panel-content">
+                    <span class="ai-panel-title">AI Legion Loadout:</span>
+                    <div class="ai-loadout-options">
+                        <button class="btn-ai-loadout active" data-type="classic">Classic (Canonical)</button>
+                        <button class="btn-ai-loadout" data-type="random">Randomized</button>
+                        <button class="btn-ai-loadout" data-type="match_player">Match Player</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Presets Bar (Spec 117 & 118) -->
+            <div class="loadout-presets-bar">
+                <div class="preset-selector-group">
+                    <span class="preset-label">Presets:</span>
+                    <div class="preset-buttons" id="preset-buttons-container">
+                        <!-- Built-in presets injected dynamically -->
+                    </div>
+                </div>
+
+                <div class="custom-preset-group">
+                    <select id="custom-presets-dropdown" class="select-preset" aria-label="Custom Presets">
+                        <option value="">-- Custom Presets --</option>
+                    </select>
+                    <button id="btn-save-custom-preset" class="btn-action-small" title="Save current loadout as custom preset">+ Save Preset</button>
+                    <button id="btn-delete-custom-preset" class="btn-action-small btn-danger" title="Delete selected custom preset">Delete</button>
+                </div>
+            </div>
+
+            <!-- Main Loadout Editor Container: Piece List + Element Grid + Live Preview -->
+            <div class="loadout-workspace">
+                <!-- 1. Piece Selector List -->
+                <div class="piece-selector-column" aria-label="Select Chess Piece">
+                    <span class="workspace-col-title">Piece Class</span>
+                    <div class="piece-roster-list" id="piece-roster-list">
+                        <!-- Injected: Pawn, Knight, Bishop, Rook, Queen, King -->
+                    </div>
+                </div>
+
+                <!-- 2. Element Grid for Selected Piece -->
+                <div class="element-picker-column" aria-label="Available Elements">
+                    <div class="picker-header">
+                        <span class="workspace-col-title" id="picker-piece-heading">Select Element</span>
+                        <div class="allow-dup-toggle">
+                            <label for="check-allow-duplicates" class="dup-label">
+                                <input type="checkbox" id="check-allow-duplicates" checked>
+                                <span>Allow Duplicates</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="elements-grid" id="elements-grid">
+                        <!-- Injected 10 elements -->
+                    </div>
+                </div>
+
+                <!-- 3. Live Preview Card (Spec 107) -->
+                <div class="element-preview-column" aria-label="Element Preview">
+                    <span class="workspace-col-title">Combat Preview</span>
+                    <div class="preview-card" id="preview-card">
+                        <div class="preview-piece-display" id="preview-piece-display">
+                            <div class="preview-svg-container" id="preview-svg-container"></div>
+                        </div>
+                        <div class="preview-details">
+                            <div class="preview-badge-row">
+                                <div class="preview-elem-badge" id="preview-elem-badge"></div>
+                            </div>
+                            <div class="preview-field">
+                                <span class="field-label">Attack:</span>
+                                <span class="field-value attack-name-val" id="preview-attack-name">FIRE BLAST</span>
+                            </div>
+                            <div class="preview-field">
+                                <span class="field-label">Movement:</span>
+                                <span class="field-value" id="preview-trail-val">Flame Trail</span>
+                            </div>
+                            <div class="preview-field">
+                                <span class="field-label">Capture FX:</span>
+                                <span class="field-value" id="preview-capture-val">Fire Nova Explosion</span>
+                            </div>
+                            <div class="preview-field">
+                                <span class="field-label">Aura:</span>
+                                <span class="field-value" id="preview-aura-val">Burning embers and heat distortion</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Action Controls (Spec 102 & 114-116) -->
+            <div class="loadout-modal-footer">
+                <div class="footer-left-actions">
+                    <button id="btn-loadout-randomize" class="btn-secondary">
+                        <span>🎲 RANDOMIZE</span>
+                    </button>
+                    <button id="btn-loadout-reset" class="btn-secondary">
+                        <span>↺ RESET DEFAULT</span>
+                    </button>
+                    <button id="btn-loadout-save" class="btn-secondary">
+                        <span>💾 SAVE LOADOUT</span>
+                    </button>
+                </div>
+                <div class="footer-right-actions">
+                    <button id="btn-loadout-start" class="btn-primary btn-start-match">
+                        <span>⚔️ START MATCH</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts (Ordered for GitHub Pages static execution) -->
     <script src="./js/chess.js"></script>
+    <script src="./js/loadout.js"></script>
     <script src="./js/audio.js"></script>
     <script src="./js/effects.js"></script>
     <script src="./js/settings.js"></script>

@@ -4,11 +4,12 @@
  */
 
 class UIManager {
-    constructor(engine, effects, audio, settings) {
+    constructor(engine, effects, audio, settings, loadout = null) {
         this.engine = engine;
         this.effects = effects;
         this.audio = audio;
         this.settings = settings;
+        this.loadout = loadout;
 
         this.boardEl = document.getElementById('chess-board');
         this.boardWrapper = document.getElementById('board-wrapper');
@@ -288,7 +289,8 @@ class UIManager {
             const piece = board[sq];
             let pieceHTML = '';
             if (piece) {
-                pieceHTML = `<div class="piece-svg-wrapper piece-${piece.type}">${this.getPieceSVG(piece.type, piece.color)}</div>`;
+                const elem = this.loadout ? this.loadout.getElementForPiece(piece.type, piece.color) : 'fire';
+                pieceHTML = `<div class="piece-svg-wrapper piece-${piece.type} aura-${elem}">${this.getPieceSVG(piece.type, piece.color)}</div>`;
             }
 
             sqEl.innerHTML = pieceHTML;
@@ -394,11 +396,50 @@ class UIManager {
         this.legalMovesForSelected = this.engine.getLegalMovesForSquare(sq);
         this.audio.playPieceSelect();
         this.renderBoard();
+        this.updateSelectedPieceElementBadge(sq);
     }
 
     clearSelection() {
         this.selectedSquare = null;
         this.legalMovesForSelected = [];
+        this.updateSelectedPieceElementBadge(null);
+    }
+
+    /**
+     * Active Piece Element Indicator Badge (Spec 120)
+     */
+    updateSelectedPieceElementBadge(sq) {
+        const badge = document.getElementById('selected-piece-element-badge');
+        if (!badge) return;
+
+        if (sq === null || sq === undefined) {
+            badge.classList.add('hidden');
+            badge.innerHTML = '';
+            return;
+        }
+
+        const piece = this.engine.board[sq];
+        if (!piece || !this.loadout) {
+            badge.classList.add('hidden');
+            return;
+        }
+
+        const pieceNames = { p: 'Pawn', n: 'Knight', b: 'Bishop', r: 'Rook', q: 'Queen', k: 'King' };
+        const colorName = piece.color === 'w' ? 'White' : 'Black';
+        const elemKey = this.loadout.getElementForPiece(piece.type, piece.color);
+        const elemMeta = this.loadout.getElementMeta(elemKey);
+        const attackName = this.loadout.getAttackName(piece.type, elemKey);
+
+        badge.style.borderColor = elemMeta.color;
+        badge.innerHTML = `
+            <span class="badge-elem-icon" style="color: ${elemMeta.color};">${elemMeta.svg}</span>
+            <span class="badge-piece-title">${colorName} ${pieceNames[piece.type]}</span>
+            <span class="badge-divider">&bull;</span>
+            <span class="badge-elem-name" style="color: ${elemMeta.color};">${elemMeta.name}</span>
+            <span class="badge-divider">&bull;</span>
+            <span class="badge-attack-name">${attackName}</span>
+        `;
+        badge.classList.remove('hidden');
     }
 
     updateActivePlayerIndicator() {

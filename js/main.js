@@ -9,7 +9,8 @@ class MahoNoChesuApp {
         this.effects = new EffectsManager();
         this.audio = new AudioManager();
         this.settings = new SettingsManager();
-        this.ui = new UIManager(this.engine, this.effects, this.audio, this.settings);
+        this.loadout = new LoadoutManager();
+        this.ui = new UIManager(this.engine, this.effects, this.audio, this.settings, this.loadout);
         this.ai = new ChessAI();
 
         // Game Configuration
@@ -20,8 +21,13 @@ class MahoNoChesuApp {
         this.isAnimating = false;
         this.consecutiveCaptures = 0;
 
+        // Custom Element Loadout State
+        this.loadoutActiveSide = 'white'; // 'white' | 'black'
+        this.loadoutActivePiece = 'p'; // 'p' | 'n' | 'b' | 'r' | 'q' | 'k'
+
         this.initSettingsHooks();
         this.initMenuModals();
+        this.initLoadoutModal();
         this.initDeveloperPanel();
         this.initGameLoop();
     }
@@ -56,6 +62,18 @@ class MahoNoChesuApp {
             this.audio.playUiClick();
             modalMainMenu.classList.remove('active');
             modalModeSelect.classList.add('active');
+        });
+
+        // Direct Loadout from Main Menu & Top Bar
+        document.getElementById('menu-btn-loadout')?.addEventListener('click', () => {
+            this.audio.playUiClick();
+            modalMainMenu.classList.remove('active');
+            this.openLoadoutModal(this.playerColor === 'w' ? 'white' : 'black');
+        });
+
+        document.getElementById('btn-loadout-toggle')?.addEventListener('click', () => {
+            this.audio.playUiClick();
+            this.openLoadoutModal(this.playerColor === 'w' ? 'white' : 'black');
         });
 
         document.getElementById('menu-btn-guide')?.addEventListener('click', () => {
@@ -102,11 +120,12 @@ class MahoNoChesuApp {
             });
         });
 
-        // Mode: PvP
+        // Mode: PvP -> Opens Element Loadout (Spec 128)
         document.getElementById('btn-mode-pvp')?.addEventListener('click', () => {
             this.audio.playUiClick();
             modalModeSelect.classList.remove('active');
-            this.startNewMatch('pvp');
+            this.gameMode = 'pvp';
+            this.openLoadoutModal('white');
         });
 
         // Mode: PvC Toggle
@@ -136,16 +155,17 @@ class MahoNoChesuApp {
             });
         });
 
-        // Start PvC Match
+        // Start PvC Match -> Opens Element Loadout (Spec 128)
         document.getElementById('btn-start-ai-game')?.addEventListener('click', () => {
             this.audio.playUiClick();
             modalModeSelect.classList.remove('active');
+            this.gameMode = 'pvc';
             if (chosenSide === 'random') {
                 this.playerColor = Math.random() > 0.5 ? 'w' : 'b';
             } else {
                 this.playerColor = chosenSide === 'white' ? 'w' : 'b';
             }
-            this.startNewMatch('pvc');
+            this.openLoadoutModal(this.playerColor === 'w' ? 'white' : 'black');
         });
 
         // Game Over Buttons
@@ -284,6 +304,14 @@ class MahoNoChesuApp {
         const whiteType = document.getElementById('white-player-type');
         const blackType = document.getElementById('black-player-type');
         if (mode === 'pvc') {
+            const aiSide = this.playerColor === 'w' ? 'b' : 'w';
+            const aiLoadout = this.loadout.resolveAiLoadout(this.playerColor);
+            if (aiSide === 'b') {
+                this.loadout.blackLoadout = aiLoadout;
+            } else {
+                this.loadout.whiteLoadout = aiLoadout;
+            }
+
             if (this.playerColor === 'w') {
                 if (whiteType) whiteType.textContent = 'Human';
                 if (blackType) blackType.textContent = `Arcane AI (${this.aiDifficulty.toUpperCase()})`;
@@ -336,6 +364,10 @@ class MahoNoChesuApp {
         const animSpeed = this.settings.settings.animationSpeed;
         const slideDuration = animSpeed === 'fast' ? 140 : (animSpeed === 'cinematic' ? 360 : 220);
 
+        // Look up piece's configured element & piece-specific attack name (Spec 109 & 123)
+        const element = this.loadout.getElementForPiece(piece.type, piece.color);
+        const attackName = this.loadout.getAttackName(piece.type, element);
+
         // 1. Play Elemental Attack FX & Smooth Movement
         if (isCapture) {
             this.consecutiveCaptures++;
@@ -345,39 +377,31 @@ class MahoNoChesuApp {
 
             const targetSq = move.isEnPassant ? (Math.floor(move.from / 8) * 8 + (move.to % 8)) : move.to;
 
-            // Route elemental attack based on piece type
-            switch (piece.type) {
-                case 'p':
-                    this.ui.triggerPieceTargetReaction(targetSq, 'piece-target-burning');
-                    this.audio.playFireBlast();
-                    await this.effects.fireBlast(move.from, move.to, piece.color, this.ui.isFlipped);
-                    break;
-                case 'n':
-                    this.ui.triggerPieceTargetReaction(targetSq, 'piece-target-electrocuted');
-                    this.audio.playThunderStrike();
-                    await this.effects.thunderStrike(move.from, move.to, piece.color, this.ui.isFlipped);
-                    break;
-                case 'b':
-                    this.ui.triggerPieceTargetReaction(targetSq, 'piece-target-slashed');
-                    this.audio.playWindSlash();
-                    await this.effects.windSlash(move.from, move.to, piece.color, this.ui.isFlipped);
-                    break;
-                case 'r':
-                    this.ui.triggerPieceTargetReaction(targetSq, 'piece-target-crushed');
-                    this.audio.playEarthBreaker();
-                    await this.effects.earthBreaker(move.from, move.to, piece.color, this.ui.isFlipped);
-                    break;
-                case 'q':
-                    this.ui.triggerPieceTargetReaction(targetSq, 'piece-target-frozen');
-                    this.audio.playFrozenDominion();
-                    await this.effects.frozenDominion(move.from, move.to, piece.color, this.ui.isFlipped);
-                    break;
-                case 'k':
-                    this.ui.triggerPieceTargetReaction(targetSq, 'piece-target-dissolved');
-                    this.audio.playJudgmentOfLight();
-                    await this.effects.judgmentOfLight(move.from, move.to, piece.color, this.ui.isFlipped);
-                    break;
-            }
+            const reactionMap = {
+                fire: 'piece-target-burning',
+                lightning: 'piece-target-electrocuted',
+                wind: 'piece-target-slashed',
+                earth: 'piece-target-crushed',
+                ice: 'piece-target-frozen',
+                water: 'piece-target-drowned',
+                light: 'piece-target-dissolved',
+                shadow: 'piece-target-void',
+                nature: 'piece-target-entangled',
+                arcane: 'piece-target-arcane'
+            };
+
+            this.ui.triggerPieceTargetReaction(targetSq, reactionMap[element] || 'piece-target-burning');
+            this.audio.playElementSound(element);
+
+            await this.effects.playElementalAttack({
+                pieceType: piece.type,
+                element,
+                attackName,
+                fromSq: move.from,
+                toSq: move.to,
+                color: piece.color,
+                isFlipped: this.ui.isFlipped
+            });
 
             // Smooth gliding advance into conquered square
             await this.ui.animatePieceMove(move.from, move.to, slideDuration);
@@ -389,7 +413,7 @@ class MahoNoChesuApp {
             this.consecutiveCaptures = 0;
             this.effects.resetCombo();
             this.audio.playMoveSound();
-            this.effects.moveTrail(piece, move.from, move.to, this.ui.isFlipped);
+            this.effects.moveTrail(piece, move.from, move.to, this.ui.isFlipped, element);
             await this.ui.animatePieceMove(move.from, move.to, slideDuration);
         }
 
@@ -473,6 +497,386 @@ class MahoNoChesuApp {
             const turnName = this.engine.turn === 'w' ? 'White' : 'Black';
             this.ui.setStatus(`${turnName} to move`, false);
         }
+    }
+
+    /**
+     * ==========================================================================
+     * CUSTOM ELEMENT LOADOUT SYSTEM CONTROLLER (Specs 101 - 129)
+     * ==========================================================================
+     */
+    initLoadoutModal() {
+        const modal = document.getElementById('modal-loadout');
+
+        // 1. Army Side Tabs (White vs Black)
+        const tabWhite = document.getElementById('tab-loadout-white');
+        const tabBlack = document.getElementById('tab-loadout-black');
+
+        tabWhite?.addEventListener('click', () => {
+            this.audio.playUiClick();
+            this.loadoutActiveSide = 'white';
+            tabWhite.classList.add('active');
+            tabBlack?.classList.remove('active');
+            this.renderLoadoutAll();
+        });
+
+        tabBlack?.addEventListener('click', () => {
+            this.audio.playUiClick();
+            this.loadoutActiveSide = 'black';
+            tabBlack.classList.add('active');
+            tabWhite?.classList.remove('active');
+            this.renderLoadoutAll();
+        });
+
+        // 2. Copy White Army to Black (Spec 112)
+        document.getElementById('btn-copy-p1-loadout')?.addEventListener('click', () => {
+            this.audio.playUiClick();
+            this.loadout.blackLoadout = { ...this.loadout.whiteLoadout };
+            this.loadout.saveLoadouts();
+            this.renderLoadoutAll();
+            this.effects.showAttackName('WHITE ARMY COPIED TO BLACK');
+        });
+
+        // 3. AI Legion Options (Spec 113)
+        document.querySelectorAll('.btn-ai-loadout').forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.audio.playUiClick();
+                document.querySelectorAll('.btn-ai-loadout').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                this.loadout.aiLoadoutType = btn.dataset.type;
+                this.loadout.saveLoadouts();
+            });
+        });
+
+        // 4. Randomize Button (Spec 114)
+        document.getElementById('btn-loadout-randomize')?.addEventListener('click', () => {
+            this.audio.playUiClick();
+            const allowDup = document.getElementById('check-allow-duplicates')?.checked ?? true;
+            const randomized = this.loadout.generateRandomLoadout(allowDup);
+            if (this.loadoutActiveSide === 'white') {
+                this.loadout.whiteLoadout = randomized;
+            } else {
+                this.loadout.blackLoadout = randomized;
+            }
+            this.loadout.saveLoadouts();
+            this.renderLoadoutAll();
+            this.effects.showAttackName('ELEMENTS RANDOMIZED');
+        });
+
+        // 5. Reset Default Button (Spec 115)
+        document.getElementById('btn-loadout-reset')?.addEventListener('click', () => {
+            this.audio.playUiClick();
+            const defaults = { p: 'fire', n: 'lightning', b: 'wind', r: 'earth', q: 'ice', k: 'light' };
+            if (this.loadoutActiveSide === 'white') {
+                this.loadout.whiteLoadout = { ...defaults };
+            } else {
+                this.loadout.blackLoadout = { ...defaults };
+            }
+            this.loadout.saveLoadouts();
+            this.renderLoadoutAll();
+            this.effects.showAttackName('DEFAULT ELEMENTS RESTORED');
+        });
+
+        // 6. Save Loadout Button (Spec 116)
+        document.getElementById('btn-loadout-save')?.addEventListener('click', () => {
+            this.audio.playUiClick();
+            this.loadout.saveLoadouts();
+            this.effects.showAttackName('LOADOUT SAVED LOCALLY');
+        });
+
+        // 7. Custom Preset Management (Spec 118)
+        document.getElementById('btn-save-custom-preset')?.addEventListener('click', () => {
+            this.audio.playUiClick();
+            const presetName = prompt('Enter a name for this custom elemental preset:', 'My Element Legion');
+            if (presetName && presetName.trim()) {
+                const currentLoadout = this.loadoutActiveSide === 'white' ? this.loadout.whiteLoadout : this.loadout.blackLoadout;
+                this.loadout.addCustomPreset(presetName.trim(), currentLoadout);
+                this.populateCustomPresetsDropdown();
+                this.effects.showAttackName(`PRESET "${presetName.trim().toUpperCase()}" SAVED`);
+            }
+        });
+
+        document.getElementById('btn-delete-custom-preset')?.addEventListener('click', () => {
+            const dropdown = document.getElementById('custom-presets-dropdown');
+            const selectedId = dropdown?.value;
+            if (selectedId) {
+                this.audio.playUiClick();
+                this.loadout.deleteCustomPreset(selectedId);
+                this.populateCustomPresetsDropdown();
+                this.effects.showAttackName('PRESET DELETED');
+            }
+        });
+
+        document.getElementById('custom-presets-dropdown')?.addEventListener('change', (e) => {
+            const selectedId = e.target.value;
+            if (selectedId && this.loadout.customPresets[selectedId]) {
+                this.audio.playUiClick();
+                const preset = this.loadout.customPresets[selectedId];
+                if (this.loadoutActiveSide === 'white') {
+                    this.loadout.whiteLoadout = { ...preset.loadout };
+                } else {
+                    this.loadout.blackLoadout = { ...preset.loadout };
+                }
+                this.loadout.saveLoadouts();
+                this.renderLoadoutAll();
+                this.effects.showAttackName(`LOADED: ${preset.name.toUpperCase()}`);
+            }
+        });
+
+        // 8. Start Match Button
+        document.getElementById('btn-loadout-start')?.addEventListener('click', () => {
+            this.audio.playUiClick();
+            document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+            this.loadout.saveLoadouts();
+            this.startNewMatch(this.gameMode);
+        });
+    }
+
+    openLoadoutModal(defaultSide = 'white') {
+        const modal = document.getElementById('modal-loadout');
+        if (!modal) return;
+
+        // Close any other active modal overlays
+        document.querySelectorAll('.modal-overlay').forEach(m => {
+            if (m.id !== 'modal-loadout') m.classList.remove('active');
+        });
+
+        this.loadoutActiveSide = defaultSide;
+        this.loadoutActivePiece = 'p';
+
+        // Update tabs active state
+        const tabWhite = document.getElementById('tab-loadout-white');
+        const tabBlack = document.getElementById('tab-loadout-black');
+        if (tabWhite && tabBlack) {
+            tabWhite.classList.toggle('active', this.loadoutActiveSide === 'white');
+            tabBlack.classList.toggle('active', this.loadoutActiveSide === 'black');
+        }
+
+        // In PvC mode, show AI options panel
+        const aiPanel = document.getElementById('ai-legion-panel');
+        if (aiPanel) {
+            aiPanel.classList.toggle('hidden', this.gameMode !== 'pvc');
+            // Sync AI mode button active state
+            document.querySelectorAll('.btn-ai-loadout').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.type === this.loadout.aiLoadoutType);
+            });
+        }
+
+        this.renderLoadoutAll();
+        modal.classList.add('active');
+    }
+
+    renderLoadoutAll() {
+        this.renderLoadoutPieceRoster();
+        this.renderLoadoutElementsGrid();
+        this.renderLoadoutPreview();
+        this.renderLoadoutPresets();
+        this.populateCustomPresetsDropdown();
+    }
+
+    /**
+     * Render the 6 Chess Pieces with their active element pill (Spec 106)
+     */
+    renderLoadoutPieceRoster() {
+        const container = document.getElementById('piece-roster-list');
+        if (!container) return;
+
+        const pieces = [
+            { type: 'p', name: 'Pawn' },
+            { type: 'n', name: 'Knight' },
+            { type: 'b', name: 'Bishop' },
+            { type: 'r', name: 'Rook' },
+            { type: 'q', name: 'Queen' },
+            { type: 'k', name: 'King' }
+        ];
+
+        const activeLoadout = this.loadoutActiveSide === 'white' ? this.loadout.whiteLoadout : this.loadout.blackLoadout;
+        const color = this.loadoutActiveSide === 'white' ? 'w' : 'b';
+
+        container.innerHTML = '';
+        pieces.forEach(p => {
+            const btn = document.createElement('button');
+            btn.className = `piece-roster-btn ${p.type === this.loadoutActivePiece ? 'active' : ''}`;
+            btn.dataset.piece = p.type;
+
+            const elemKey = activeLoadout[p.type] || 'fire';
+            const elemMeta = this.loadout.getElementMeta(elemKey);
+
+            btn.innerHTML = `
+                <div class="roster-piece-info">
+                    <div class="roster-piece-svg">${this.ui.getPieceSVG(p.type, color)}</div>
+                    <span class="roster-piece-name">${p.name}</span>
+                </div>
+                <div class="roster-elem-pill" style="color: ${elemMeta.color}; border-color: ${elemMeta.color}; background: rgba(${this.hexToRgb(elemMeta.color)}, 0.1);">
+                    <span class="roster-elem-icon">${elemMeta.svg}</span>
+                    <span>${elemMeta.name}</span>
+                </div>
+            `;
+
+            btn.addEventListener('click', () => {
+                this.audio.playUiClick();
+                this.loadoutActivePiece = p.type;
+                this.renderLoadoutPieceRoster();
+                this.renderLoadoutElementsGrid();
+                this.renderLoadoutPreview();
+            });
+
+            container.appendChild(btn);
+        });
+    }
+
+    /**
+     * Render 10 Element Selection Buttons (Spec 103, 106, 121, 122)
+     */
+    renderLoadoutElementsGrid() {
+        const container = document.getElementById('elements-grid');
+        const heading = document.getElementById('picker-piece-heading');
+        if (!container) return;
+
+        const pieceNames = { p: 'Pawn', n: 'Knight', b: 'Bishop', r: 'Rook', q: 'Queen', k: 'King' };
+        if (heading) {
+            heading.textContent = `Assign ${pieceNames[this.loadoutActivePiece]} Element`;
+        }
+
+        const activeLoadout = this.loadoutActiveSide === 'white' ? this.loadout.whiteLoadout : this.loadout.blackLoadout;
+        const currentAssignedElem = activeLoadout[this.loadoutActivePiece] || 'fire';
+
+        container.innerHTML = '';
+        Object.values(ELEMENTS).forEach(elem => {
+            const btn = document.createElement('button');
+            const isSelected = elem.id === currentAssignedElem;
+            btn.className = `elem-select-btn ${isSelected ? 'active' : ''}`;
+            btn.dataset.element = elem.id;
+            btn.style.borderColor = isSelected ? elem.color : 'rgba(212, 175, 55, 0.15)';
+            btn.style.color = elem.color;
+
+            if (isSelected) {
+                btn.style.background = `linear-gradient(135deg, rgba(${this.hexToRgb(elem.color)}, 0.18), var(--bg-surface))`;
+            }
+
+            btn.innerHTML = `
+                <div class="elem-btn-icon" style="color: ${elem.color};">${elem.svg}</div>
+                <div class="elem-btn-text">
+                    <span class="elem-btn-name" style="color: ${elem.color};">${elem.name}</span>
+                    <span class="elem-btn-trail">${elem.trailName}</span>
+                </div>
+            `;
+
+            btn.addEventListener('click', () => {
+                this.audio.playElementSound(elem.id);
+
+                const allowDup = document.getElementById('check-allow-duplicates')?.checked ?? true;
+                if (!allowDup) {
+                    // Check if another piece already has this element, if so, swap
+                    const otherPieceKey = Object.keys(activeLoadout).find(k => k !== this.loadoutActivePiece && activeLoadout[k] === elem.id);
+                    if (otherPieceKey) {
+                        activeLoadout[otherPieceKey] = currentAssignedElem;
+                    }
+                }
+
+                activeLoadout[this.loadoutActivePiece] = elem.id;
+                this.loadout.saveLoadouts();
+
+                this.renderLoadoutPieceRoster();
+                this.renderLoadoutElementsGrid();
+                this.renderLoadoutPreview();
+            });
+
+            container.appendChild(btn);
+        });
+    }
+
+    /**
+     * Live Combat Preview Card (Spec 107)
+     */
+    renderLoadoutPreview() {
+        const svgContainer = document.getElementById('preview-svg-container');
+        const badgeEl = document.getElementById('preview-elem-badge');
+        const attackEl = document.getElementById('preview-attack-name');
+        const trailEl = document.getElementById('preview-trail-val');
+        const captureEl = document.getElementById('preview-capture-val');
+        const auraEl = document.getElementById('preview-aura-val');
+
+        const activeLoadout = this.loadoutActiveSide === 'white' ? this.loadout.whiteLoadout : this.loadout.blackLoadout;
+        const color = this.loadoutActiveSide === 'white' ? 'w' : 'b';
+        const pType = this.loadoutActivePiece;
+        const elemKey = activeLoadout[pType] || 'fire';
+        const elemMeta = this.loadout.getElementMeta(elemKey);
+        const attackName = this.loadout.getAttackName(pType, elemKey);
+
+        if (svgContainer) {
+            svgContainer.innerHTML = this.ui.getPieceSVG(pType, color);
+            svgContainer.style.filter = `drop-shadow(0 0 16px ${elemMeta.color})`;
+        }
+
+        if (badgeEl) {
+            badgeEl.style.color = elemMeta.color;
+            badgeEl.style.borderColor = elemMeta.color;
+            badgeEl.style.background = `rgba(${this.hexToRgb(elemMeta.color)}, 0.12)`;
+            badgeEl.innerHTML = `${elemMeta.svg} <span>${elemMeta.name}</span>`;
+        }
+
+        if (attackEl) {
+            attackEl.textContent = attackName;
+            attackEl.style.color = elemMeta.color;
+            attackEl.style.textShadow = `0 0 14px ${elemMeta.color}`;
+        }
+
+        if (trailEl) trailEl.textContent = elemMeta.trailName;
+        if (captureEl) captureEl.textContent = elemMeta.captureFx;
+        if (auraEl) auraEl.textContent = elemMeta.auraDesc;
+    }
+
+    /**
+     * Render Built-in Preset Buttons (Spec 117)
+     */
+    renderLoadoutPresets() {
+        const container = document.getElementById('preset-buttons-container');
+        if (!container) return;
+
+        container.innerHTML = '';
+        Object.entries(LOADOUT_PRESETS).forEach(([key, preset]) => {
+            const btn = document.createElement('button');
+            btn.className = 'preset-chip-btn';
+            btn.textContent = preset.name;
+            btn.title = preset.desc;
+
+            btn.addEventListener('click', () => {
+                this.audio.playUiClick();
+                if (this.loadoutActiveSide === 'white') {
+                    this.loadout.whiteLoadout = { ...preset.loadout };
+                } else {
+                    this.loadout.blackLoadout = { ...preset.loadout };
+                }
+                this.loadout.saveLoadouts();
+                this.renderLoadoutAll();
+                this.effects.showAttackName(`PRESET APPLIED: ${preset.name.toUpperCase()}`);
+            });
+
+            container.appendChild(btn);
+        });
+    }
+
+    /**
+     * Populate Custom Presets Dropdown (Spec 118)
+     */
+    populateCustomPresetsDropdown() {
+        const dropdown = document.getElementById('custom-presets-dropdown');
+        if (!dropdown) return;
+
+        dropdown.innerHTML = '<option value="">-- Custom Presets --</option>';
+        Object.values(this.loadout.customPresets).forEach(preset => {
+            const opt = document.createElement('option');
+            opt.value = preset.id;
+            opt.textContent = preset.name;
+            dropdown.appendChild(opt);
+        });
+    }
+
+    hexToRgb(hex) {
+        let c = hex.substring(1);
+        if (c.length === 3) c = c.split('').map(x => x + x).join('');
+        const num = parseInt(c, 16);
+        return `${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}`;
     }
 
     initDeveloperPanel() {
