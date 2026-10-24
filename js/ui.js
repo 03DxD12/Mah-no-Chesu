@@ -344,6 +344,63 @@ class UIManager {
         this.updateActivePlayerIndicator();
     }
 
+    getSquareElement(sq) {
+        if (sq < 0 || sq > 63) return null;
+        for (let i = 0; i < 64; i++) {
+            const el = this.boardEl.children[i];
+            if (el && parseInt(el.dataset.square, 10) === sq) {
+                return el;
+            }
+        }
+        return null;
+    }
+
+    renderBoardFromFEN(fen) {
+        if (!fen) return;
+        const parts = fen.split(' ');
+        const rows = parts[0].split('/');
+        const tempBoard = new Array(64).fill(null);
+
+        for (let r = 0; r < 8; r++) {
+            let file = 0;
+            const rank = 7 - r;
+            const rowStr = rows[r];
+            for (let c = 0; c < rowStr.length; c++) {
+                const ch = rowStr[c];
+                if (ch >= '1' && ch <= '8') {
+                    file += parseInt(ch, 10);
+                } else {
+                    const color = (ch === ch.toUpperCase()) ? 'w' : 'b';
+                    const type = ch.toLowerCase();
+                    const sq = rank * 8 + file;
+                    tempBoard[sq] = { type, color };
+                    file++;
+                }
+            }
+        }
+
+        for (let visualIdx = 0; visualIdx < 64; visualIdx++) {
+            const visualRow = Math.floor(visualIdx / 8);
+            const visualCol = visualIdx % 8;
+            const rank = this.isFlipped ? visualRow : (7 - visualRow);
+            const file = this.isFlipped ? (7 - visualCol) : visualCol;
+            const sq = rank * 8 + file;
+            const sqEl = this.boardEl.children[visualIdx];
+            if (!sqEl) continue;
+
+            const isLight = (file + rank) % 2 !== 0;
+            sqEl.className = `square ${isLight ? 'light' : 'dark'}`;
+
+            const piece = tempBoard[sq];
+            let pieceHTML = '';
+            if (piece) {
+                const elem = this.loadout ? this.loadout.getElementForPiece(piece, piece.color) : 'fire';
+                pieceHTML = `<div class="piece-svg-wrapper piece-${piece.type} aura-${elem}">${this.getPieceSVG(piece.type, piece.color)}</div>`;
+            }
+            sqEl.innerHTML = pieceHTML;
+        }
+    }
+
     renderMoveHints() {
         if (!this.settings.settings.moveHints || this.selectedSquare === null) return;
 

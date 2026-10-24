@@ -287,9 +287,20 @@
                 </button>
             </div>
 
-            <!-- Match Timer Selector (Point 15) -->
+            <!-- Match Presets (Spec 39) -->
             <div class="match-timer-section">
-                <span class="timer-section-title">⏱️ CHESS CLOCK TIMER</span>
+                <span class="timer-section-title">⚔️ MATCH PRESET</span>
+                <div class="timer-chips-grid" id="match-preset-chips-grid">
+                    <button type="button" class="btn-timer-chip active" data-preset="casual">Casual (Relaxed)</button>
+                    <button type="button" class="btn-timer-chip" data-preset="competitive">Competitive (5+0)</button>
+                    <button type="button" class="btn-timer-chip" data-preset="cinematic">Cinematic (Epic FX)</button>
+                    <button type="button" class="btn-timer-chip" data-preset="low_performance">Low Performance</button>
+                </div>
+            </div>
+
+            <!-- Match Timer Selector & Increment (Spec 35) -->
+            <div class="match-timer-section">
+                <span class="timer-section-title">⏱️ CHESS CLOCK &amp; INCREMENT</span>
                 <div class="timer-chips-grid" id="timer-chips-grid">
                     <button type="button" class="btn-timer-chip active" data-timer="none">No Timer</button>
                     <button type="button" class="btn-timer-chip" data-timer="1m">1m Bullet</button>
@@ -298,15 +309,68 @@
                     <button type="button" class="btn-timer-chip" data-timer="10m">10m Standard</button>
                     <button type="button" class="btn-timer-chip" data-timer="15m">15m Classic</button>
                 </div>
+                <div class="timer-chips-grid mt-2" id="timer-increment-chips-grid">
+                    <button type="button" class="btn-timer-chip active" data-increment="0">+0s</button>
+                    <button type="button" class="btn-timer-chip" data-increment="1">+1s</button>
+                    <button type="button" class="btn-timer-chip" data-increment="2">+2s</button>
+                    <button type="button" class="btn-timer-chip" data-increment="5">+5s</button>
+                    <button type="button" class="btn-timer-chip" data-increment="10">+10s</button>
+                </div>
             </div>
 
-            <!-- AI Settings Sub-view -->
+            <!-- AI Settings Sub-view (Spec 67 - 70) -->
             <div id="ai-sub-config" class="ai-config hidden">
-                <h3>AI Difficulty</h3>
+                <h3>Select AI Opponent &amp; Personality</h3>
+                <div class="ai-personalities-grid" id="ai-personalities-grid">
+                    <button type="button" class="btn-ai-personality active" data-personality="kaen">
+                        <span class="ai-p-avatar">🔥</span>
+                        <div class="ai-p-info">
+                            <strong>Kaen</strong>
+                            <small>Fire &bull; Aggressive</small>
+                        </div>
+                    </button>
+                    <button type="button" class="btn-ai-personality" data-personality="raiden">
+                        <span class="ai-p-avatar">⚡</span>
+                        <div class="ai-p-info">
+                            <strong>Raiden</strong>
+                            <small>Lightning &bull; Tactical</small>
+                        </div>
+                    </button>
+                    <button type="button" class="btn-ai-personality" data-personality="fubuki">
+                        <span class="ai-p-avatar">❄️</span>
+                        <div class="ai-p-info">
+                            <strong>Fubuki</strong>
+                            <small>Ice &bull; Defensive</small>
+                        </div>
+                    </button>
+                    <button type="button" class="btn-ai-personality" data-personality="terra">
+                        <span class="ai-p-avatar">🪨</span>
+                        <div class="ai-p-info">
+                            <strong>Terra</strong>
+                            <small>Earth &bull; Positional</small>
+                        </div>
+                    </button>
+                    <button type="button" class="btn-ai-personality" data-personality="noctis">
+                        <span class="ai-p-avatar">🌑</span>
+                        <div class="ai-p-info">
+                            <strong>Noctis</strong>
+                            <small>Shadow &bull; Unpredictable</small>
+                        </div>
+                    </button>
+                    <button type="button" class="btn-ai-personality" data-personality="lumina">
+                        <span class="ai-p-avatar">☀️</span>
+                        <div class="ai-p-info">
+                            <strong>Lumina</strong>
+                            <small>Light &bull; Balanced</small>
+                        </div>
+                    </button>
+                </div>
+
+                <h3>AI Engine Search Depth</h3>
                 <div class="difficulty-group">
-                    <button class="btn-diff active" data-diff="easy">Apprentice (Easy)</button>
-                    <button class="btn-diff" data-diff="normal">Mage (Normal)</button>
-                    <button class="btn-diff" data-diff="hard">Archmage (Hard)</button>
+                    <button class="btn-diff active" data-diff="easy">Apprentice (Depth 1)</button>
+                    <button class="btn-diff" data-diff="normal">Mage (Depth 2-3)</button>
+                    <button class="btn-diff" data-diff="hard">Archmage (Depth 4)</button>
                 </div>
 
                 <h3>Choose Your Legion</h3>
@@ -752,18 +816,185 @@
         </div>
     </div>
 
-    <!-- Game Over Modal -->
-    <div id="modal-game-over" class="modal-overlay">
-        <div class="modal-card victory-card">
-            <div class="victory-crown" id="victory-crown">♚</div>
-            <h2 class="victory-title" id="victory-title">CHECKMATE</h2>
-            <p class="victory-subtitle" id="victory-subtitle">WHITE WINS BY SUPREME CONQUEST</p>
-            <p class="victory-reason" id="victory-reason">All enemy paths are extinguished.</p>
-            
+    <!-- Match Results & Comprehensive Statistics Modal (Spec 26, 50, 51) -->
+    <div id="modal-match-results" class="modal-overlay">
+        <div class="modal-card match-results-card">
+            <div class="results-header">
+                <div class="results-crown">👑</div>
+                <h2 class="results-outcome-title" id="results-outcome-title">WHITE VICTORIOUS!</h2>
+                <p class="results-outcome-desc" id="results-outcome-desc">Checkmate delivered on the battlefield.</p>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="results-stats-grid">
+                <div class="result-stat-card">
+                    <span class="stat-card-label">Game Duration</span>
+                    <span class="stat-card-val" id="results-stat-duration">00:00</span>
+                </div>
+                <div class="result-stat-card">
+                    <span class="stat-card-label">Total Moves</span>
+                    <span class="stat-card-val" id="results-stat-moves">0 moves</span>
+                </div>
+                <div class="result-stat-card">
+                    <span class="stat-card-label">White Captures</span>
+                    <span class="stat-card-val" id="results-stat-white-caps">0</span>
+                </div>
+                <div class="result-stat-card">
+                    <span class="stat-card-label">Black Captures</span>
+                    <span class="stat-card-val" id="results-stat-black-caps">0</span>
+                </div>
+                <div class="result-stat-card">
+                    <span class="stat-card-label">Checks Delivered</span>
+                    <span class="stat-card-val" id="results-stat-checks">W: 0 • B: 0</span>
+                </div>
+                <div class="result-stat-card">
+                    <span class="stat-card-label">Promotions</span>
+                    <span class="stat-card-val" id="results-stat-promotions">W: 0 • B: 0</span>
+                </div>
+                <div class="result-stat-card full-width">
+                    <span class="stat-card-label">Most Active Piece</span>
+                    <span class="stat-card-val highlight-gold" id="results-stat-active-piece">None</span>
+                </div>
+                <div class="result-stat-card full-width">
+                    <span class="stat-card-label">Most Used Element</span>
+                    <span class="stat-card-val highlight-elem" id="results-stat-top-elem">FIRE (0 captures)</span>
+                </div>
+                <div class="result-stat-card full-width">
+                    <span class="stat-card-label">Final Attack / Finisher</span>
+                    <span class="stat-card-val highlight-gold" id="results-stat-final-attack">None</span>
+                </div>
+            </div>
+
+            <div class="results-actions-bar">
+                <button type="button" id="btn-results-rematch" class="btn-primary">⚔️ REMATCH</button>
+                <button type="button" id="btn-results-replay" class="btn-secondary">📜 REPLAY MATCH</button>
+                <button type="button" id="btn-results-cinematic-replay" class="btn-secondary btn-gold">🎬 CINEMATIC REPLAY</button>
+                <button type="button" id="btn-results-menu" class="btn-secondary">MAIN MENU</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Replay Modal (Spec 53 - 64) -->
+    <div id="modal-replay" class="modal-overlay modal-replay-overlay">
+        <div class="modal-card replay-card">
+            <div class="replay-header">
+                <div class="replay-title-wrap">
+                    <span class="replay-crest">🎬</span>
+                    <div>
+                        <h2 class="replay-title">CHRONICLES REPLAY</h2>
+                        <span class="replay-subtitle">Interactive Battle Playback &bull; Timeline Stepper &bull; Clash Analysis</span>
+                    </div>
+                </div>
+                <div class="replay-header-actions">
+                    <button type="button" id="btn-replay-mode-toggle" class="btn-replay-pill">CINEMATIC MODE: OFF</button>
+                    <button type="button" id="btn-replay-close" class="btn-close">&times;</button>
+                </div>
+            </div>
+
+            <div class="replay-body">
+                <!-- Live Replay Step HUD -->
+                <div class="replay-step-hud">
+                    <div class="replay-hud-badge" id="replay-current-ply-badge">Move 1 • e2-e4</div>
+                    <div class="replay-hud-ability" id="replay-current-ability-text">FIRE • BLAZING CHARGE</div>
+                    <div class="replay-hud-clash" id="replay-current-clash-text">Standard Tactical Advance</div>
+                </div>
+
+                <!-- Event Skip Timeline Chips (Spec 61 & 62) -->
+                <div class="replay-event-skip-bar">
+                    <span class="skip-bar-label">Skip to:</span>
+                    <button type="button" id="btn-replay-skip-capture" class="btn-skip-chip">⚔️ Next Capture</button>
+                    <button type="button" id="btn-replay-skip-check" class="btn-skip-chip">⚠️ Next Check</button>
+                    <button type="button" id="btn-replay-skip-promotion" class="btn-skip-chip">✦ Promotion</button>
+                    <button type="button" id="btn-replay-skip-mate" class="btn-skip-chip">👑 Checkmate</button>
+                </div>
+
+                <!-- Scrollable Move Notation Strip -->
+                <div class="replay-move-list-strip" id="replay-move-list-body">
+                    <!-- Populated dynamically with ply items -->
+                </div>
+
+                <!-- Playback Controls Bar (Spec 54 & 58) -->
+                <div class="replay-controls-bar">
+                    <div class="replay-speed-group">
+                        <span class="speed-label">Speed:</span>
+                        <button type="button" class="btn-replay-speed" data-speed="0.5">0.5x</button>
+                        <button type="button" class="btn-replay-speed active" data-speed="1">1x</button>
+                        <button type="button" class="btn-replay-speed" data-speed="1.5">1.5x</button>
+                        <button type="button" class="btn-replay-speed" data-speed="2">2x</button>
+                    </div>
+
+                    <div class="replay-stepper-group">
+                        <button type="button" id="btn-replay-first" class="btn-replay-ctl" title="First Move">|&lt;</button>
+                        <button type="button" id="btn-replay-prev" class="btn-replay-ctl" title="Previous Move">&lt;</button>
+                        <button type="button" id="btn-replay-play" class="btn-replay-ctl btn-primary-replay" title="Play / Pause">▶ PLAY</button>
+                        <button type="button" id="btn-replay-next" class="btn-replay-ctl" title="Next Move">&gt;</button>
+                        <button type="button" id="btn-replay-last" class="btn-replay-ctl" title="Final Move">&gt;|</button>
+                        <button type="button" id="btn-replay-restart" class="btn-replay-ctl" title="Restart Replay">↺</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Match History & Lifetime Profile Modal (Spec 77 - 83) -->
+    <div id="modal-match-history" class="modal-overlay">
+        <div class="modal-card history-card">
+            <div class="modal-header">
+                <div class="loadout-title-group">
+                    <h2 class="modal-title">WAR CHRONICLES &amp; STATS</h2>
+                    <span class="loadout-subtitle">Recent Matches &bull; Player Performance &bull; Lifetime Milestones</span>
+                </div>
+                <button type="button" class="btn-close modal-close">&times;</button>
+            </div>
+
+            <!-- Lifetime Profile Stats Banner -->
+            <div class="profile-stats-summary" id="profile-stats-summary">
+                <div class="profile-stat-box">
+                    <span class="p-stat-val" id="prof-stat-games">0</span>
+                    <span class="p-stat-lbl">Matches</span>
+                </div>
+                <div class="profile-stat-box">
+                    <span class="p-stat-val" id="prof-stat-wins">0</span>
+                    <span class="p-stat-lbl">Victories</span>
+                </div>
+                <div class="profile-stat-box">
+                    <span class="p-stat-val" id="prof-stat-winrate">0%</span>
+                    <span class="p-stat-lbl">Win Rate</span>
+                </div>
+                <div class="profile-stat-box">
+                    <span class="p-stat-val" id="prof-stat-mates">0</span>
+                    <span class="p-stat-lbl">Checkmates</span>
+                </div>
+                <div class="profile-stat-box">
+                    <span class="p-stat-val" id="prof-stat-captures">0</span>
+                    <span class="p-stat-lbl">Captures</span>
+                </div>
+            </div>
+
+            <!-- Recent Matches List -->
+            <h3 class="history-list-title">Recent Battles (Last 20)</h3>
+            <div class="recent-matches-list" id="recent-matches-container">
+                <!-- Injected dynamically -->
+            </div>
+
             <div class="modal-actions mt-4">
-                <button id="btn-game-over-rematch" class="btn-primary">REMATCH</button>
-                <button id="btn-game-over-new" class="btn-secondary">NEW GAME</button>
-                <button id="btn-game-over-menu" class="btn-secondary">MAIN MENU</button>
+                <button type="button" id="btn-clear-match-history" class="btn-secondary btn-danger">CLEAR HISTORY</button>
+                <button type="button" class="btn-secondary modal-close">CLOSE</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- In-Match Pause Menu Modal (Spec 71 - 76) -->
+    <div id="modal-pause-menu" class="modal-overlay">
+        <div class="modal-card pause-card">
+            <h2 class="pause-title">MATCH PAUSED</h2>
+            <div class="pause-menu-actions">
+                <button type="button" id="btn-pause-resume" class="btn-menu btn-primary">RESUME MATCH</button>
+                <button type="button" id="btn-toggle-focus-board" class="btn-menu">TOGGLE BOARD FOCUS</button>
+                <button type="button" id="btn-hide-ui-screenshot" class="btn-menu">HIDE UI (SCREENSHOT MODE)</button>
+                <button type="button" id="btn-pause-restart" class="btn-menu">RESTART MATCH</button>
+                <button type="button" id="btn-pause-resign" class="btn-menu btn-danger">RESIGN MATCH</button>
+                <button type="button" id="btn-pause-menu" class="btn-menu btn-secondary">MAIN MENU</button>
             </div>
         </div>
     </div>
@@ -1277,6 +1508,7 @@
     <script src="./js/settings.js"></script>
     <script src="./js/ui.js"></script>
     <script src="./js/ai.js"></script>
+    <script src="./js/match-presentation.js"></script>
     <script src="./js/main.js"></script>
 </body>
 </html>

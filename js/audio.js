@@ -970,6 +970,14 @@ class AudioManager {
         this.musicInterval = setInterval(playNextChord, 6000);
     }
 
+    duckBgm(factor = 0.2) {
+        if (!this.musicGain || !this.ctx) return;
+        const target = this.musicVolume * factor;
+        const t = this.ctx.currentTime;
+        this.musicGain.gain.cancelScheduledValues(t);
+        this.musicGain.gain.linearRampToValueAtTime(target, t + 0.3);
+    }
+
     stopAmbientMusic() {
         if (this.musicInterval) {
             clearInterval(this.musicInterval);

@@ -5546,3 +5546,686 @@ body {
         padding: 0 1.5rem;
     }
 }
+
+/* ==========================================================================
+   MATCH PRESENTATION & COMBAT CHOREOGRAPHY SYSTEM (PHASE 2)
+   ========================================================================== */
+
+/* 1. Attack Name Banner (Spec 10 & 11) */
+.attack-banner {
+    position: fixed;
+    top: 5rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(-10px) scale(0.95);
+    background: rgba(15, 23, 42, 0.94);
+    border: 2px solid var(--border-gold);
+    border-radius: var(--radius-md);
+    padding: 0.55rem 1.6rem;
+    font-family: Georgia, serif;
+    font-size: 1.15rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: var(--text-gold);
+    text-shadow: 0 0 16px rgba(251, 191, 36, 0.6);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(212, 175, 55, 0.3);
+    z-index: 1000;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    white-space: pre-line;
+    text-align: center;
+}
+
+.attack-banner.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+}
+
+/* 2. Floating Piece Motion Personalities (Spec 4) */
+.floating-piece {
+    position: absolute;
+    pointer-events: none;
+    z-index: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.7));
+}
+
+.floating-piece.motion-piece-n {
+    filter: drop-shadow(0 14px 20px rgba(56, 189, 248, 0.6));
+}
+
+.floating-piece.motion-piece-r {
+    filter: drop-shadow(0 6px 14px rgba(217, 119, 6, 0.7));
+}
+
+.floating-piece.motion-piece-b {
+    filter: drop-shadow(0 10px 18px rgba(52, 211, 153, 0.6));
+}
+
+.floating-piece.motion-piece-q {
+    filter: drop-shadow(0 12px 24px rgba(236, 72, 153, 0.7));
+}
+
+.floating-piece.motion-piece-k {
+    filter: drop-shadow(0 8px 20px rgba(250, 204, 21, 0.7));
+}
+
+/* 3. Temporary Board Reactions (Spec 32 - 34) */
+.temporary-board-rx {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    border-radius: var(--radius-sm);
+    animation: tempBoardFade 0.9s ease-out forwards;
+}
+
+@keyframes tempBoardFade {
+    0%   { opacity: 0.85; transform: scale(0.96); }
+    30%  { opacity: 0.95; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.04); }
+}
+
+.temporary-board-rx.rx-fire {
+    background: radial-gradient(circle, rgba(249, 115, 22, 0.5) 0%, rgba(239, 68, 68, 0.25) 70%, transparent 100%);
+    box-shadow: inset 0 0 12px rgba(249, 115, 22, 0.6);
+}
+
+.temporary-board-rx.rx-lightning {
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.5) 0%, rgba(14, 165, 233, 0.2) 70%, transparent 100%);
+    box-shadow: inset 0 0 14px rgba(56, 189, 248, 0.7);
+}
+
+.temporary-board-rx.rx-ice {
+    background: radial-gradient(circle, rgba(6, 182, 212, 0.5) 0%, rgba(165, 243, 252, 0.25) 70%, transparent 100%);
+    box-shadow: inset 0 0 12px rgba(6, 182, 212, 0.6);
+}
+
+.temporary-board-rx.rx-wind {
+    background: radial-gradient(circle, rgba(52, 211, 153, 0.45) 0%, rgba(16, 185, 129, 0.2) 70%, transparent 100%);
+}
+
+.temporary-board-rx.rx-earth {
+    background: radial-gradient(circle, rgba(217, 119, 6, 0.5) 0%, rgba(180, 83, 9, 0.25) 70%, transparent 100%);
+    box-shadow: inset 0 0 10px rgba(217, 119, 6, 0.6);
+}
+
+.temporary-board-rx.rx-water {
+    background: radial-gradient(circle, rgba(2, 132, 199, 0.5) 0%, rgba(56, 189, 248, 0.2) 70%, transparent 100%);
+}
+
+.temporary-board-rx.rx-light {
+    background: radial-gradient(circle, rgba(250, 204, 21, 0.5) 0%, rgba(254, 240, 138, 0.25) 70%, transparent 100%);
+    box-shadow: inset 0 0 14px rgba(250, 204, 21, 0.7);
+}
+
+.temporary-board-rx.rx-shadow {
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.55) 0%, rgba(76, 29, 149, 0.3) 70%, transparent 100%);
+    box-shadow: inset 0 0 14px rgba(139, 92, 246, 0.6);
+}
+
+.temporary-board-rx.rx-nature {
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.5) 0%, rgba(5, 150, 105, 0.2) 70%, transparent 100%);
+}
+
+.temporary-board-rx.rx-arcane {
+    background: radial-gradient(circle, rgba(236, 72, 153, 0.5) 0%, rgba(168, 85, 247, 0.25) 70%, transparent 100%);
+    box-shadow: inset 0 0 14px rgba(236, 72, 153, 0.7);
+}
+
+/* 4. Check & Defeat Square Indicators (Specs 18, 19, 23, 24) */
+.square.sq-check-pulse {
+    animation: kingCheckPulse 0.75s ease-in-out infinite alternate !important;
+}
+
+@keyframes kingCheckPulse {
+    0%   { box-shadow: inset 0 0 12px rgba(239, 68, 68, 0.8), 0 0 15px rgba(239, 68, 68, 0.6); }
+    100% { box-shadow: inset 0 0 24px rgba(249, 115, 22, 1), 0 0 30px rgba(249, 115, 22, 0.9); }
+}
+
+.square.sq-defeated-king-aura {
+    box-shadow: inset 0 0 25px rgba(139, 92, 246, 0.9), 0 0 20px rgba(0, 0, 0, 0.9) !important;
+    position: relative;
+}
+
+.square.sq-defeated-king-aura::after {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border: 2px dashed rgba(168, 85, 247, 0.7);
+    border-radius: 50%;
+    animation: rotateAura 6s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes rotateAura {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+/* 5. Match Presets & Increments Chips (Spec 35 & 39) */
+.match-preset-chips-grid,
+.timer-increment-chips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 0.5rem;
+    margin-top: 0.45rem;
+}
+
+.btn-preset-chip,
+.btn-increment-chip {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    padding: 0.45rem 0.65rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.btn-preset-chip:hover,
+.btn-increment-chip:hover {
+    border-color: var(--border-gold);
+    color: var(--text-light);
+    transform: translateY(-1px);
+}
+
+.btn-preset-chip.active,
+.btn-increment-chip.active {
+    background: rgba(212, 175, 55, 0.2);
+    border-color: var(--border-gold);
+    color: var(--text-gold);
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+}
+
+/* 6. AI Opponent Personalities Grid (Specs 67 - 70) */
+.ai-personalities-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.6rem;
+    margin-top: 0.5rem;
+}
+
+.btn-ai-personality {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: rgba(15, 23, 42, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius-md);
+    padding: 0.5rem 0.65rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+}
+
+.btn-ai-personality:hover {
+    border-color: var(--border-gold);
+    background: rgba(30, 41, 59, 0.85);
+    transform: translateY(-2px);
+}
+
+.btn-ai-personality.active {
+    border-color: var(--border-gold);
+    background: rgba(212, 175, 55, 0.18);
+    box-shadow: 0 0 12px rgba(212, 175, 55, 0.3);
+}
+
+.ai-avatar-thumb {
+    font-size: 1.35rem;
+    line-height: 1;
+}
+
+.ai-personality-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.ai-name-title {
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: var(--text-light);
+    letter-spacing: 0.04em;
+}
+
+.ai-style-subtitle {
+    font-size: 0.68rem;
+    color: var(--text-gold);
+    font-weight: 600;
+}
+
+/* 7. Comprehensive Match Results Modal (Spec 41 - 51) */
+.match-results-card {
+    background: rgba(15, 23, 42, 0.95);
+    border: 2px solid var(--border-gold);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), 0 0 35px rgba(212, 175, 55, 0.3);
+    max-width: 620px;
+    width: 92%;
+    padding: 1.75rem;
+    color: var(--text-light);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.results-header-block {
+    text-align: center;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.25);
+    padding-bottom: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.results-title-heading {
+    font-family: Georgia, serif;
+    font-size: 1.85rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    color: var(--text-gold);
+    text-shadow: 0 0 18px rgba(251, 191, 36, 0.5);
+    margin: 0;
+}
+
+.results-subtitle-meta {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    margin-top: 0.35rem;
+}
+
+.results-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.65rem;
+    margin-bottom: 1.5rem;
+}
+
+.result-stat-box {
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-md);
+    padding: 0.65rem 0.85rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-label-text {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.stat-value-text {
+    font-family: Georgia, serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-light);
+    margin-top: 0.15rem;
+}
+
+.results-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+}
+
+.btn-result-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1rem;
+    font-size: 0.84rem;
+    font-weight: 700;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.btn-result-action.primary {
+    background: linear-gradient(135deg, #d4af37, #b48a1a);
+    color: #0b0f19;
+    font-weight: 800;
+}
+
+.btn-result-action.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(212, 175, 55, 0.4);
+}
+
+.btn-result-action.secondary {
+    background: rgba(30, 41, 59, 0.85);
+    border-color: rgba(212, 175, 55, 0.35);
+    color: var(--text-light);
+}
+
+.btn-result-action.secondary:hover {
+    border-color: var(--border-gold);
+    color: var(--text-gold);
+    transform: translateY(-2px);
+}
+
+/* 8. Interactive Replay Modal (Specs 53 - 64) */
+.replay-modal-card {
+    background: rgba(15, 23, 42, 0.96);
+    border: 2px solid var(--border-gold);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.95), 0 0 40px rgba(212, 175, 55, 0.25);
+    max-width: 680px;
+    width: 94%;
+    padding: 1.5rem;
+    color: var(--text-light);
+    max-height: 92vh;
+    overflow-y: auto;
+}
+
+.replay-hud-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.25);
+    margin-bottom: 0.85rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.replay-title {
+    font-family: Georgia, serif;
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--text-gold);
+}
+
+.replay-stepper-badge {
+    font-family: monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #38bdf8;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+}
+
+.replay-move-strip-container {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    overflow-x: auto;
+    padding: 0.65rem 0.4rem;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-md);
+    margin-bottom: 1rem;
+    scrollbar-width: thin;
+}
+
+.replay-san-chip {
+    padding: 0.3rem 0.6rem;
+    font-family: monospace;
+    font-size: 0.82rem;
+    background: rgba(30, 41, 59, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.replay-san-chip:hover {
+    border-color: var(--border-gold);
+    color: var(--text-light);
+}
+
+.replay-san-chip.active {
+    background: rgba(212, 175, 55, 0.25);
+    border-color: var(--border-gold);
+    color: var(--text-gold);
+    font-weight: 800;
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+}
+
+.replay-controls-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+    margin-bottom: 1rem;
+}
+
+.btn-replay-nav {
+    background: rgba(30, 41, 59, 0.85);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    color: var(--text-light);
+    border-radius: var(--radius-md);
+    padding: 0.55rem 0.95rem;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-replay-nav:hover {
+    border-color: var(--border-gold);
+    color: var(--text-gold);
+    transform: translateY(-2px);
+}
+
+.btn-replay-nav.play-btn {
+    background: linear-gradient(135deg, #d4af37, #b48a1a);
+    color: #0b0f19;
+    font-weight: 800;
+    padding: 0.55rem 1.4rem;
+}
+
+.replay-speed-selector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+}
+
+.btn-replay-speed {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-muted);
+    border-radius: var(--radius-sm);
+    padding: 0.25rem 0.55rem;
+    font-size: 0.74rem;
+    cursor: pointer;
+}
+
+.btn-replay-speed.active {
+    border-color: var(--border-gold);
+    color: var(--text-gold);
+    background: rgba(212, 175, 55, 0.2);
+}
+
+.replay-event-skips-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.25rem;
+}
+
+.btn-skip-chip {
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    color: #bae6fd;
+    border-radius: 999px;
+    padding: 0.3rem 0.75rem;
+    font-size: 0.74rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-skip-chip:hover {
+    border-color: #38bdf8;
+    background: rgba(56, 189, 248, 0.2);
+}
+
+/* 9. Match History & Profile Stats (Specs 77 - 83) */
+.history-modal-card {
+    background: rgba(15, 23, 42, 0.95);
+    border: 2px solid var(--border-gold);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9);
+    max-width: 640px;
+    width: 92%;
+    padding: 1.75rem;
+    color: var(--text-light);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.profile-stats-summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    border-radius: var(--radius-md);
+    padding: 0.75rem;
+    margin-bottom: 1.25rem;
+    text-align: center;
+}
+
+.profile-stat-box .p-label {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.profile-stat-box .p-val {
+    font-family: Georgia, serif;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--text-gold);
+    margin-top: 0.15rem;
+}
+
+.recent-matches-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    max-height: 360px;
+    overflow-y: auto;
+}
+
+.match-history-entry {
+    background: rgba(30, 41, 59, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-md);
+    padding: 0.75rem 0.95rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.2s ease;
+}
+
+.match-history-entry:hover {
+    border-color: var(--border-gold);
+    background: rgba(30, 41, 59, 0.95);
+}
+
+.history-entry-meta {
+    display: flex;
+    flex-direction: column;
+}
+
+.history-entry-res {
+    font-weight: 800;
+    font-size: 0.9rem;
+    color: var(--text-gold);
+}
+
+.history-entry-sub {
+    font-size: 0.76rem;
+    color: var(--text-muted);
+    margin-top: 0.15rem;
+}
+
+/* 10. Pause Menu Dialog (Spec 71 - 74) */
+.pause-card {
+    background: rgba(15, 23, 42, 0.96);
+    border: 2px solid var(--border-gold);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.95);
+    max-width: 420px;
+    width: 90%;
+    padding: 1.75rem;
+    text-align: center;
+    color: var(--text-light);
+}
+
+.pause-title {
+    font-family: Georgia, serif;
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: var(--text-gold);
+    margin: 0 0 1.25rem 0;
+}
+
+.pause-menu-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.btn-pause-action {
+    background: rgba(30, 41, 59, 0.85);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    border-radius: var(--radius-md);
+    padding: 0.65rem 1rem;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--text-light);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-pause-action:hover {
+    border-color: var(--border-gold);
+    color: var(--text-gold);
+    background: rgba(212, 175, 55, 0.15);
+    transform: translateY(-1px);
+}
+
+/* 11. Clean View Screenshot Mode & Focus Board Mode (Specs 88 & 89) */
+body.screenshot-clean-view #header,
+body.screenshot-clean-view #controls-bar,
+body.screenshot-clean-view #move-history,
+body.screenshot-clean-view .captured-row,
+body.screenshot-clean-view .player-turn-indicator,
+body.screenshot-clean-view #hud-bottom-bar {
+    display: none !important;
+}
+
+body.screenshot-clean-view #board-container {
+    margin: auto !important;
+    transform: scale(1.08);
+}
+
+.focus-board-mode #side-panel,
+.focus-board-mode #move-history,
+.focus-board-mode .panel-secondary {
+    display: none !important;
+}
+
+.focus-board-mode #board-container {
+    max-width: 96vw;
+    max-height: 85vh;
+}

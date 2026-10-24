@@ -28,9 +28,16 @@ class MahoNoChesuApp {
 
         // Match Clock State (Point 15: 1m, 3m, 5m, 10m, 15m, none)
         this.timerMode = 'none'; // 'none' | '1m' | '3m' | '5m' | '10m' | '15m'
+        this.clockIncrement = 0; // 0, 1, 2, 5, 10
         this.whiteTimeSeconds = 0;
         this.blackTimeSeconds = 0;
         this.clockTimerInterval = null;
+
+        // AI Personality Configuration (Specs 67 & 68)
+        this.selectedPersonality = 'kaen'; // 'kaen' | 'raiden' | 'fubuki' | 'terra' | 'noctis' | 'lumina'
+
+        // Match Presentation & Replay Coordinator (Spec 1)
+        this.presentation = new MatchPresentationController(this);
 
         // Element Laboratory Sandbox State (Point 27 & 28)
         this.labAttackerPiece = 'n';
@@ -241,6 +248,61 @@ class MahoNoChesuApp {
             iconOn.classList.toggle('hidden', !newState);
             iconOff.classList.toggle('hidden', newState);
         });
+
+        // Match Presets (Spec 39)
+        document.querySelectorAll('.btn-preset-chip').forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.audio.playUiClick();
+                document.querySelectorAll('.btn-preset-chip').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                if (this.presentation) {
+                    this.presentation.setPreset(btn.dataset.preset || 'casual');
+                }
+            });
+        });
+
+        // Timer Increments (Spec 35)
+        document.querySelectorAll('.btn-increment-chip').forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.audio.playUiClick();
+                document.querySelectorAll('.btn-increment-chip').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                this.clockIncrement = parseInt(btn.dataset.increment || '0', 10);
+            });
+        });
+
+        // AI Personalities (Spec 67 & 68)
+        document.querySelectorAll('.btn-ai-personality').forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.audio.playUiClick();
+                document.querySelectorAll('.btn-ai-personality').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                this.selectedPersonality = btn.dataset.personality || 'kaen';
+            });
+        });
+
+        // Match Pause Menu (Spec 71)
+        document.getElementById('btn-pause-match')?.addEventListener('click', () => {
+            this.audio.playUiClick();
+            if (this.presentation) {
+                this.presentation.openPauseMenu();
+            }
+        });
+
+        // Match History Modal (Spec 77 - 79)
+        document.getElementById('btn-match-history-toggle')?.addEventListener('click', () => {
+            this.audio.playUiClick();
+            if (this.presentation) {
+                this.presentation.openMatchHistoryModal();
+            }
+        });
+        document.getElementById('menu-btn-match-history')?.addEventListener('click', () => {
+            this.audio.playUiClick();
+            document.getElementById('modal-main-menu')?.classList.remove('active');
+            if (this.presentation) {
+                this.presentation.openMatchHistoryModal();
+            }
+        });
     }
 
     initGameLoop() {
@@ -287,7 +349,9 @@ class MahoNoChesuApp {
 
         this.ui.onRestartRequest = () => {
             this.audio.playUiClick();
-            this.stopMatchClock();
+            if (this.presentation) {
+                this.presentation.pauseActiveClock();
+            }
             this.startNewMatch(this.gameMode);
         };
 
@@ -308,13 +372,10 @@ class MahoNoChesuApp {
 
             const onAccept = () => {
                 cleanUp();
-                this.stopMatchClock();
-                this.ui.showGameOver({
-                    gameOver: true,
-                    winner: null,
-                    reason: 'draw_agreed',
-                    description: 'Truce accepted by mutual agreement.'
-                });
+                if (this.presentation) {
+                    this.presentation.pauseActiveClock();
+                    this.presentation.presentDrawSequence('Agreement');
+                }
             };
 
             const onDecline = () => {
@@ -329,15 +390,9 @@ class MahoNoChesuApp {
         this.ui.onResignRequest = () => {
             if (this.isAnimating) return;
             this.audio.playUiClick();
-            this.stopMatchClock();
-            const resigningColor = this.engine.turn;
-            const winner = resigningColor === 'w' ? 'b' : 'w';
-            this.ui.showGameOver({
-                gameOver: true,
-                winner,
-                reason: 'resignation',
-                description: `${resigningColor === 'w' ? 'White' : 'Black'} has conceded the battlefield.`
-            });
+            if (this.presentation) {
+                this.presentation.handleResignation(this.engine.turn);
+            }
         };
     }
 
@@ -353,19 +408,21 @@ class MahoNoChesuApp {
         const blackType = document.getElementById('black-player-type');
         if (mode === 'pvc') {
             const aiSide = this.playerColor === 'w' ? 'b' : 'w';
-            const aiLoadout = this.loadout.resolveAiLoadout(this.playerColor);
+            const personality = this.ai.getPersonality ? this.ai.getPersonality(this.selectedPersonality) : null;
+            const aiLoadout = personality && personality.loadout ? { ...personality.loadout } : this.loadout.resolveAiLoadout(this.playerColor);
             if (aiSide === 'b') {
                 this.loadout.blackLoadout = aiLoadout;
             } else {
                 this.loadout.whiteLoadout = aiLoadout;
             }
 
+            const aiName = personality ? `${personality.name} (${personality.style})` : `Arcane AI (${this.aiDifficulty.toUpperCase()})`;
             if (this.playerColor === 'w') {
                 if (whiteType) whiteType.textContent = 'Human';
-                if (blackType) blackType.textContent = `Arcane AI (${this.aiDifficulty.toUpperCase()})`;
+                if (blackType) blackType.textContent = aiName;
                 this.ui.setFlipped(false);
             } else {
-                if (whiteType) whiteType.textContent = `Arcane AI (${this.aiDifficulty.toUpperCase()})`;
+                if (whiteType) whiteType.textContent = aiName;
                 if (blackType) blackType.textContent = 'Human';
                 this.ui.setFlipped(true); // Flip for black player
             }
@@ -383,7 +440,14 @@ class MahoNoChesuApp {
         this.ui.renderMoveHistory(this.moveHistoryLog);
         this.ui.renderCapturedPieces();
         this.updateStatusDisplay();
-        this.startMatchClock();
+
+        // Initialize and start match presentation statistics & clocks (Spec 36, 41, 108)
+        if (this.presentation) {
+            this.presentation.stats.startMatch();
+            this.presentation.initClock(this.timerMode, this.clockIncrement);
+            this.presentation.updateActivePlayerPanel('w');
+            this.presentation.startClockForActiveTurn();
+        }
 
         // If PvC and AI plays White, trigger AI first move
         if (this.gameMode === 'pvc' && this.playerColor === 'b') {
@@ -413,241 +477,31 @@ class MahoNoChesuApp {
     }
 
     /**
-     * Primary Move Execution & Elemental Animation Flow
+     * Primary Move Execution & Presentation Flow (Spec 1 & 2)
      */
     async processMoveSequence(move) {
-        this.isAnimating = true;
-        this.ui.isAnimating = true;
-
-        const piece = this.engine.board[move.from];
-        const isCapture = !!(move.captured || move.isEnPassant || this.engine.board[move.to]);
-        const isWhite = piece.color === 'w';
-
-        // Check if pawn reaches the final rank (Specs 163 - 164, 190)
-        const toRank = Math.floor(move.to / 8);
-        const isPawnPromotion = piece.type === 'p' && (toRank === 7 || toRank === 0);
-
-        // Determine smooth movement animation duration
-        const animSpeed = this.settings.settings.animationSpeed;
-        const slideDuration = animSpeed === 'fast' ? 140 : (animSpeed === 'cinematic' ? 360 : 220);
-
-        // Look up piece's configured element & piece-specific attack name (Spec 109, 123, 186-188)
-        const element = this.loadout.getElementForPiece(piece, piece.color);
-        const attackName = this.loadout.getAttackName(piece.type, element);
-
-        // Army synergy for moving player (Specs 144 - 153)
-        const activeArmyLoadout = piece.color === 'w' ? this.loadout.whiteLoadout : this.loadout.blackLoadout;
-        const synergyInfo = this.loadout.calculateElementSynergies(activeArmyLoadout);
-
-        // 1. Play Elemental Attack FX & Smooth Movement (Spec 190: uses OLD element)
-        if (isCapture) {
-            this.consecutiveCaptures++;
-
-            // Track same-element and cross-element combos (Specs 154 - 155)
-            if (this.comboTracker.player === piece.color) {
-                this.comboTracker.streak++;
-                if (this.comboTracker.lastElement === element) {
-                    this.comboTracker.sameStreak++;
-                } else {
-                    this.comboTracker.sameStreak = 1;
-                }
-            } else {
-                this.comboTracker.player = piece.color;
-                this.comboTracker.streak = 1;
-                this.comboTracker.sameStreak = 1;
-            }
-            this.comboTracker.lastElement = element;
-
-            if (this.comboTracker.streak >= 2) {
-                const isSame = this.comboTracker.sameStreak >= 2;
-                this.effects.showComboChain({
-                    streak: isSame ? this.comboTracker.sameStreak : this.comboTracker.streak,
-                    element,
-                    isSameElement: isSame
-                });
-            }
-
-            const targetSq = move.isEnPassant ? (Math.floor(move.from / 8) * 8 + (move.to % 8)) : move.to;
-
-            const reactionMap = {
-                fire: 'piece-target-burning',
-                lightning: 'piece-target-electrocuted',
-                wind: 'piece-target-slashed',
-                earth: 'piece-target-crushed',
-                ice: 'piece-target-frozen',
-                water: 'piece-target-drowned',
-                light: 'piece-target-dissolved',
-                shadow: 'piece-target-void',
-                nature: 'piece-target-entangled',
-                arcane: 'piece-target-arcane'
-            };
-
-            const defenderColor = piece.color === 'w' ? 'b' : 'w';
-            const defenderElement = this.loadout.getPieceElement(defenderColor, move.captured) || 'fire';
-
-            this.ui.triggerPieceTargetReaction(targetSq, reactionMap[element] || 'piece-target-burning');
-            this.audio.playElementSound(element);
-
-            await this.effects.playElementalAttack({
-                pieceType: piece.type,
-                element,
-                defenderElement,
-                attackName,
-                fromSq: move.from,
-                toSq: move.to,
-                color: piece.color,
-                isFlipped: this.ui.isFlipped,
-                synergyInfo
-            });
-
-            // Smooth gliding advance into conquered square (Pawn stands on promotion square)
-            await this.ui.animatePieceMove(move.from, move.to, slideDuration);
-        } else if (move.isCastling) {
-            this.comboTracker = { player: null, lastElement: null, streak: 0, sameStreak: 0 };
-            this.audio.playCastling();
-            this.effects.fortressAura(move.from, move.to, this.ui.isFlipped);
-            await this.ui.animatePieceMove(move.from, move.to, slideDuration);
-        } else {
-            this.consecutiveCaptures = 0;
-            this.comboTracker = { player: null, lastElement: null, streak: 0, sameStreak: 0 };
-            this.effects.resetCombo();
-            this.audio.playMoveSound();
-            this.effects.moveTrail(piece, move.from, move.to, this.ui.isFlipped, element);
-            await this.ui.animatePieceMove(move.from, move.to, slideDuration);
+        if (this.presentation) {
+            await this.presentation.presentMove(move);
         }
+    }
 
-        // 2. ASCENSION - Pawn Promotion Sequence (Specs 163 - 190)
-        if (isPawnPromotion) {
-            const isHumanPlayer = this.gameMode === 'pvp' || (this.gameMode === 'pvc' && piece.color === this.playerColor);
-            let promoChoice;
-
-            if (isHumanPlayer) {
-                promoChoice = await this.ui.promptAscension({
-                    color: piece.color,
-                    pawnElement: element,
-                    settings: this.settings.settings,
-                    onPreview: (previewData) => {
-                        this.effects.playAscensionSequence({
-                            squareIndex: move.to,
-                            isFlipped: this.ui.isFlipped,
-                            element: previewData.element,
-                            pieceType: previewData.pieceType,
-                            style: previewData.style,
-                            isReducedMotion: this.settings.settings.reducedMotion
-                        });
-                        this.audio.playAscensionSound(previewData.element, previewData.style);
-                    }
-                });
-            } else {
-                promoChoice = {
-                    pieceType: move.promotion || 'q',
-                    element: element,
-                    style: 'elemental'
-                };
-            }
-
-            move.promotion = promoChoice.pieceType;
-            move.element = promoChoice.element;
-            move.ascensionStyle = promoChoice.style;
-
-            // Play the canonical Ascension animation & audio on the promotion square (Spec 170-176, 194)
-            this.audio.playAscensionSound(move.element, move.ascensionStyle);
-            await this.effects.playAscensionSequence({
-                squareIndex: move.to,
-                isFlipped: this.ui.isFlipped,
-                element: move.element,
-                pieceType: move.promotion,
-                style: move.ascensionStyle,
-                isReducedMotion: this.settings.settings.reducedMotion
-            });
+    stopMatchClock() {
+        if (this.presentation) {
+            this.presentation.pauseActiveClock();
         }
+    }
 
-        // Generate SAN notation after promotion piece is finalized
-        const san = this.engine.generateSAN(move);
-
-        // 3. Commit move in chess engine (preserves individual piece.element on promoted piece)
-        this.engine.makeMove(move);
-        this.ui.lastMove = move;
-
-        // 4. Update Move History
-        this.moveHistoryLog.push({ san, move });
-        this.ui.renderMoveHistory(this.moveHistoryLog);
-        this.ui.renderCapturedPieces();
-
-        // 5. Screen reader announcement
-        const pieceNames = { p: 'Pawn', n: 'Knight', b: 'Bishop', r: 'Rook', q: 'Queen', k: 'King' };
-        const actionWord = isCapture ? 'captures on' : 'moves to';
-        const fromAlg = this.engine.squareToAlgebraic(move.from);
-        const toAlg = this.engine.squareToAlgebraic(move.to);
-        this.ui.announce(`${isWhite ? 'White' : 'Black'} ${pieceNames[piece.type]} from ${fromAlg} ${actionWord} ${toAlg}`);
-
-        // 6. Check Game Over & Checks (Spec 191, 192, 193)
-        const status = this.engine.getGameStatus();
-
-        if (status.gameOver && (status.reason === 'checkmate' || status.checkmate) && isPawnPromotion) {
-            // Spec 192 & 193: ASCENSION CHECKMATE SPECIAL FINISHER
-            this.audio.playAscensionCheckmateSound(move.element);
-            await this.effects.playAscensionCheckmate({
-                squareIndex: move.to,
-                isFlipped: this.ui.isFlipped,
-                element: move.element,
-                pieceType: move.promotion,
-                winnerColor: piece.color
-            });
-            this.audio.playVictory();
-            this.ui.showGameOver(status);
-            this.isAnimating = false;
-            this.ui.isAnimating = false;
-            return;
+    startMatchClock() {
+        if (this.presentation) {
+            this.presentation.initClock(this.timerMode, this.clockIncrement);
+            this.presentation.updateActivePlayerPanel(this.engine ? this.engine.turn : 'w');
+            this.presentation.startClockForActiveTurn();
         }
+    }
 
-        if (status.inCheck && !status.gameOver) {
-            this.audio.playCheck();
-            const checkingColor = this.engine.turn === 'w' ? 'b' : 'w';
-            const checkLoadout = checkingColor === 'w' ? this.loadout.whiteLoadout : this.loadout.blackLoadout;
-            const checkSyn = this.loadout.calculateElementSynergies(checkLoadout);
-
-            if (checkSyn.isPureArmy) {
-                this.effects.playPureArmyCheckEffect(checkSyn.dominantElement, false);
-            } else {
-                this.effects.showAttackName('CHECK');
-                this.effects.screenShake('sm');
-            }
-        }
-
-        // 7. Auto-Rotate board in local PvP mode if enabled
-        if (this.gameMode === 'pvp' && this.settings.settings.autoRotate) {
-            this.ui.setFlipped(this.engine.turn === 'b');
-        }
-
-        this.updateBoardSynergyTheme();
-        this.ui.renderBoard();
-        this.updateStatusDisplay();
-        this.updateClockDisplay();
-
-        if (status.gameOver) {
-            this.stopMatchClock();
-            this.audio.playVictory();
-            if (status.reason === 'checkmate' || status.checkmate) {
-                const winningColor = this.engine.turn === 'w' ? 'b' : 'w';
-                const winLoadout = winningColor === 'w' ? this.loadout.whiteLoadout : this.loadout.blackLoadout;
-                const winSyn = this.loadout.calculateElementSynergies(winLoadout);
-                if (winSyn.isPureArmy) {
-                    this.effects.playPureArmyCheckEffect(winSyn.dominantElement, true);
-                }
-            }
-            this.ui.showGameOver(status);
-            this.isAnimating = false;
-            this.ui.isAnimating = false;
-            return;
-        }
-
-        this.isAnimating = false;
-        this.ui.isAnimating = false;
-
-        // 8. Trigger AI reply if it's computer's turn
-        if (this.gameMode === 'pvc' && this.engine.turn !== this.playerColor) {
-            setTimeout(() => this.triggerAIMove(), 350);
+    updateClockDisplay() {
+        if (this.presentation) {
+            this.presentation.renderClocks();
         }
     }
 

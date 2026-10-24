@@ -256,6 +256,83 @@ class ChessEngine {
         return this.isSquareAttacked(kingSq, opponentColor);
     }
 
+    countAttackers(sq, attackerColor) {
+        let count = 0;
+        const f = sq % 8;
+        const r = Math.floor(sq / 8);
+
+        // 1. Pawn attacks
+        const pawnDir = attackerColor === 'w' ? -1 : 1;
+        const pr = r + pawnDir;
+        if (pr >= 0 && pr <= 7) {
+            for (const df of [-1, 1]) {
+                const pf = f + df;
+                if (pf >= 0 && pf <= 7) {
+                    const p = this.board[pr * 8 + pf];
+                    if (p && p.color === attackerColor && p.type === 'p') count++;
+                }
+            }
+        }
+
+        // 2. Knight attacks
+        const knightOffsets = [
+            [-2, -1], [-2, 1], [-1, -2], [-1, 2],
+            [1, -2], [1, 2], [2, -1], [2, 1]
+        ];
+        for (let i = 0; i < 8; i++) {
+            const [df, dr] = knightOffsets[i];
+            const kf = f + df;
+            const kr = r + dr;
+            if (kf >= 0 && kf <= 7 && kr >= 0 && kr <= 7) {
+                const p = this.board[kr * 8 + kf];
+                if (p && p.color === attackerColor && p.type === 'n') count++;
+            }
+        }
+
+        // 3. Orthogonal attacks (Rook & Queen)
+        const orthoDirs = [[0, 1], [0, -1], [1, 0], [-1, 0]];
+        for (let i = 0; i < 4; i++) {
+            const [df, dr] = orthoDirs[i];
+            let cf = f + df;
+            let cr = r + dr;
+            while (cf >= 0 && cf <= 7 && cr >= 0 && cr <= 7) {
+                const p = this.board[cr * 8 + cf];
+                if (p) {
+                    if (p.color === attackerColor && (p.type === 'r' || p.type === 'q')) count++;
+                    break;
+                }
+                cf += df;
+                cr += dr;
+            }
+        }
+
+        // 4. Diagonal attacks (Bishop & Queen)
+        const diagDirs = [[1, 1], [1, -1], [-1, 1], [-1, -1]];
+        for (let i = 0; i < 4; i++) {
+            const [df, dr] = diagDirs[i];
+            let cf = f + df;
+            let cr = r + dr;
+            while (cf >= 0 && cf <= 7 && cr >= 0 && cr <= 7) {
+                const p = this.board[cr * 8 + cf];
+                if (p) {
+                    if (p.color === attackerColor && (p.type === 'b' || p.type === 'q')) count++;
+                    break;
+                }
+                cf += df;
+                cr += dr;
+            }
+        }
+
+        return count;
+    }
+
+    isDoubleCheck(color = this.turn) {
+        const kingSq = this.findKing(color);
+        if (kingSq === -1) return false;
+        const opponentColor = color === 'w' ? 'b' : 'w';
+        return this.countAttackers(kingSq, opponentColor) >= 2;
+    }
+
     /**
      * Generate pseudo-legal moves for side 'color'
      */

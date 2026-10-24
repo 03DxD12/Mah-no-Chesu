@@ -279,8 +279,76 @@ class ChessAI {
 
         return bestMove;
     }
+
+    getPersonality(id) {
+        return AI_PERSONALITIES[id] || AI_PERSONALITIES.lumina;
+    }
 }
+
+const AI_PERSONALITIES = {
+    kaen: {
+        id: 'kaen',
+        name: 'Kaen',
+        title: 'The Inferno Warlord',
+        element: 'fire',
+        style: 'Aggressive',
+        avatar: '🔥',
+        desc: 'Relentless forward pressure favoring active pieces and tactical sacrifices.',
+        loadout: { p: 'fire', n: 'fire', b: 'wind', r: 'earth', q: 'fire', k: 'light' }
+    },
+    raiden: {
+        id: 'raiden',
+        name: 'Raiden',
+        title: 'The Storm Tactician',
+        element: 'lightning',
+        style: 'Tactical',
+        avatar: '⚡',
+        desc: 'Sharp, rapid counter-attacks and electric breakthroughs across open files.',
+        loadout: { p: 'lightning', n: 'lightning', b: 'wind', r: 'water', q: 'lightning', k: 'light' }
+    },
+    fubuki: {
+        id: 'fubuki',
+        name: 'Fubuki',
+        title: 'The Glacial Aegis',
+        element: 'ice',
+        style: 'Defensive',
+        avatar: '❄️',
+        desc: 'Solid fortress pawn structures, patient defense, and freezing counter-strikes.',
+        loadout: { p: 'ice', n: 'ice', b: 'water', r: 'earth', q: 'ice', k: 'light' }
+    },
+    terra: {
+        id: 'terra',
+        name: 'Terra',
+        title: 'The Mountain Sovereign',
+        element: 'earth',
+        style: 'Positional',
+        avatar: '🪨',
+        desc: 'Unshakable center control, deep outposts, and crushing positional weight.',
+        loadout: { p: 'earth', n: 'earth', b: 'nature', r: 'earth', q: 'nature', k: 'light' }
+    },
+    noctis: {
+        id: 'noctis',
+        name: 'Noctis',
+        title: 'The Void Harvester',
+        element: 'shadow',
+        style: 'Unpredictable',
+        avatar: '🌑',
+        desc: 'Unconventional maneuvers, mysterious piece paths, and elusive threats.',
+        loadout: { p: 'shadow', n: 'shadow', b: 'arcane', r: 'shadow', q: 'arcane', k: 'light' }
+    },
+    lumina: {
+        id: 'lumina',
+        name: 'Lumina',
+        title: 'The Sun Ascendant',
+        element: 'light',
+        style: 'Balanced',
+        avatar: '☀️',
+        desc: 'Harmonious classical play, pure principles, and radiant judgment.',
+        loadout: { p: 'light', n: 'light', b: 'arcane', r: 'light', q: 'light', k: 'light' }
+    }
+};
 
 if (typeof window !== 'undefined') {
     window.ChessAI = ChessAI;
+    window.AI_PERSONALITIES = AI_PERSONALITIES;
 }
