@@ -6229,3 +6229,922 @@ body.screenshot-clean-view #board-container {
     max-width: 96vw;
     max-height: 85vh;
 }
+
+/* =============================================================================
+   12. MAIN MENU CATEGORIZED GROUPS (Spec 2 & 3)
+   ============================================================================= */
+.menu-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 0.75rem;
+    width: 100%;
+}
+
+.menu-group-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--text-gold);
+    text-transform: uppercase;
+    padding-left: 0.25rem;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    padding-bottom: 0.2rem;
+    margin-bottom: 0.2rem;
+}
+
+/* =============================================================================
+   13. LEARNING ACTION HUD (Spec 4 & 116)
+   ============================================================================= */
+.learning-action-hud {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: var(--board-max-size, 620px);
+    margin: 0 auto 0.6rem auto;
+    padding: 0.5rem 0.85rem;
+    background: linear-gradient(135deg, rgba(20, 24, 38, 0.95), rgba(12, 15, 26, 0.98));
+    border: 1px solid var(--border-gold);
+    border-radius: var(--radius-md, 8px);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5), 0 0 12px rgba(212, 175, 55, 0.25);
+    z-index: 50;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.learning-action-hud.visible {
+    display: flex !important;
+}
+
+.hud-left {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.learning-hud-cat {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--text-gold);
+    text-transform: uppercase;
+}
+
+.learning-hud-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.learning-hud-obj {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    line-height: 1.2;
+}
+
+.hud-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-shrink: 0;
+    margin-left: 0.5rem;
+}
+
+.btn-hud-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    padding: 0.35rem 0.65rem;
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: var(--radius-sm, 4px);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-hud-action:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--border-gold);
+    color: var(--text-gold);
+}
+
+.btn-hud-action.btn-gold {
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.3), rgba(180, 140, 30, 0.4));
+    border-color: var(--border-gold);
+    color: var(--text-gold);
+}
+
+/* =============================================================================
+   14. PROGRESSION NOTIFICATION TOASTS (Spec 73 & 110)
+   ============================================================================= */
+.progression-toast-container {
+    position: fixed;
+    top: 1.2rem;
+    right: 1.2rem;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    pointer-events: none;
+}
+
+.progression-toast {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.7rem 1.1rem;
+    background: linear-gradient(135deg, rgba(20, 24, 40, 0.98), rgba(10, 12, 22, 0.98));
+    border: 1px solid var(--border-gold);
+    border-radius: var(--radius-md, 8px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7), 0 0 16px rgba(212, 175, 55, 0.35);
+    color: var(--text-primary);
+    opacity: 0;
+    transform: translateX(50px) scale(0.95);
+    transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    pointer-events: auto;
+}
+
+.progression-toast.visible {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+}
+
+.toast-icon {
+    font-size: 1.6rem;
+    line-height: 1;
+}
+
+.toast-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.toast-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--text-gold);
+    text-transform: uppercase;
+}
+
+.toast-sub {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+}
+
+/* =============================================================================
+   15. TRAINING ACADEMY STYLES (Spec 5 - 7)
+   ============================================================================= */
+.academy-progress-banner {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 0.85rem 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    border-radius: var(--radius-md, 8px);
+    margin-bottom: 0.85rem;
+}
+
+.academy-prog-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.academy-prog-label {
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--text-gold);
+}
+
+.academy-prog-val {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.academy-progress-track {
+    width: 100%;
+    height: 8px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: var(--radius-full, 999px);
+    overflow: hidden;
+}
+
+.academy-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #d4af37, #f7d070);
+    border-radius: var(--radius-full, 999px);
+    transition: width 0.4s ease;
+}
+
+.academy-filter-bar,
+.puzzles-filter-bar,
+.achievements-filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 0.85rem;
+}
+
+.academy-chip,
+.puzzle-chip,
+.ach-chip {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius-full, 999px);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.academy-chip.active,
+.puzzle-chip.active,
+.ach-chip.active {
+    color: #0b0e14;
+    background: linear-gradient(135deg, #d4af37, #f7d070);
+    border-color: #d4af37;
+    font-weight: 700;
+}
+
+.academy-lessons-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 0.65rem;
+    max-height: 52vh;
+    overflow-y: auto;
+    padding-right: 0.35rem;
+}
+
+.academy-lesson-card {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 0.85rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md, 8px);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.academy-lesson-card:hover:not(.locked) {
+    background: rgba(212, 175, 55, 0.08);
+    border-color: var(--border-gold);
+    transform: translateY(-2px);
+}
+
+.academy-lesson-card.completed {
+    border-color: rgba(60, 180, 100, 0.4);
+    background: rgba(40, 120, 70, 0.08);
+}
+
+.academy-lesson-card.locked {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.lesson-num {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--text-gold);
+    width: 26px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.lesson-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+
+.lesson-title {
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.lesson-desc {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.lesson-badge {
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 0.2rem 0.45rem;
+    border-radius: var(--radius-sm, 4px);
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.academy-lesson-card.completed .lesson-badge {
+    background: rgba(60, 180, 100, 0.2);
+    color: #4ade80;
+}
+
+/* =============================================================================
+   16. CHESS PUZZLES & DAILY BANNER (Spec 30 - 43)
+   ============================================================================= */
+.daily-puzzle-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.2rem;
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.12), rgba(30, 40, 60, 0.6));
+    border: 1px solid var(--border-gold);
+    border-radius: var(--radius-md, 8px);
+    margin-bottom: 1rem;
+}
+
+.daily-puzzle-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.daily-tag {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--text-gold);
+}
+
+.daily-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.daily-desc {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.daily-status {
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: #4ade80;
+}
+
+.puzzles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 0.75rem;
+    max-height: 48vh;
+    overflow-y: auto;
+    padding-right: 0.35rem;
+}
+
+.puzzle-browser-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 0.85rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md, 8px);
+    transition: all 0.2s ease;
+}
+
+.puzzle-browser-card:hover {
+    border-color: var(--border-gold);
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.puzzle-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.puzzle-cat-badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--text-gold);
+}
+
+.puzzle-diff-tag {
+    font-size: 0.62rem;
+    font-weight: 700;
+    padding: 0.15rem 0.4rem;
+    border-radius: var(--radius-sm, 4px);
+    text-transform: uppercase;
+}
+
+.puzzle-diff-tag.diff-beginner {
+    background: rgba(40, 160, 80, 0.25);
+    color: #4ade80;
+}
+
+.puzzle-diff-tag.diff-intermediate {
+    background: rgba(220, 160, 30, 0.25);
+    color: #fbbf24;
+}
+
+.puzzle-diff-tag.diff-advanced {
+    background: rgba(220, 60, 40, 0.25);
+    color: #f87171;
+}
+
+.puzzle-name {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.puzzle-obj {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.25;
+}
+
+.puzzle-footer-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.35rem;
+    padding-top: 0.45rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.puzzle-stars {
+    font-size: 0.85rem;
+    color: #fbbf24;
+    letter-spacing: 0.1em;
+}
+
+.btn-play-puzzle {
+    padding: 0.25rem 0.65rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    background: rgba(212, 175, 55, 0.15);
+    border: 1px solid var(--border-gold);
+    color: var(--text-gold);
+    border-radius: var(--radius-sm, 4px);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-play-puzzle:hover {
+    background: var(--text-gold);
+    color: #0b0e14;
+}
+
+/* =============================================================================
+   17. DAILY CHALLENGES STYLES (Spec 44 - 48)
+   ============================================================================= */
+.challenges-date-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0.8rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: var(--radius-md, 8px);
+    margin-bottom: 1rem;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+}
+
+.challenges-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    margin-bottom: 1rem;
+}
+
+.challenge-row-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md, 8px);
+}
+
+.challenge-row-card.completed {
+    border-color: rgba(74, 222, 128, 0.35);
+    background: rgba(74, 222, 128, 0.05);
+}
+
+.ch-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    flex: 1;
+}
+
+.ch-text {
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.ch-bar-wrap {
+    width: 100%;
+    height: 6px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: var(--radius-full, 999px);
+    overflow: hidden;
+}
+
+.ch-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #d4af37, #4ade80);
+    border-radius: var(--radius-full, 999px);
+    transition: width 0.35s ease;
+}
+
+.ch-progress-tag {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-gold);
+    flex-shrink: 0;
+}
+
+/* =============================================================================
+   18. ACHIEVEMENTS STYLES (Spec 66 - 73)
+   ============================================================================= */
+.achievements-summary-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-gold);
+}
+
+.achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 0.75rem;
+    max-height: 52vh;
+    overflow-y: auto;
+    padding-right: 0.35rem;
+}
+
+.achievement-card {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.75rem 0.95rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-md, 8px);
+    opacity: 0.65;
+    transition: all 0.2s ease;
+}
+
+.achievement-card.unlocked {
+    opacity: 1;
+    border-color: rgba(212, 175, 55, 0.4);
+    background: rgba(212, 175, 55, 0.05);
+}
+
+.ach-icon {
+    font-size: 1.8rem;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.ach-details {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+
+.ach-name {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.ach-desc {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    line-height: 1.25;
+}
+
+.ach-progress-sub {
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--text-gold);
+    margin-top: 0.2rem;
+}
+
+.ach-reward {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #4ade80;
+    flex-shrink: 0;
+}
+
+/* =============================================================================
+   19. PLAYER PROFILE & MASTERY (Spec 74 - 82, 102 - 106)
+   ============================================================================= */
+.profile-hero {
+    display: flex;
+    gap: 1.2rem;
+    padding: 1.1rem;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(20, 24, 38, 0.85));
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: var(--radius-md, 8px);
+    margin-bottom: 1rem;
+}
+
+.profile-hero-left {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+}
+
+.profile-avatar-circle {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(212, 175, 55, 0.3), rgba(0, 0, 0, 0.6));
+    border: 2px solid var(--border-gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    flex-shrink: 0;
+    box-shadow: 0 0 12px rgba(212, 175, 55, 0.35);
+}
+
+.profile-user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.profile-name-row {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.profile-name-field {
+    background: transparent;
+    border: none;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.3);
+    color: var(--text-primary);
+    font-size: 1.05rem;
+    font-weight: 700;
+    padding: 0.1rem 0.2rem;
+    width: 140px;
+    outline: none;
+}
+
+.profile-name-field:focus {
+    border-bottom-color: var(--border-gold);
+}
+
+.profile-edit-hint {
+    font-size: 0.75rem;
+    color: var(--text-gold);
+    opacity: 0.6;
+}
+
+.profile-badges-row {
+    display: flex;
+    gap: 0.35rem;
+}
+
+.profile-pill-badge {
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 0.15rem 0.5rem;
+    border-radius: var(--radius-full, 999px);
+    background: linear-gradient(135deg, #d4af37, #f7d070);
+    color: #0b0e14;
+}
+
+.profile-pill-title {
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 0.15rem 0.5rem;
+    border-radius: var(--radius-full, 999px);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: var(--text-primary);
+}
+
+.profile-hero-right {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.4rem;
+    flex: 1;
+}
+
+.profile-xp-head {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+}
+
+.profile-xp-head strong {
+    color: var(--text-gold);
+}
+
+.profile-xp-track {
+    width: 100%;
+    height: 8px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: var(--radius-full, 999px);
+    overflow: hidden;
+}
+
+.profile-xp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #d4af37, #4ade80);
+    border-radius: var(--radius-full, 999px);
+    transition: width 0.35s ease;
+}
+
+.profile-custom-selectors {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 0.35rem;
+}
+
+.profile-select-label {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+}
+
+.select-compact {
+    padding: 0.2rem 0.45rem;
+    font-size: 0.72rem;
+}
+
+.profile-tabs-bar {
+    display: flex;
+    gap: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 1rem;
+    padding-bottom: 0.35rem;
+}
+
+.profile-tab-btn {
+    padding: 0.45rem 0.85rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    border-radius: var(--radius-sm, 4px);
+    transition: all 0.15s ease;
+}
+
+.profile-tab-btn.active {
+    color: var(--text-gold);
+    background: rgba(212, 175, 55, 0.12);
+    font-weight: 700;
+}
+
+.profile-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 0.75rem;
+}
+
+.stat-box {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-md, 8px);
+    text-align: center;
+}
+
+.sb-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+}
+
+.sb-val {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--text-gold);
+}
+
+.mastery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.75rem;
+}
+
+.mastery-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-md, 8px);
+}
+
+.m-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.m-elem-name {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.m-lvl-tag {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--text-gold);
+    background: rgba(212, 175, 55, 0.15);
+    padding: 0.1rem 0.35rem;
+    border-radius: var(--radius-sm, 4px);
+}
+
+.m-xp-text {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+}
+
+.m-bar {
+    width: 100%;
+    height: 5px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: var(--radius-full, 999px);
+    overflow: hidden;
+}
+
+.m-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #d4af37, #60a5fa);
+    border-radius: var(--radius-full, 999px);
+}
+
+.profile-footer-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-top: 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .profile-hero {
+        flex-direction: column;
+    }
+    .profile-custom-selectors {
+        flex-direction: column;
+    }
+    .daily-puzzle-banner {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

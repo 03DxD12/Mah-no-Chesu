@@ -39,6 +39,10 @@ class MahoNoChesuApp {
         // Match Presentation & Replay Coordinator (Spec 1)
         this.presentation = new MatchPresentationController(this);
 
+        // Progression, Tutorials, Challenges & Puzzles (Specs 1 - 141)
+        this.progression = new ProgressionManager(this);
+        this.learning = new LearningManager(this, this.progression);
+
         // Element Laboratory Sandbox State (Point 27 & 28)
         this.labAttackerPiece = 'n';
         this.labAttackerColor = 'w';
@@ -308,6 +312,17 @@ class MahoNoChesuApp {
     initGameLoop() {
         this.ui.onPlayerMoveRequest = async (move) => {
             if (this.isAnimating) return;
+
+            // In Learning Mode (Tutorial or Puzzle)
+            if (this.learning && this.learning.activeMode) {
+                if (this.learning.activeMode === 'tutorial') {
+                    this.learning.handleTutorialMove(move);
+                    return;
+                } else if (this.learning.activeMode === 'puzzle') {
+                    this.learning.handlePuzzleMove(move);
+                    return;
+                }
+            }
 
             // In PvC mode, check if it's player's turn
             if (this.gameMode === 'pvc' && this.engine.turn !== this.playerColor) {

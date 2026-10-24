@@ -891,6 +891,18 @@ class MatchPresentationController {
         // Save match to local history (Spec 77 - 79)
         this.saveCompletedMatchToHistory();
 
+        // Feed completed match into Player Progression, Challenges & Achievements (Spec 83 & 84)
+        if (this.app.progression) {
+            this.app.progression.handleMatchCompleted({
+                winner,
+                reason,
+                gameMode: this.app.gameMode,
+                stats: this.stats,
+                whiteLoadout: this.app.loadout.whiteLoadout,
+                blackLoadout: this.app.loadout.blackLoadout
+            });
+        }
+
         const modal = document.getElementById('modal-match-results');
         if (!modal) return;
 
