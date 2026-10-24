@@ -544,6 +544,62 @@
                     <label for="setting-reduced-motion">Reduced Motion</label>
                     <input type="checkbox" id="setting-reduced-motion">
                 </div>
+
+                <div class="setting-divider">
+                    <span class="setting-section-title">PAWN ASCENSION SETTINGS</span>
+                </div>
+
+                <!-- Promotion Mode -->
+                <div class="setting-row">
+                    <label for="setting-promo-mode">
+                        <span>Promotion Mode</span>
+                        <small class="sub-label">Detailed (All choices) | Quick (Piece only) | Automatic</small>
+                    </label>
+                    <select id="setting-promo-mode">
+                        <option value="detailed" selected>Detailed (Piece, Element &amp; Style)</option>
+                        <option value="quick">Quick (Piece Only, Inherit Element)</option>
+                        <option value="automatic">Automatic (Auto-Queen, Inherit Element)</option>
+                    </select>
+                </div>
+
+                <!-- Element Selection Policy -->
+                <div class="setting-row">
+                    <label for="setting-promo-element">
+                        <span>Element Selection</span>
+                        <small class="sub-label">Choose element policy on promotion</small>
+                    </label>
+                    <select id="setting-promo-element">
+                        <option value="ask" selected>Ask Every Time</option>
+                        <option value="inherit">Inherit Pawn Element</option>
+                        <option value="default">Use Piece Default (Q=Ice, R=Earth, B=Wind, N=Lightning)</option>
+                        <option value="random">Random Element</option>
+                    </select>
+                </div>
+
+                <!-- Ascension Effect Style Policy -->
+                <div class="setting-row">
+                    <label for="setting-promo-effect">
+                        <span>Ascension Effect Style</span>
+                        <small class="sub-label">Cosmetic transformation sequence</small>
+                    </label>
+                    <select id="setting-promo-effect">
+                        <option value="ask" selected>Ask Every Time</option>
+                        <option value="default">Elemental Ascension (Default)</option>
+                        <option value="random">Random Style</option>
+                    </select>
+                </div>
+
+                <!-- Show Promotion Preview -->
+                <div class="setting-row">
+                    <label for="setting-promo-preview">Show Ascension Preview</label>
+                    <input type="checkbox" id="setting-promo-preview" checked>
+                </div>
+
+                <!-- Cinematic Promotion -->
+                <div class="setting-row">
+                    <label for="setting-promo-cinematic">Cinematic Promotion Effects</label>
+                    <input type="checkbox" id="setting-promo-cinematic" checked>
+                </div>
             </div>
 
             <button class="btn-primary modal-close mt-4">Save &amp; Return</button>
@@ -567,13 +623,98 @@
         </div>
     </div>
 
-    <!-- Pawn Promotion Modal -->
-    <div id="modal-promotion" class="modal-overlay">
-        <div class="modal-card promo-card">
-            <h2 class="promo-title">ASCENSION</h2>
-            <p class="promo-sub">Choose your pawn's elevated elemental form:</p>
-            <div class="promo-choices" id="promo-choices-container">
-                <!-- Injected dynamically with Queen, Rook, Bishop, Knight -->
+    <!-- Pawn Promotion Modal (ASCENSION) -->
+    <div id="modal-promotion" class="modal-overlay modal-ascension-overlay" role="dialog" aria-modal="true" aria-labelledby="ascension-title">
+        <div class="modal-card ascension-card">
+            <div class="ascension-header">
+                <div class="ascension-crest">✦</div>
+                <h2 class="ascension-title" id="ascension-title">ASCENSION</h2>
+                <p class="ascension-subtitle">The Pawn has reached its destiny on the final rank.</p>
+            </div>
+
+            <div class="ascension-body">
+                <!-- Step 1: Piece Selection -->
+                <div class="ascension-section" id="ascension-step-piece">
+                    <div class="ascension-section-header">
+                        <span class="step-badge">1</span>
+                        <h3 class="step-title">CHOOSE ELEVATED PIECE</h3>
+                    </div>
+                    <div class="ascension-pieces-grid" id="ascension-pieces-grid" role="radiogroup" aria-label="Promotion Piece Selection">
+                        <!-- Rendered dynamically: Queen, Rook, Bishop, Knight with SVGs -->
+                    </div>
+                </div>
+
+                <!-- Step 2: Element Selection -->
+                <div class="ascension-section" id="ascension-step-element">
+                    <div class="ascension-section-header">
+                        <span class="step-badge">2</span>
+                        <h3 class="step-title">CHOOSE ELEMENT</h3>
+                    </div>
+                    <div class="ascension-quick-elements">
+                        <button type="button" class="btn-ascension-quick" id="btn-promo-inherit">
+                            <span class="quick-icon">↻</span>
+                            <span class="quick-text">INHERIT PAWN ELEMENT (<span id="promo-inherit-name">FIRE</span>)</span>
+                        </button>
+                        <button type="button" class="btn-ascension-quick" id="btn-promo-random-elem">
+                            <span class="quick-icon">🎲</span>
+                            <span class="quick-text">RANDOM ELEMENT</span>
+                        </button>
+                    </div>
+                    <div class="ascension-elements-grid" id="ascension-elements-grid" role="radiogroup" aria-label="Element Selection">
+                        <!-- Rendered dynamically with 10 elements -->
+                    </div>
+                </div>
+
+                <!-- Step 3: Ascension Style -->
+                <div class="ascension-section" id="ascension-step-style">
+                    <div class="ascension-section-header">
+                        <span class="step-badge">3</span>
+                        <h3 class="step-title">CHOOSE ASCENSION STYLE</h3>
+                    </div>
+                    <div class="ascension-styles-grid" id="ascension-styles-grid" role="radiogroup" aria-label="Ascension Style Selection">
+                        <!-- Rendered dynamically: Elemental, Royal, Arcane, Celestial, Dark, Random -->
+                    </div>
+                </div>
+
+                <!-- Step 4: Preview Card -->
+                <div class="ascension-section ascension-preview-section" id="ascension-step-preview">
+                    <div class="ascension-section-header">
+                        <span class="step-badge">✦</span>
+                        <h3 class="step-title">ASCENSION PREVIEW</h3>
+                    </div>
+                    <div class="ascension-preview-card" id="ascension-preview-card">
+                        <div class="preview-avatar-wrap" id="preview-avatar-wrap">
+                            <div class="preview-piece-svg" id="preview-piece-svg"></div>
+                            <div class="preview-halo" id="preview-halo"></div>
+                        </div>
+                        <div class="preview-details">
+                            <div class="preview-badge-row">
+                                <span class="preview-piece-badge" id="preview-piece-badge">QUEEN</span>
+                                <span class="preview-elem-badge" id="preview-elem-badge">FIRE</span>
+                                <span class="preview-style-badge" id="preview-style-badge">ROYAL ASCENSION</span>
+                            </div>
+                            <h4 class="preview-title" id="preview-title">INFERNAL QUEEN ASCENSION</h4>
+                            <div class="preview-ability-row">
+                                <span class="preview-ability-label">New Ability:</span>
+                                <span class="preview-ability-name" id="preview-ability-name">Pyroclasm / Inferno Queen</span>
+                            </div>
+                            <p class="preview-desc" id="preview-desc">Sweeps along open files and diagonals, leaving trails of burning fire and royal embers.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Action Buttons -->
+            <div class="ascension-footer">
+                <button type="button" class="btn-ascension-secondary" id="btn-promo-preview-effect">
+                    <span class="btn-icon">👁</span> PREVIEW EFFECT
+                </button>
+                <button type="button" class="btn-ascension-secondary" id="btn-promo-reset">
+                    <span class="btn-icon">↺</span> RESET
+                </button>
+                <button type="button" class="btn-ascension-primary" id="btn-promo-confirm">
+                    <span class="btn-icon">⚡</span> CONFIRM ASCENSION
+                </button>
             </div>
         </div>
     </div>

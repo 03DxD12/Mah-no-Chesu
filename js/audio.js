@@ -675,6 +675,251 @@ class AudioManager {
     }
 
     /**
+     * ASCENSION TRANSFORMATION AUDIO (Spec 194)
+     * Distinct Web Audio procedural synthesis per element + transformation style
+     */
+    playAscensionSound(element = 'fire', style = 'elemental') {
+        this.triggerHaptic([40, 30, 60, 30, 80]);
+        if (!this.sfxEnabled || !this.ctx) return;
+        this.initContext();
+        const t = this.ctx.currentTime;
+        const elem = (element || 'fire').toLowerCase();
+
+        switch (elem) {
+            case 'fire': {
+                // Flame ignition whoosh + deep impact
+                const boom = this.ctx.createOscillator();
+                const bGain = this.ctx.createGain();
+                boom.type = 'sine';
+                boom.frequency.setValueAtTime(160, t);
+                boom.frequency.exponentialRampToValueAtTime(32, t + 0.7);
+                bGain.gain.setValueAtTime(0.7, t);
+                bGain.gain.exponentialRampToValueAtTime(0.01, t + 0.7);
+                boom.connect(bGain);
+                bGain.connect(this.sfxGain);
+                boom.start(t);
+                boom.stop(t + 0.7);
+
+                const noise = this.ctx.createBufferSource();
+                noise.buffer = this.createNoiseBuffer(0.8);
+                const filter = this.ctx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(400, t);
+                filter.frequency.exponentialRampToValueAtTime(1400, t + 0.25);
+                filter.frequency.exponentialRampToValueAtTime(80, t + 0.8);
+                const nGain = this.ctx.createGain();
+                nGain.gain.setValueAtTime(0.6, t);
+                nGain.gain.exponentialRampToValueAtTime(0.01, t + 0.8);
+                noise.connect(filter);
+                filter.connect(nGain);
+                nGain.connect(this.sfxGain);
+                noise.start(t);
+                break;
+            }
+            case 'lightning': {
+                // Electrical charge buildup + sharp thunder hit
+                const snap = this.ctx.createOscillator();
+                const sGain = this.ctx.createGain();
+                snap.type = 'sawtooth';
+                snap.frequency.setValueAtTime(200, t);
+                snap.frequency.exponentialRampToValueAtTime(2800, t + 0.2);
+                snap.frequency.exponentialRampToValueAtTime(120, t + 0.5);
+                sGain.gain.setValueAtTime(0.6, t);
+                sGain.gain.exponentialRampToValueAtTime(0.01, t + 0.5);
+                snap.connect(sGain);
+                sGain.connect(this.sfxGain);
+                snap.start(t);
+                snap.stop(t + 0.5);
+
+                const boom = this.ctx.createOscillator();
+                const bGain = this.ctx.createGain();
+                boom.type = 'sine';
+                boom.frequency.setValueAtTime(220, t + 0.15);
+                boom.frequency.exponentialRampToValueAtTime(35, t + 0.7);
+                bGain.gain.setValueAtTime(0.8, t + 0.15);
+                bGain.gain.exponentialRampToValueAtTime(0.01, t + 0.7);
+                boom.connect(bGain);
+                bGain.connect(this.sfxGain);
+                boom.start(t + 0.15);
+                boom.stop(t + 0.7);
+                break;
+            }
+            case 'wind': {
+                // Rising air vortex + tempest burst
+                const noise = this.ctx.createBufferSource();
+                noise.buffer = this.createNoiseBuffer(0.9);
+                const bpf = this.ctx.createBiquadFilter();
+                bpf.type = 'bandpass';
+                bpf.frequency.setValueAtTime(300, t);
+                bpf.frequency.exponentialRampToValueAtTime(2400, t + 0.4);
+                bpf.frequency.exponentialRampToValueAtTime(200, t + 0.9);
+                bpf.Q.value = 3.5;
+                const gain = this.ctx.createGain();
+                gain.gain.setValueAtTime(0.5, t);
+                gain.gain.exponentialRampToValueAtTime(0.01, t + 0.9);
+                noise.connect(bpf);
+                bpf.connect(gain);
+                gain.connect(this.sfxGain);
+                noise.start(t);
+                break;
+            }
+            case 'earth': {
+                // Stone rumble + heavy seismic impact
+                const rumble = this.ctx.createOscillator();
+                const rGain = this.ctx.createGain();
+                rumble.type = 'triangle';
+                rumble.frequency.setValueAtTime(75, t);
+                rumble.frequency.exponentialRampToValueAtTime(28, t + 0.8);
+                rGain.gain.setValueAtTime(0.7, t);
+                rGain.gain.exponentialRampToValueAtTime(0.01, t + 0.8);
+                rumble.connect(rGain);
+                rGain.connect(this.sfxGain);
+                rumble.start(t);
+                rumble.stop(t + 0.8);
+                break;
+            }
+            case 'ice': {
+                // Frost buildup + crystalline shatter
+                [659.25, 880, 1174.66, 1760].forEach((freq, idx) => {
+                    const ch = this.ctx.createOscillator();
+                    const g = this.ctx.createGain();
+                    ch.type = 'sine';
+                    ch.frequency.setValueAtTime(freq, t + idx * 0.08);
+                    g.gain.setValueAtTime(0.3, t + idx * 0.08);
+                    g.gain.exponentialRampToValueAtTime(0.01, t + idx * 0.08 + 0.35);
+                    ch.connect(g);
+                    g.connect(this.sfxGain);
+                    ch.start(t + idx * 0.08);
+                    ch.stop(t + idx * 0.08 + 0.35);
+                });
+                break;
+            }
+            case 'water': {
+                // Rising tidal vortex + ocean surge
+                const noise = this.ctx.createBufferSource();
+                noise.buffer = this.createNoiseBuffer(0.85);
+                const lpf = this.ctx.createBiquadFilter();
+                lpf.type = 'lowpass';
+                lpf.frequency.setValueAtTime(200, t);
+                lpf.frequency.exponentialRampToValueAtTime(1100, t + 0.35);
+                lpf.frequency.exponentialRampToValueAtTime(150, t + 0.85);
+                const gain = this.ctx.createGain();
+                gain.gain.setValueAtTime(0.6, t);
+                gain.gain.exponentialRampToValueAtTime(0.01, t + 0.85);
+                noise.connect(lpf);
+                lpf.connect(gain);
+                gain.connect(this.sfxGain);
+                noise.start(t);
+                break;
+            }
+            case 'light': {
+                // Harmonic ascent + divine radiant impact
+                [392.00, 523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, t + idx * 0.07);
+                    gain.gain.setValueAtTime(0.25, t + idx * 0.07);
+                    gain.gain.exponentialRampToValueAtTime(0.01, t + idx * 0.07 + 0.6);
+                    osc.connect(gain);
+                    gain.connect(this.sfxGain);
+                    osc.start(t + idx * 0.07);
+                    osc.stop(t + idx * 0.07 + 0.6);
+                });
+                break;
+            }
+            case 'shadow': {
+                // Low magical rumble + dark dimensional portal impact
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(80, t);
+                osc.frequency.exponentialRampToValueAtTime(35, t + 0.8);
+                gain.gain.setValueAtTime(0.5, t);
+                gain.gain.exponentialRampToValueAtTime(0.01, t + 0.8);
+                osc.connect(gain);
+                gain.connect(this.sfxGain);
+                osc.start(t);
+                osc.stop(t + 0.8);
+                break;
+            }
+            case 'nature': {
+                // Growing vines sweep + floral emerald burst
+                [330, 440, 554, 660].forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const g = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq * 0.8, t + idx * 0.08);
+                    osc.frequency.exponentialRampToValueAtTime(freq * 1.3, t + idx * 0.08 + 0.25);
+                    g.gain.setValueAtTime(0.25, t + idx * 0.08);
+                    g.gain.exponentialRampToValueAtTime(0.01, t + idx * 0.08 + 0.4);
+                    osc.connect(g);
+                    g.connect(this.sfxGain);
+                    osc.start(t + idx * 0.08);
+                    osc.stop(t + idx * 0.08 + 0.4);
+                });
+                break;
+            }
+            case 'arcane':
+            default: {
+                // Magical tone sweep + rune singularity explosion
+                [523.25, 783.99, 1046.50, 1567.98].forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const g = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, t + idx * 0.06);
+                    osc.frequency.exponentialRampToValueAtTime(freq * 1.5, t + idx * 0.06 + 0.3);
+                    g.gain.setValueAtTime(0.25, t + idx * 0.06);
+                    g.gain.exponentialRampToValueAtTime(0.01, t + idx * 0.06 + 0.5);
+                    osc.connect(g);
+                    g.connect(this.sfxGain);
+                    osc.start(t + idx * 0.06);
+                    osc.stop(t + idx * 0.06 + 0.5);
+                });
+                break;
+            }
+        }
+    }
+
+    /**
+     * ASCENSION CHECKMATE SPECIAL AUDIO (Spec 193)
+     */
+    playAscensionCheckmateSound(element = 'fire') {
+        this.triggerHaptic([80, 50, 100, 50, 150, 50, 300]);
+        if (!this.sfxEnabled || !this.ctx) return;
+        this.initContext();
+        const t = this.ctx.currentTime;
+
+        // Grand triumphant orchestral fanfares in unison
+        const notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((freq, idx) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, t + idx * 0.09);
+            gain.gain.setValueAtTime(0.35, t + idx * 0.09);
+            gain.gain.exponentialRampToValueAtTime(0.01, t + idx * 0.09 + 0.9);
+            osc.connect(gain);
+            gain.connect(this.sfxGain);
+            osc.start(t + idx * 0.09);
+            osc.stop(t + idx * 0.09 + 0.9);
+        });
+
+        // Sub bass checkmate thunder
+        const boom = this.ctx.createOscillator();
+        const bGain = this.ctx.createGain();
+        boom.type = 'sine';
+        boom.frequency.setValueAtTime(120, t + 0.4);
+        boom.frequency.exponentialRampToValueAtTime(25, t + 1.4);
+        bGain.gain.setValueAtTime(0.9, t + 0.4);
+        bGain.gain.exponentialRampToValueAtTime(0.01, t + 1.4);
+        boom.connect(bGain);
+        bGain.connect(this.sfxGain);
+        boom.start(t + 0.4);
+        boom.stop(t + 1.4);
+    }
+
+    /**
      * Dark Fantasy Ambient Synth Background Generator
      * Generates soothing, mysterious, low-pass ambient chords
      */

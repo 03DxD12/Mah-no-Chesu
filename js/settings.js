@@ -17,7 +17,12 @@ class SettingsManager {
             autoRotate: false,
             photosensitivity: false,
             reducedMotion: false,
-            boardTheme: 'slate' // 'slate' | 'obsidian' | 'emerald' | 'wood' | 'ice'
+            boardTheme: 'slate', // 'slate' | 'obsidian' | 'emerald' | 'wood' | 'ice'
+            promotionMode: 'detailed',    // 'detailed' | 'quick' | 'automatic' (Spec 183)
+            promotionElement: 'ask',      // 'ask' | 'inherit' | 'default' | 'random' (Spec 184)
+            ascensionEffect: 'ask',       // 'ask' | 'default' | 'random' (Spec 195)
+            showPromotionPreview: true,   // (Spec 182, 195)
+            cinematicPromotion: true      // (Spec 195)
         };
 
         this.settings = { ...this.defaults };
@@ -92,6 +97,12 @@ class SettingsManager {
         const photoCheckbox = document.getElementById('setting-photosensitivity');
         const motionCheckbox = document.getElementById('setting-reduced-motion');
 
+        const promoModeSelect = document.getElementById('setting-promo-mode');
+        const promoElemSelect = document.getElementById('setting-promo-element');
+        const promoEffectSelect = document.getElementById('setting-promo-effect');
+        const promoPreviewCheckbox = document.getElementById('setting-promo-preview');
+        const promoCinematicCheckbox = document.getElementById('setting-promo-cinematic');
+
         // Populate values
         if (sfxCheckbox) sfxCheckbox.checked = this.settings.sfx;
         if (musicCheckbox) musicCheckbox.checked = this.settings.music;
@@ -107,6 +118,37 @@ class SettingsManager {
         if (autoRotateCheckbox) autoRotateCheckbox.checked = this.settings.autoRotate;
         if (photoCheckbox) photoCheckbox.checked = this.settings.photosensitivity;
         if (motionCheckbox) motionCheckbox.checked = this.settings.reducedMotion;
+        if (promoModeSelect) promoModeSelect.value = this.settings.promotionMode || 'detailed';
+        if (promoElemSelect) promoElemSelect.value = this.settings.promotionElement || 'ask';
+        if (promoEffectSelect) promoEffectSelect.value = this.settings.ascensionEffect || 'ask';
+        if (promoPreviewCheckbox) promoPreviewCheckbox.checked = this.settings.showPromotionPreview !== false;
+        if (promoCinematicCheckbox) promoCinematicCheckbox.checked = this.settings.cinematicPromotion !== false;
+
+        // Event listeners
+        promoModeSelect?.addEventListener('change', (e) => {
+            this.settings.promotionMode = e.target.value;
+            this.saveSettings();
+        });
+
+        promoElemSelect?.addEventListener('change', (e) => {
+            this.settings.promotionElement = e.target.value;
+            this.saveSettings();
+        });
+
+        promoEffectSelect?.addEventListener('change', (e) => {
+            this.settings.ascensionEffect = e.target.value;
+            this.saveSettings();
+        });
+
+        promoPreviewCheckbox?.addEventListener('change', (e) => {
+            this.settings.showPromotionPreview = e.target.checked;
+            this.saveSettings();
+        });
+
+        promoCinematicCheckbox?.addEventListener('change', (e) => {
+            this.settings.cinematicPromotion = e.target.checked;
+            this.saveSettings();
+        });
 
         // Event listeners
         themeSelect?.addEventListener('change', (e) => {

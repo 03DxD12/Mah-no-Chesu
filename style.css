@@ -1427,60 +1427,553 @@ body {
     cursor: pointer;
 }
 
-/* Promotion Modal */
-.promo-card {
-    text-align: center;
-    max-width: 440px;
+.setting-divider {
+    margin-top: 0.85rem;
+    padding-top: 0.65rem;
+    border-top: 1px solid rgba(212, 175, 55, 0.25);
+    display: flex;
+    align-items: center;
 }
 
-.promo-title {
-    font-family: Georgia, serif;
-    font-size: 1.6rem;
+.setting-section-title {
+    font-size: 0.74rem;
+    font-weight: 700;
     color: var(--text-gold);
-    letter-spacing: 0.15em;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
 }
 
-.promo-sub {
+/* ==========================================================================
+   ASCENSION - ELEMENTAL PAWN PROMOTION SYSTEM (Specs 163 - 198)
+   ========================================================================== */
+.modal-ascension-overlay {
+    backdrop-filter: blur(10px) brightness(0.65);
+    -webkit-backdrop-filter: blur(10px) brightness(0.65);
+    background: radial-gradient(circle at center, rgba(17, 24, 39, 0.85) 0%, rgba(5, 7, 12, 0.95) 100%);
+    z-index: 1200;
+}
+
+.ascension-card {
+    max-width: 680px;
+    width: 95%;
+    max-height: 90dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: linear-gradient(175deg, #121927 0%, #0a0e16 100%);
+    border: 1.5px solid var(--border-gold);
+    box-shadow: 0 10px 45px rgba(0, 0, 0, 0.85), 0 0 35px rgba(212, 175, 55, 0.25);
+    border-radius: var(--radius-lg);
+    position: relative;
+    padding: 0;
+}
+
+.ascension-header {
+    text-align: center;
+    padding: 1.1rem 1rem 0.6rem;
+    background: linear-gradient(180deg, rgba(212, 175, 55, 0.12) 0%, transparent 100%);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.ascension-crest {
+    font-size: 1.4rem;
+    color: var(--text-gold);
+    filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.7));
+    line-height: 1;
+    margin-bottom: 0.2rem;
+}
+
+.ascension-title {
+    font-family: Georgia, serif;
+    font-size: 1.8rem;
+    color: var(--text-gold);
+    letter-spacing: 0.18em;
+    margin: 0;
+    text-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+}
+
+.ascension-subtitle {
     font-size: 0.8rem;
     color: var(--text-secondary);
-    margin-bottom: 1.25rem;
+    margin: 0.25rem 0 0;
 }
 
-.promo-choices {
+.ascension-body {
+    overflow-y: auto;
+    flex: 1;
+    padding: 0.85rem 1.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+    overscroll-behavior: contain;
+}
+
+.ascension-section {
+    background: rgba(19, 27, 39, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-md);
+    padding: 0.75rem 0.85rem;
+}
+
+.ascension-section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.65rem;
+}
+
+.step-badge {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--border-gold);
+    color: #07090e;
+    font-weight: 800;
+    font-size: 0.72rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 8px rgba(212, 175, 55, 0.4);
+}
+
+.step-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: 0.08em;
+    margin: 0;
+    text-transform: uppercase;
+}
+
+/* Step 1: Pieces Grid */
+.ascension-pieces-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 0.75rem;
+    gap: 0.65rem;
 }
 
-.promo-btn {
+.ascension-piece-btn {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
+    gap: 0.35rem;
     background: var(--bg-surface-elevated);
-    border: 2px solid var(--border-subtle);
+    border: 1.5px solid rgba(255, 255, 255, 0.1);
     border-radius: var(--radius-md);
-    padding: 1rem 0.5rem;
+    padding: 0.75rem 0.4rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    position: relative;
+    user-select: none;
+}
+
+.ascension-piece-btn:hover {
+    border-color: rgba(212, 175, 55, 0.6);
+    transform: translateY(-2px);
+    background: rgba(30, 41, 59, 0.9);
+}
+
+.ascension-piece-btn.selected {
+    border-color: var(--border-gold);
+    background: linear-gradient(180deg, rgba(212, 175, 55, 0.18) 0%, rgba(15, 23, 42, 0.95) 100%);
+    box-shadow: 0 0 16px rgba(212, 175, 55, 0.35), inset 0 0 10px rgba(212, 175, 55, 0.15);
+}
+
+.ascension-piece-btn .piece-svg-box {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ascension-piece-btn .piece-svg-box svg {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.ascension-piece-btn .piece-title-text {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: 0.05em;
+}
+
+.ascension-piece-btn.selected .piece-title-text {
+    color: var(--text-gold);
+}
+
+/* Step 2: Elements Grid */
+.ascension-quick-elements {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.65rem;
+    flex-wrap: wrap;
+}
+
+.btn-ascension-quick {
+    flex: 1 1 calc(50% - 0.25rem);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    background: rgba(30, 41, 59, 0.85);
+    border: 1px dashed rgba(212, 175, 55, 0.5);
+    border-radius: var(--radius-sm);
+    padding: 0.45rem 0.6rem;
+    color: var(--text-gold);
+    font-size: 0.75rem;
+    font-weight: 600;
     cursor: pointer;
     transition: all var(--transition-fast);
 }
 
-.promo-btn:hover {
+.btn-ascension-quick:hover {
+    background: rgba(212, 175, 55, 0.15);
+    border-style: solid;
     border-color: var(--border-gold);
-    transform: translateY(-4px);
-    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.3);
 }
 
-.promo-piece-svg {
-    width: 44px;
-    height: 44px;
+.ascension-elements-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.45rem;
 }
 
-.promo-label {
-    font-size: 0.75rem;
+.ascension-elem-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    background: var(--bg-surface-elevated);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-sm);
+    padding: 0.5rem 0.25rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    user-select: none;
+}
+
+.ascension-elem-btn:hover {
+    transform: translateY(-2px);
+    border-color: currentColor;
+}
+
+.ascension-elem-btn.selected {
+    border-color: currentColor;
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 12px currentColor, inset 0 0 8px rgba(255, 255, 255, 0.1);
+}
+
+.elem-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    box-shadow: 0 0 6px currentColor;
+}
+
+.elem-name-text {
+    font-size: 0.72rem;
     font-weight: 600;
     color: var(--text-primary);
+}
+
+.ascension-elem-btn.selected .elem-name-text {
+    font-weight: 700;
+    color: #ffffff;
+}
+
+/* Step 3: Styles Grid */
+.ascension-styles-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+}
+
+.ascension-style-btn {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    background: var(--bg-surface-elevated);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-sm);
+    padding: 0.5rem 0.6rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    text-align: left;
+}
+
+.ascension-style-btn:hover {
+    border-color: rgba(212, 175, 55, 0.6);
+    background: rgba(30, 41, 59, 0.9);
+}
+
+.ascension-style-btn.selected {
+    border-color: var(--border-gold);
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.15) 0%, rgba(15, 23, 42, 0.95) 100%);
+    box-shadow: 0 0 12px rgba(212, 175, 55, 0.3);
+}
+
+.style-title-text {
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.ascension-style-btn.selected .style-title-text {
+    color: var(--text-gold);
+}
+
+.style-desc-text {
+    font-size: 0.66rem;
+    color: var(--text-muted);
+    line-height: 1.25;
+}
+
+/* Step 4: Preview Card */
+.ascension-preview-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.08) 0%, rgba(15, 23, 42, 0.95) 100%);
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    border-radius: var(--radius-md);
+    padding: 0.85rem;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.preview-avatar-wrap {
+    position: relative;
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(7, 9, 14, 0.8);
+    border-radius: 50%;
+    border: 1.5px solid var(--border-gold);
+}
+
+.preview-piece-svg {
+    width: 44px;
+    height: 44px;
+    z-index: 2;
+}
+
+.preview-piece-svg svg {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.8));
+}
+
+.preview-halo {
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    opacity: 0.7;
+    animation: previewPulse 2s ease-in-out infinite alternate;
+    pointer-events: none;
+}
+
+@keyframes previewPulse {
+    0% { transform: scale(0.95); opacity: 0.5; }
+    100% { transform: scale(1.1); opacity: 0.9; }
+}
+
+.preview-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.preview-badge-row {
+    display: flex;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.3rem;
+}
+
+.preview-piece-badge,
+.preview-elem-badge,
+.preview-style-badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 0.12rem 0.45rem;
+    border-radius: var(--radius-full);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.preview-piece-badge {
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--text-primary);
+}
+
+.preview-elem-badge {
+    background: rgba(212, 175, 55, 0.2);
+    color: var(--text-gold);
+    border: 1px solid rgba(212, 175, 55, 0.4);
+}
+
+.preview-style-badge {
+    background: rgba(139, 92, 246, 0.2);
+    color: #c4b5fd;
+    border: 1px solid rgba(139, 92, 246, 0.4);
+}
+
+.preview-title {
+    font-family: Georgia, serif;
+    font-size: 1.05rem;
+    color: var(--text-gold);
+    margin: 0 0 0.25rem 0;
+    letter-spacing: 0.05em;
+    text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+}
+
+.preview-ability-row {
+    font-size: 0.76rem;
+    margin-bottom: 0.2rem;
+}
+
+.preview-ability-label {
+    color: var(--text-muted);
+}
+
+.preview-ability-name {
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-left: 0.3rem;
+}
+
+.preview-desc {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.35;
+}
+
+/* Ascension Footer */
+.ascension-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.65rem;
+    padding: 0.85rem 1.1rem;
+    background: #0d121c;
+    border-top: 1px solid rgba(212, 175, 55, 0.2);
+    flex-wrap: wrap;
+}
+
+.btn-ascension-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    padding: 0.55rem 0.85rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.btn-ascension-secondary:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--text-primary);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-ascension-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
+    border: 1px solid #ffd700;
+    border-radius: var(--radius-sm);
+    color: #07090e;
+    padding: 0.6rem 1.25rem;
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+    transition: all var(--transition-fast);
+}
+
+.btn-ascension-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 25px rgba(212, 175, 55, 0.65);
+    background: linear-gradient(135deg, #fce074 0%, #d4af37 100%);
+}
+
+@media (max-width: 640px) {
+    .ascension-card {
+        width: 100%;
+        max-height: 94dvh;
+        border-radius: var(--radius-md);
+    }
+    .ascension-header {
+        padding: 0.75rem 0.6rem 0.4rem;
+    }
+    .ascension-title {
+        font-size: 1.4rem;
+    }
+    .ascension-subtitle {
+        font-size: 0.72rem;
+    }
+    .ascension-body {
+        padding: 0.6rem 0.7rem;
+        gap: 0.75rem;
+    }
+    .ascension-pieces-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.4rem;
+    }
+    .ascension-piece-btn {
+        padding: 0.5rem 0.2rem;
+    }
+    .ascension-piece-btn .piece-svg-box {
+        width: 34px;
+        height: 34px;
+    }
+    .ascension-piece-btn .piece-title-text {
+        font-size: 0.68rem;
+    }
+    .ascension-elements-grid {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 0.3rem;
+    }
+    .ascension-elem-btn {
+        padding: 0.4rem 0.15rem;
+    }
+    .elem-name-text {
+        font-size: 0.64rem;
+    }
+    .ascension-styles-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.35rem;
+    }
+    .ascension-preview-card {
+        flex-direction: column;
+        text-align: center;
+        padding: 0.65rem;
+    }
+    .preview-badge-row {
+        justify-content: center;
+    }
+    .ascension-footer {
+        padding: 0.6rem 0.7rem;
+        justify-content: stretch;
+    }
+    .btn-ascension-secondary,
+    .btn-ascension-primary {
+        flex: 1 1 100%;
+        justify-content: center;
+    }
 }
 
 /* Game Over / Victory Modal */

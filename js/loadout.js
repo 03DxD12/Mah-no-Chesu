@@ -442,12 +442,71 @@ class LoadoutManager {
     }
 
     /**
-     * Get active element for a piece based on its type and player color
+     * Get active element for a piece based on its instance, type and player color (Specs 186-188)
      */
-    getElementForPiece(pieceType, color) {
-        const type = (pieceType || '').toLowerCase();
+    getElementForPiece(pieceOrType, color) {
+        if (pieceOrType && typeof pieceOrType === 'object') {
+            if (pieceOrType.element) return pieceOrType.element;
+            const type = (pieceOrType.type || '').toLowerCase();
+            const pColor = pieceOrType.color || color;
+            const loadout = pColor === 'w' ? this.whiteLoadout : this.blackLoadout;
+            return loadout[type] || 'fire';
+        }
+        const type = (pieceOrType || '').toLowerCase();
         const loadout = color === 'w' ? this.whiteLoadout : this.blackLoadout;
         return loadout[type] || 'fire';
+    }
+
+    /**
+     * Generate canonical Ascension transformation title (Specs 170-181, 198)
+     * e.g. "INFERNAL QUEEN ASCENSION", "THUNDER KNIGHT ASCENSION", "TITAN FORTRESS ASCENSION"
+     */
+    getAscensionTitle(pieceType, element, style = 'elemental') {
+        const type = (pieceType || 'q').toLowerCase();
+        const elem = (element || 'fire').toLowerCase();
+        const st = (style || 'elemental').toLowerCase();
+
+        const elemAdjectives = {
+            fire: 'INFERNAL',
+            lightning: 'THUNDER',
+            wind: 'TEMPEST',
+            earth: 'TITAN',
+            ice: 'FROZEN',
+            water: 'TIDAL',
+            light: 'DIVINE',
+            shadow: 'ABYSSAL',
+            nature: 'VERDANT',
+            arcane: 'MYSTIC'
+        };
+
+        const pieceEpithets = {
+            q: 'QUEEN',
+            r: 'FORTRESS',
+            b: 'BISHOP',
+            n: 'KNIGHT'
+        };
+
+        const adj = elemAdjectives[elem] || elem.toUpperCase();
+        const pieceName = pieceEpithets[type] || 'CHAMPION';
+
+        // Canonical combinations per specs 171-181 & 198
+        if (st === 'royal') {
+            return `ROYAL ${adj} ${pieceName} ASCENSION`;
+        }
+        if (st === 'dark' && elem === 'shadow' && type === 'n') {
+            return 'PHANTOM KNIGHT AWAKENING';
+        }
+        if (st === 'dark') {
+            return `DARK ${adj} ${pieceName} AWAKENING`;
+        }
+        if (st === 'celestial') {
+            return `CELESTIAL ${adj} ${pieceName} AWAKENING`;
+        }
+        if (st === 'arcane') {
+            return `ARCANE ${adj} ${pieceName} TRANSFORMATION`;
+        }
+
+        return `${adj} ${pieceName} ASCENSION`;
     }
 
     /**

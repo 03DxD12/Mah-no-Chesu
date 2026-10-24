@@ -375,28 +375,23 @@ class MahoNoChesuApp {
         const isCapture = !!(move.captured || move.isEnPassant || this.engine.board[move.to]);
         const isWhite = piece.color === 'w';
 
-        // Pawn promotion prompt if not already specified
+        // Check if pawn reaches the final rank (Specs 163 - 164, 190)
         const toRank = Math.floor(move.to / 8);
-        if (piece.type === 'p' && (toRank === 7 || toRank === 0) && !move.promotion) {
-            move.promotion = await this.ui.promptPromotion(piece.color);
-        }
-
-        // Generate SAN notation before committing move
-        const san = this.engine.generateSAN(move);
+        const isPawnPromotion = piece.type === 'p' && (toRank === 7 || toRank === 0);
 
         // Determine smooth movement animation duration
         const animSpeed = this.settings.settings.animationSpeed;
         const slideDuration = animSpeed === 'fast' ? 140 : (animSpeed === 'cinematic' ? 360 : 220);
 
-        // Look up piece's configured element & piece-specific attack name (Spec 109 & 123)
-        const element = this.loadout.getElementForPiece(piece.type, piece.color);
+        // Look up piece's configured element & piece-specific attack name (Spec 109, 123, 186-188)
+        const element = this.loadout.getElementForPiece(piece, piece.color);
         const attackName = this.loadout.getAttackName(piece.type, element);
 
         // Army synergy for moving player (Specs 144 - 153)
         const activeArmyLoadout = piece.color === 'w' ? this.loadout.whiteLoadout : this.loadout.blackLoadout;
         const synergyInfo = this.loadout.calculateElementSynergies(activeArmyLoadout);
 
-        // 1. Play Elemental Attack FX & Smooth Movement
+        // 1. Play Elemental Attack FX & Smooth Movement (Spec 190: uses OLD element)
         if (isCapture) {
             this.consecutiveCaptures++;
 
@@ -453,7 +448,7 @@ class MahoNoChesuApp {
                 synergyInfo
             });
 
-            // Smooth gliding advance into conquered square
+            // Smooth gliding advance into conquered square (Pawn stands on promotion square)
             await this.ui.animatePieceMove(move.from, move.to, slideDuration);
         } else if (move.isCastling) {
             this.comboTracker = { player: null, lastElement: null, streak: 0, sameStreak: 0 };
@@ -469,14 +464,58 @@ class MahoNoChesuApp {
             await this.ui.animatePieceMove(move.from, move.to, slideDuration);
         }
 
-        // 2. Commit move in chess engine
+        // 2. ASCENSION - Pawn Promotion Sequence (Specs 163 - 190)
+        if (isPawnPromotion) {
+            const isHumanPlayer = this.gameMode === 'pvp' || (this.gameMode === 'pvc' && piece.color === this.playerColor);
+            let promoChoice;
+
+            if (isHumanPlayer) {
+                promoChoice = await this.ui.promptAscension({
+                    color: piece.color,
+                    pawnElement: element,
+                    settings: this.settings.settings,
+                    onPreview: (previewData) => {
+                        this.effects.playAscensionSequence({
+                            squareIndex: move.to,
+                            isFlipped: this.ui.isFlipped,
+                            element: previewData.element,
+                            pieceType: previewData.pieceType,
+                            style: previewData.style,
+                            isReducedMotion: this.settings.settings.reducedMotion
+                        });
+                        this.audio.playAscensionSound(previewData.element, previewData.style);
+                    }
+                });
+            } else {
+                promoChoice = {
+                    pieceType: move.promotion || 'q',
+                    element: element,
+                    style: 'elemental'
+                };
+            }
+
+            move.promotion = promoChoice.pieceType;
+            move.element = promoChoice.element;
+            move.ascensionStyle = promoChoice.style;
+
+            // Play the canonical Ascension animation & audio on the promotion square (Spec 170-176, 194)
+            this.audio.playAscensionSound(move.element, move.ascensionStyle);
+            await this.effects.playAscensionSequence({
+                squareIndex: move.to,
+                isFlipped: this.ui.isFlipped,
+                element: move.element,
+                pieceType: move.promotion,
+                style: move.ascensionStyle,
+                isReducedMotion: this.settings.settings.reducedMotion
+            });
+        }
+
+        // Generate SAN notation after promotion piece is finalized
+        const san = this.engine.generateSAN(move);
+
+        // 3. Commit move in chess engine (preserves individual piece.element on promoted piece)
         this.engine.makeMove(move);
         this.ui.lastMove = move;
-
-        // 3. Promotion Aura
-        if (move.promotion) {
-            this.effects.ascensionAura(move.to, this.ui.isFlipped);
-        }
 
         // 4. Update Move History
         this.moveHistoryLog.push({ san, move });
@@ -490,8 +529,25 @@ class MahoNoChesuApp {
         const toAlg = this.engine.squareToAlgebraic(move.to);
         this.ui.announce(`${isWhite ? 'White' : 'Black'} ${pieceNames[piece.type]} from ${fromAlg} ${actionWord} ${toAlg}`);
 
-        // 6. Check Game Over & Checks
+        // 6. Check Game Over & Checks (Spec 191, 192, 193)
         const status = this.engine.getGameStatus();
+
+        if (status.gameOver && (status.reason === 'checkmate' || status.checkmate) && isPawnPromotion) {
+            // Spec 192 & 193: ASCENSION CHECKMATE SPECIAL FINISHER
+            this.audio.playAscensionCheckmateSound(move.element);
+            await this.effects.playAscensionCheckmate({
+                squareIndex: move.to,
+                isFlipped: this.ui.isFlipped,
+                element: move.element,
+                pieceType: move.promotion,
+                winnerColor: piece.color
+            });
+            this.audio.playVictory();
+            this.ui.showGameOver(status);
+            this.isAnimating = false;
+            this.ui.isAnimating = false;
+            return;
+        }
 
         if (status.inCheck && !status.gameOver) {
             this.audio.playCheck();
@@ -518,7 +574,7 @@ class MahoNoChesuApp {
 
         if (status.gameOver) {
             this.audio.playVictory();
-            if (status.checkmate) {
+            if (status.reason === 'checkmate' || status.checkmate) {
                 const winningColor = this.engine.turn === 'w' ? 'b' : 'w';
                 const winLoadout = winningColor === 'w' ? this.loadout.whiteLoadout : this.loadout.blackLoadout;
                 const winSyn = this.loadout.calculateElementSynergies(winLoadout);

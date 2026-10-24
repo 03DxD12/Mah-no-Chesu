@@ -1228,6 +1228,352 @@ class EffectsManager {
     }
 
     /**
+     * ASCENSION TRANSFORMATION SEQUENCE (Specs 163 - 181, 190)
+     */
+    async playAscensionSequence({ squareIndex, isFlipped = false, element = 'fire', pieceType = 'q', style = 'elemental', isReducedMotion = false }) {
+        const pt = this.getSquareCenter(squareIndex, isFlipped);
+        const elem = (element || 'fire').toLowerCase();
+        const elemMeta = window.ELEMENTS && window.ELEMENTS[elem] ? window.ELEMENTS[elem] : { color: '#f97316', secondaryColor: '#fbbf24' };
+        const primaryCol = elemMeta.color || '#f97316';
+        const secCol = elemMeta.secondaryColor || '#fbbf24';
+
+        if (isReducedMotion) {
+            this.addShockwave(pt.x, pt.y, pt.width * 0.9, primaryCol, 2);
+            for (let i = 0; i < 12; i++) {
+                this.spawnParticle({
+                    x: pt.x + (Math.random() - 0.5) * pt.width * 0.5,
+                    y: pt.y + (Math.random() - 0.5) * pt.height * 0.5,
+                    vx: (Math.random() - 0.5) * 1.5,
+                    vy: -1 - Math.random(),
+                    radius: 2 + Math.random() * 2,
+                    color: primaryCol,
+                    decay: 0.04
+                });
+            }
+            await new Promise(r => setTimeout(r, 400));
+            return;
+        }
+
+        this.screenShake('md');
+
+        // Style Overlays (Specs 170 - 175)
+        if (style === 'royal') {
+            this.addShockwave(pt.x, pt.y, pt.width * 1.5, '#d4af37', 4.5);
+            this.activeBeams.push({
+                x: pt.x,
+                y: pt.y,
+                width: pt.width * 0.65,
+                color: '#fbbf24',
+                coreColor: '#ffffff',
+                alpha: 1,
+                decay: 0.035
+            });
+        } else if (style === 'arcane') {
+            this.activeMagicRings.push({
+                x: pt.x,
+                y: pt.y,
+                radius: 4,
+                maxRadius: pt.width * 0.9,
+                color: '#ec4899',
+                alpha: 1,
+                decay: 0.03,
+                rotation: 0,
+                vRot: 0.08
+            });
+            this.activeMagicRings.push({
+                x: pt.x,
+                y: pt.y,
+                radius: 4,
+                maxRadius: pt.width * 1.25,
+                color: '#a855f7',
+                alpha: 1,
+                decay: 0.025,
+                rotation: 0,
+                vRot: -0.06
+            });
+        } else if (style === 'celestial') {
+            this.activeBeams.push({
+                x: pt.x,
+                y: pt.y,
+                width: pt.width * 0.8,
+                color: '#facc15',
+                coreColor: '#ffffff',
+                alpha: 1,
+                decay: 0.028
+            });
+            this.addShockwave(pt.x, pt.y, pt.width * 1.3, '#fef08a', 3);
+        } else if (style === 'dark') {
+            this.activeMagicRings.push({
+                x: pt.x,
+                y: pt.y,
+                radius: pt.width * 0.7,
+                maxRadius: pt.width * 1.4,
+                color: '#8b5cf6',
+                alpha: 1,
+                decay: 0.03,
+                rotation: 0,
+                vRot: 0.1
+            });
+            this.addShockwave(pt.x, pt.y, pt.width * 1.1, '#1e1b4b', 5);
+        }
+
+        // Element-Specific Ascension Effects (Spec 176)
+        switch (elem) {
+            case 'fire': {
+                this.addShockwave(pt.x, pt.y, pt.width * 1.2, '#f97316', 4);
+                for (let i = 0; i < 40; i++) {
+                    const angle = (i / 40) * Math.PI * 4;
+                    const r = (i / 40) * (pt.width * 0.45);
+                    this.spawnParticle({
+                        x: pt.x + Math.cos(angle) * r,
+                        y: pt.y + Math.sin(angle) * r,
+                        vx: Math.cos(angle) * 1.5,
+                        vy: -3.5 - Math.random() * 3,
+                        radius: 3.5 + Math.random() * 4,
+                        color: Math.random() > 0.4 ? primaryCol : secCol,
+                        decay: 0.028
+                    });
+                }
+                break;
+            }
+            case 'lightning': {
+                this.addShockwave(pt.x, pt.y, pt.width * 1.3, '#38bdf8', 4);
+                for (let a = 0; a < 3; a++) {
+                    const pts = [];
+                    let curX = pt.x + (Math.random() - 0.5) * pt.width * 0.4;
+                    let curY = 0;
+                    pts.push({ x: curX, y: curY });
+                    while (curY < pt.y) {
+                        curY += 20 + Math.random() * 25;
+                        curX += (Math.random() - 0.5) * 30;
+                        pts.push({ x: curX, y: Math.min(curY, pt.y) });
+                    }
+                    this.activeLightningArcs.push({
+                        points: pts,
+                        color: '#ffffff',
+                        glow: '#38bdf8',
+                        alpha: 1,
+                        decay: 0.05
+                    });
+                }
+                for (let i = 0; i < 35; i++) {
+                    this.spawnParticle({
+                        x: pt.x + (Math.random() - 0.5) * pt.width * 0.6,
+                        y: pt.y + (Math.random() - 0.5) * pt.height * 0.6,
+                        vx: (Math.random() - 0.5) * 6,
+                        vy: (Math.random() - 0.5) * 6,
+                        radius: 4,
+                        color: Math.random() > 0.3 ? '#38bdf8' : '#ffffff',
+                        shape: 'spark',
+                        decay: 0.035
+                    });
+                }
+                break;
+            }
+            case 'wind': {
+                this.addShockwave(pt.x, pt.y, pt.width * 1.4, '#34d399', 3);
+                for (let i = 0; i < 40; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    this.spawnParticle({
+                        x: pt.x + Math.cos(angle) * (pt.width * 0.35),
+                        y: pt.y + Math.sin(angle) * (pt.height * 0.35),
+                        vx: -Math.sin(angle) * 4.5,
+                        vy: Math.cos(angle) * 4.5 - 2,
+                        radius: 2.5 + Math.random() * 3,
+                        color: Math.random() > 0.5 ? '#34d399' : '#ecfdf5',
+                        shape: 'streak',
+                        decay: 0.03
+                    });
+                }
+                break;
+            }
+            case 'earth': {
+                this.addShockwave(pt.x, pt.y, pt.width * 1.1, '#d97706', 4.5);
+                this.activeFissures.push({
+                    cx: pt.x,
+                    cy: pt.y,
+                    length: pt.width * 1.2,
+                    alpha: 1,
+                    decay: 0.02
+                });
+                for (let i = 0; i < 30; i++) {
+                    this.spawnParticle({
+                        x: pt.x + (Math.random() - 0.5) * pt.width * 0.5,
+                        y: pt.y + (Math.random() - 0.5) * pt.height * 0.5,
+                        vx: (Math.random() - 0.5) * 4.5,
+                        vy: -2 - Math.random() * 3,
+                        radius: 3 + Math.random() * 4,
+                        color: Math.random() > 0.5 ? '#d97706' : '#78350f',
+                        shape: 'rock',
+                        gravity: 0.15,
+                        decay: 0.025
+                    });
+                }
+                break;
+            }
+            case 'ice': {
+                this.addShockwave(pt.x, pt.y, pt.width * 1.3, '#06b6d4', 3.5);
+                this.activeMagicRings.push({
+                    x: pt.x,
+                    y: pt.y,
+                    radius: 2,
+                    maxRadius: pt.width * 0.8,
+                    color: '#67e8f9',
+                    alpha: 1,
+                    decay: 0.03,
+                    rotation: 0,
+                    vRot: 0.05
+                });
+                for (let i = 0; i < 36; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    this.spawnParticle({
+                        x: pt.x,
+                        y: pt.y,
+                        vx: Math.cos(angle) * (3 + Math.random() * 4),
+                        vy: Math.sin(angle) * (3 + Math.random() * 4),
+                        radius: 3 + Math.random() * 3.5,
+                        color: Math.random() > 0.4 ? '#06b6d4' : '#e0f2fe',
+                        shape: 'crystal',
+                        decay: 0.03
+                    });
+                }
+                break;
+            }
+            case 'water': {
+                this.addShockwave(pt.x, pt.y, pt.width * 1.25, '#0284c7', 3.5);
+                for (let i = 0; i < 35; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    this.spawnParticle({
+                        x: pt.x + Math.cos(angle) * (pt.width * 0.2),
+                        y: pt.y + Math.sin(angle) * (pt.height * 0.2),
+                        vx: Math.cos(angle) * 3,
+                        vy: -2.5 - Math.random() * 3,
+                        radius: 3.5 + Math.random() * 3,
+                        color: Math.random() > 0.4 ? '#0284c7' : '#bae6fd',
+                        decay: 0.03
+                    });
+                }
+                break;
+            }
+            case 'light': {
+                this.addShockwave(pt.x, pt.y, pt.width * 1.4, '#facc15', 4);
+                this.activeBeams.push({
+                    x: pt.x,
+                    y: pt.y,
+                    width: pt.width * 0.7,
+                    color: '#facc15',
+                    coreColor: '#ffffff',
+                    alpha: 1,
+                    decay: 0.03
+                });
+                for (let i = 0; i < 35; i++) {
+                    this.spawnParticle({
+                        x: pt.x + (Math.random() - 0.5) * pt.width * 0.6,
+                        y: pt.y + (Math.random() - 0.5) * pt.height * 0.6,
+                        vx: (Math.random() - 0.5) * 3,
+                        vy: -1.5 - Math.random() * 3,
+                        radius: 2.5 + Math.random() * 3.5,
+                        color: Math.random() > 0.3 ? '#facc15' : '#ffffff',
+                        decay: 0.025
+                    });
+                }
+                break;
+            }
+            case 'shadow': {
+                this.addShockwave(pt.x, pt.y, pt.width * 1.3, '#8b5cf6', 4);
+                for (let i = 0; i < 35; i++) {
+                    this.spawnParticle({
+                        x: pt.x + (Math.random() - 0.5) * pt.width * 0.4,
+                        y: pt.y + (Math.random() - 0.5) * pt.height * 0.4,
+                        vx: (Math.random() - 0.5) * 4,
+                        vy: (Math.random() - 0.5) * 4,
+                        radius: 4 + Math.random() * 4,
+                        color: Math.random() > 0.4 ? '#8b5cf6' : '#2e1065',
+                        decay: 0.028
+                    });
+                }
+                break;
+            }
+            case 'nature': {
+                this.addShockwave(pt.x, pt.y, pt.width * 1.25, '#10b981', 3.5);
+                for (let i = 0; i < 35; i++) {
+                    this.spawnParticle({
+                        x: pt.x + (Math.random() - 0.5) * pt.width * 0.5,
+                        y: pt.y + (Math.random() - 0.5) * pt.height * 0.5,
+                        vx: (Math.random() - 0.5) * 3.5,
+                        vy: -2 - Math.random() * 2.5,
+                        radius: 3 + Math.random() * 3,
+                        color: Math.random() > 0.4 ? '#10b981' : '#6ee7b7',
+                        shape: 'spark',
+                        decay: 0.028
+                    });
+                }
+                break;
+            }
+            case 'arcane':
+            default: {
+                this.addShockwave(pt.x, pt.y, pt.width * 1.35, '#ec4899', 4);
+                for (let i = 0; i < 35; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    this.spawnParticle({
+                        x: pt.x,
+                        y: pt.y,
+                        vx: Math.cos(angle) * (2.5 + Math.random() * 3.5),
+                        vy: Math.sin(angle) * (2.5 + Math.random() * 3.5),
+                        radius: 3.5 + Math.random() * 3.5,
+                        color: Math.random() > 0.4 ? '#ec4899' : '#a855f7',
+                        shape: 'crystal',
+                        decay: 0.028
+                    });
+                }
+                break;
+            }
+        }
+
+        await new Promise(r => setTimeout(r, 700));
+    }
+
+    /**
+     * ASCENSION CHECKMATE SPECIAL FINISHER (Spec 193)
+     */
+    async playAscensionCheckmate({ squareIndex, isFlipped = false, element = 'fire', pieceType = 'q', winnerColor = 'w' }) {
+        const pt = this.getSquareCenter(squareIndex, isFlipped);
+        const elemMeta = window.ELEMENTS && window.ELEMENTS[element] ? window.ELEMENTS[element] : { color: '#f97316' };
+        const color = elemMeta.color || '#f97316';
+
+        this.screenShake('lg');
+
+        // Sequence of banners (Spec 193)
+        this.showAttackName('ASCENSION', true, true, element);
+        await new Promise(r => setTimeout(r, 800));
+
+        this.showAttackName('A NEW POWER AWAKENS', true, true, element);
+        await new Promise(r => setTimeout(r, 800));
+
+        this.showAttackName('CHECKMATE', true, true, element);
+
+        // Huge grand board shockwaves
+        this.addShockwave(pt.x, pt.y, this.boardWidth ? this.boardWidth * 0.9 : 400, color, 6);
+        this.addShockwave(pt.x, pt.y, this.boardWidth ? this.boardWidth * 1.4 : 600, '#ffffff', 4);
+
+        for (let i = 0; i < 70; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const spd = 4 + Math.random() * 8;
+            this.spawnParticle({
+                x: pt.x,
+                y: pt.y,
+                vx: Math.cos(angle) * spd,
+                vy: Math.sin(angle) * spd,
+                radius: 4 + Math.random() * 5,
+                color: Math.random() > 0.3 ? color : '#ffffff',
+                decay: 0.02
+            });
+        }
+
+        await new Promise(r => setTimeout(r, 900));
+    }
+
+    /**
      * Master Render Loop (60 FPS, Multi-Layer Canvas Compositing)
      */
     animate(timestamp) {

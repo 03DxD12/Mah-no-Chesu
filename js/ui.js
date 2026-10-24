@@ -306,7 +306,7 @@ class UIManager {
             const piece = board[sq];
             let pieceHTML = '';
             if (piece) {
-                const elem = this.loadout ? this.loadout.getElementForPiece(piece.type, piece.color) : 'fire';
+                const elem = this.loadout ? this.loadout.getElementForPiece(piece, piece.color) : 'fire';
                 pieceHTML = `<div class="piece-svg-wrapper piece-${piece.type} aura-${elem}">${this.getPieceSVG(piece.type, piece.color)}</div>`;
             }
 
@@ -443,7 +443,7 @@ class UIManager {
 
         const pieceNames = { p: 'Pawn', n: 'Knight', b: 'Bishop', r: 'Rook', q: 'Queen', k: 'King' };
         const colorName = piece.color === 'w' ? 'White' : 'Black';
-        const elemKey = this.loadout.getElementForPiece(piece.type, piece.color);
+        const elemKey = this.loadout.getElementForPiece(piece, piece.color);
         const elemMeta = this.loadout.getElementMeta(elemKey);
         const attackName = this.loadout.getAttackName(piece.type, elemKey);
 
@@ -557,42 +557,344 @@ class UIManager {
     }
 
     /**
-     * Modal: Pawn Promotion Selection
+     * Modal: Elemental Pawn Promotion - ASCENSION (Specs 163 - 198)
      */
-    promptPromotion(color) {
+    promptAscension({ color, pawnElement = 'fire', settings = null, onPreview = null } = {}) {
         return new Promise((resolve) => {
             const modal = document.getElementById('modal-promotion');
-            const container = document.getElementById('promo-choices-container');
-            if (!modal || !container) {
-                resolve('q');
+            if (!modal) {
+                resolve({ pieceType: 'q', element: pawnElement || 'fire', style: 'elemental' });
                 return;
             }
 
-            container.innerHTML = '';
-            const options = [
-                { type: 'q', name: 'Queen (Ice)', elem: '❄️' },
-                { type: 'r', name: 'Rook (Earth)', elem: '🪨' },
-                { type: 'b', name: 'Bishop (Wind)', elem: '🌪️' },
-                { type: 'n', name: 'Knight (Lightning)', elem: '⚡' }
+            const currentSettings = settings || (this.settings ? this.settings.settings : {});
+            const promoMode = currentSettings.promotionMode || 'detailed';
+            const promoElemPolicy = currentSettings.promotionElement || 'ask';
+            const promoEffectPolicy = currentSettings.ascensionEffect || 'ask';
+
+            // Automatic mode: resolve immediately without displaying modal (Spec 183)
+            if (promoMode === 'automatic') {
+                let finalElem = pawnElement || 'fire';
+                if (promoElemPolicy === 'default') {
+                    const defaultMap = { q: 'ice', r: 'earth', b: 'wind', n: 'lightning' };
+                    finalElem = defaultMap['q'] || 'ice';
+                } else if (promoElemPolicy === 'random') {
+                    const allElems = ['fire', 'lightning', 'wind', 'earth', 'ice', 'water', 'light', 'shadow', 'nature', 'arcane'];
+                    finalElem = allElems[Math.floor(Math.random() * allElems.length)];
+                }
+                resolve({ pieceType: 'q', element: finalElem, style: 'elemental' });
+                return;
+            }
+
+            // Defaults
+            let selectedPiece = 'q';
+            let selectedElement = pawnElement || 'fire';
+            let selectedStyle = 'elemental';
+
+            if (promoElemPolicy === 'default') {
+                const defaultMap = { q: 'ice', r: 'earth', b: 'wind', n: 'lightning' };
+                selectedElement = defaultMap[selectedPiece] || 'ice';
+            } else if (promoElemPolicy === 'random') {
+                const allElems = ['fire', 'lightning', 'wind', 'earth', 'ice', 'water', 'light', 'shadow', 'nature', 'arcane'];
+                selectedElement = allElems[Math.floor(Math.random() * allElems.length)];
+            }
+
+            if (promoEffectPolicy === 'random') {
+                const styles = ['elemental', 'royal', 'arcane', 'celestial', 'dark'];
+                selectedStyle = styles[Math.floor(Math.random() * styles.length)];
+            }
+
+            // Quick mode adjustments
+            const stepElemEl = document.getElementById('ascension-step-element');
+            const stepStyleEl = document.getElementById('ascension-step-style');
+            const stepPreviewEl = document.getElementById('ascension-step-preview');
+
+            if (promoMode === 'quick') {
+                if (stepElemEl) stepElemEl.style.display = 'none';
+                if (stepStyleEl) stepStyleEl.style.display = 'none';
+                if (stepPreviewEl && currentSettings.showPromotionPreview === false) stepPreviewEl.style.display = 'none';
+            } else {
+                if (stepElemEl) stepElemEl.style.display = '';
+                if (stepStyleEl) stepStyleEl.style.display = '';
+                if (stepPreviewEl) stepPreviewEl.style.display = currentSettings.showPromotionPreview === false ? 'none' : '';
+            }
+
+            // Update Inherit pawn button text
+            const inheritNameEl = document.getElementById('promo-inherit-name');
+            if (inheritNameEl) {
+                inheritNameEl.textContent = (pawnElement || 'FIRE').toUpperCase();
+            }
+
+            // 1. Render Pieces Grid (Only Queen, Rook, Bishop, Knight - King and Pawn must NOT appear!)
+            const piecesGrid = document.getElementById('ascension-pieces-grid');
+            if (piecesGrid) {
+                piecesGrid.innerHTML = '';
+                const pieces = [
+                    { type: 'q', name: 'QUEEN' },
+                    { type: 'r', name: 'ROOK' },
+                    { type: 'b', name: 'BISHOP' },
+                    { type: 'n', name: 'KNIGHT' }
+                ];
+                pieces.forEach(p => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = `ascension-piece-btn ${p.type === selectedPiece ? 'selected' : ''}`;
+                    btn.dataset.piece = p.type;
+                    btn.setAttribute('role', 'radio');
+                    btn.setAttribute('aria-checked', p.type === selectedPiece ? 'true' : 'false');
+                    btn.innerHTML = `
+                        <div class="piece-svg-box">${this.getPieceSVG(p.type, color)}</div>
+                        <span class="piece-title-text">${p.name}</span>
+                    `;
+                    btn.addEventListener('click', () => {
+                        this.audio.playPieceSelect();
+                        selectedPiece = p.type;
+                        piecesGrid.querySelectorAll('.ascension-piece-btn').forEach(b => {
+                            const isCur = b.dataset.piece === selectedPiece;
+                            b.classList.toggle('selected', isCur);
+                            b.setAttribute('aria-checked', isCur ? 'true' : 'false');
+                        });
+                        if (promoElemPolicy === 'default') {
+                            const defaultMap = { q: 'ice', r: 'earth', b: 'wind', n: 'lightning' };
+                            selectedElement = defaultMap[selectedPiece] || 'ice';
+                            updateElemUI();
+                        }
+                        updatePreview();
+                    });
+                    piecesGrid.appendChild(btn);
+                });
+            }
+
+            // 2. Render Elements Grid (10 Elements)
+            const elemsGrid = document.getElementById('ascension-elements-grid');
+            const allElements = [
+                { id: 'fire', name: 'Fire', color: '#f97316' },
+                { id: 'lightning', name: 'Lightning', color: '#38bdf8' },
+                { id: 'wind', name: 'Wind', color: '#34d399' },
+                { id: 'earth', name: 'Earth', color: '#d97706' },
+                { id: 'ice', name: 'Ice', color: '#06b6d4' },
+                { id: 'water', name: 'Water', color: '#0284c7' },
+                { id: 'light', name: 'Light', color: '#facc15' },
+                { id: 'shadow', name: 'Shadow', color: '#8b5cf6' },
+                { id: 'nature', name: 'Nature', color: '#10b981' },
+                { id: 'arcane', name: 'Arcane', color: '#ec4899' }
             ];
 
-            options.forEach(opt => {
-                const btn = document.createElement('button');
-                btn.className = 'promo-btn';
-                btn.innerHTML = `
-                    <div class="promo-piece-svg">${this.getPieceSVG(opt.type, color)}</div>
-                    <span class="promo-label">${opt.name}</span>
-                `;
-                btn.addEventListener('click', () => {
-                    modal.classList.remove('active');
-                    this.audio.playPromotion();
-                    resolve(opt.type);
+            const updateElemUI = () => {
+                if (!elemsGrid) return;
+                elemsGrid.querySelectorAll('.ascension-elem-btn').forEach(b => {
+                    const isCur = b.dataset.elem === selectedElement;
+                    b.classList.toggle('selected', isCur);
+                    b.setAttribute('aria-checked', isCur ? 'true' : 'false');
                 });
-                container.appendChild(btn);
+            };
+
+            if (elemsGrid) {
+                elemsGrid.innerHTML = '';
+                allElements.forEach(el => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = `ascension-elem-btn ${el.id === selectedElement ? 'selected' : ''}`;
+                    btn.dataset.elem = el.id;
+                    btn.style.color = el.color;
+                    btn.setAttribute('role', 'radio');
+                    btn.setAttribute('aria-checked', el.id === selectedElement ? 'true' : 'false');
+                    btn.innerHTML = `
+                        <span class="elem-dot" style="background:${el.color}; box-shadow:0 0 6px ${el.color};"></span>
+                        <span class="elem-name-text">${el.name}</span>
+                    `;
+                    btn.addEventListener('click', () => {
+                        this.audio.playUiClick();
+                        selectedElement = el.id;
+                        updateElemUI();
+                        updatePreview();
+                    });
+                    elemsGrid.appendChild(btn);
+                });
+            }
+
+            // Quick Element Buttons
+            const btnInherit = document.getElementById('btn-promo-inherit');
+            btnInherit?.replaceWith(btnInherit.cloneNode(true));
+            const newBtnInherit = document.getElementById('btn-promo-inherit');
+            newBtnInherit?.addEventListener('click', () => {
+                this.audio.playUiClick();
+                selectedElement = pawnElement || 'fire';
+                updateElemUI();
+                updatePreview();
+            });
+
+            const btnRandomElem = document.getElementById('btn-promo-random-elem');
+            btnRandomElem?.replaceWith(btnRandomElem.cloneNode(true));
+            const newBtnRandomElem = document.getElementById('btn-promo-random-elem');
+            newBtnRandomElem?.addEventListener('click', () => {
+                this.audio.playUiClick();
+                const randomItem = allElements[Math.floor(Math.random() * allElements.length)];
+                selectedElement = randomItem.id;
+                updateElemUI();
+                updatePreview();
+            });
+
+            // 3. Render Styles Grid (6 styles)
+            const stylesGrid = document.getElementById('ascension-styles-grid');
+            const ascensionStyles = [
+                { id: 'elemental', name: 'Elemental', desc: 'Elemental mastery (Default)' },
+                { id: 'royal', name: 'Royal', desc: 'Golden crown & light pillar' },
+                { id: 'arcane', name: 'Arcane', desc: 'Rotating runic circles' },
+                { id: 'celestial', name: 'Celestial', desc: 'Divine awakening beam' },
+                { id: 'dark', name: 'Dark', desc: 'Abyssal portal & shadows' },
+                { id: 'random', name: 'Random', desc: 'Surprise transformation' }
+            ];
+
+            const updateStyleUI = () => {
+                if (!stylesGrid) return;
+                stylesGrid.querySelectorAll('.ascension-style-btn').forEach(b => {
+                    const isCur = b.dataset.style === selectedStyle;
+                    b.classList.toggle('selected', isCur);
+                    b.setAttribute('aria-checked', isCur ? 'true' : 'false');
+                });
+            };
+
+            if (stylesGrid) {
+                stylesGrid.innerHTML = '';
+                ascensionStyles.forEach(st => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = `ascension-style-btn ${st.id === selectedStyle ? 'selected' : ''}`;
+                    btn.dataset.style = st.id;
+                    btn.setAttribute('role', 'radio');
+                    btn.setAttribute('aria-checked', st.id === selectedStyle ? 'true' : 'false');
+                    btn.innerHTML = `
+                        <span class="style-title-text">${st.name}</span>
+                        <span class="style-desc-text">${st.desc}</span>
+                    `;
+                    btn.addEventListener('click', () => {
+                        this.audio.playUiClick();
+                        selectedStyle = st.id;
+                        updateStyleUI();
+                        updatePreview();
+                    });
+                    stylesGrid.appendChild(btn);
+                });
+            }
+
+            // 4. Live Preview Card
+            const previewSvg = document.getElementById('preview-piece-svg');
+            const previewHalo = document.getElementById('preview-halo');
+            const previewPieceBadge = document.getElementById('preview-piece-badge');
+            const previewElemBadge = document.getElementById('preview-elem-badge');
+            const previewStyleBadge = document.getElementById('preview-style-badge');
+            const previewTitle = document.getElementById('preview-title');
+            const previewAbilityName = document.getElementById('preview-ability-name');
+            const previewDesc = document.getElementById('preview-desc');
+
+            const updatePreview = () => {
+                const effectiveStyle = selectedStyle === 'random' ? 'elemental' : selectedStyle;
+                const elemMeta = this.loadout ? this.loadout.getElementMeta(selectedElement) : { name: selectedElement.toUpperCase(), color: '#f97316' };
+                const pieceNames = { q: 'QUEEN', r: 'ROOK', b: 'BISHOP', n: 'KNIGHT' };
+
+                if (previewSvg) {
+                    previewSvg.innerHTML = this.getPieceSVG(selectedPiece, color);
+                }
+                if (previewHalo) {
+                    previewHalo.style.boxShadow = `0 0 25px ${elemMeta.color}, inset 0 0 15px ${elemMeta.color}`;
+                    previewHalo.style.borderColor = elemMeta.color;
+                }
+                if (previewPieceBadge) {
+                    previewPieceBadge.textContent = pieceNames[selectedPiece] || 'PIECE';
+                }
+                if (previewElemBadge) {
+                    previewElemBadge.textContent = elemMeta.name.toUpperCase();
+                    previewElemBadge.style.color = elemMeta.color;
+                    previewElemBadge.style.borderColor = elemMeta.color;
+                }
+                if (previewStyleBadge) {
+                    previewStyleBadge.textContent = `${effectiveStyle.toUpperCase()} ASCENSION`;
+                }
+
+                const title = this.loadout ? this.loadout.getAscensionTitle(selectedPiece, selectedElement, effectiveStyle) : `${elemMeta.name.toUpperCase()} ${pieceNames[selectedPiece]} ASCENSION`;
+                if (previewTitle) previewTitle.textContent = title;
+
+                const ability = this.loadout ? this.loadout.getAttackName(selectedPiece, selectedElement) : `${elemMeta.name} Awakening`;
+                if (previewAbilityName) previewAbilityName.textContent = ability;
+
+                const descs = {
+                    q: 'Commands the entire board along ranks, files, and diagonals with supreme elemental domination.',
+                    r: 'An unyielding bulwark sweeping across orthogonal files with heavy siege impact.',
+                    b: 'Harnesses graceful angled trajectories, striking swiftly along open diagonals.',
+                    n: 'Leaps across enemy lines with agile momentum, delivering sudden aggressive shockwaves.'
+                };
+                if (previewDesc) previewDesc.textContent = descs[selectedPiece] || 'Awakened power on the chessboard.';
+            };
+
+            updatePreview();
+
+            // Footer Actions
+            const cleanupAndResolve = (result) => {
+                modal.classList.remove('active');
+                resolve(result);
+            };
+
+            const btnPreviewEffect = document.getElementById('btn-promo-preview-effect');
+            btnPreviewEffect?.replaceWith(btnPreviewEffect.cloneNode(true));
+            const newBtnPreviewEffect = document.getElementById('btn-promo-preview-effect');
+            newBtnPreviewEffect?.addEventListener('click', () => {
+                this.audio.playUiClick();
+                let effStyle = selectedStyle;
+                if (effStyle === 'random') {
+                    const stList = ['elemental', 'royal', 'arcane', 'celestial', 'dark'];
+                    effStyle = stList[Math.floor(Math.random() * stList.length)];
+                }
+                if (onPreview) {
+                    onPreview({ pieceType: selectedPiece, element: selectedElement, style: effStyle });
+                }
+            });
+
+            const btnReset = document.getElementById('btn-promo-reset');
+            btnReset?.replaceWith(btnReset.cloneNode(true));
+            const newBtnReset = document.getElementById('btn-promo-reset');
+            newBtnReset?.addEventListener('click', () => {
+                this.audio.playUiClick();
+                selectedPiece = 'q';
+                selectedElement = pawnElement || 'fire';
+                selectedStyle = 'elemental';
+                if (piecesGrid) {
+                    piecesGrid.querySelectorAll('.ascension-piece-btn').forEach(b => {
+                        b.classList.toggle('selected', b.dataset.piece === 'q');
+                    });
+                }
+                updateElemUI();
+                updateStyleUI();
+                updatePreview();
+            });
+
+            const btnConfirm = document.getElementById('btn-promo-confirm');
+            btnConfirm?.replaceWith(btnConfirm.cloneNode(true));
+            const newBtnConfirm = document.getElementById('btn-promo-confirm');
+            newBtnConfirm?.addEventListener('click', () => {
+                this.audio.playPromotion();
+                let finalStyle = selectedStyle;
+                if (finalStyle === 'random') {
+                    const stList = ['elemental', 'royal', 'arcane', 'celestial', 'dark'];
+                    finalStyle = stList[Math.floor(Math.random() * stList.length)];
+                }
+                cleanupAndResolve({
+                    pieceType: selectedPiece,
+                    element: selectedElement,
+                    style: finalStyle
+                });
             });
 
             modal.classList.add('active');
         });
+    }
+
+    /**
+     * Backward-compatible helper for simple promotion calls
+     */
+    async promptPromotion(color, pawnElement = 'fire') {
+        const result = await this.promptAscension({ color, pawnElement });
+        return result.pieceType;
     }
 
     /**

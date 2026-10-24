@@ -520,7 +520,14 @@ class ChessEngine {
 
         // Handle promotion transformation
         if (move.promotion) {
-            this.board[move.to] = { type: move.promotion, color: piece.color };
+            this.board[move.to] = {
+                type: move.promotion,
+                color: piece.color,
+                element: move.element || piece.element,
+                promoted: true,
+                originalType: 'p',
+                id: `${piece.color}-promoted-${move.promotion}-${Date.now()}`
+            };
         }
 
         // Switch active color and fullmove count
