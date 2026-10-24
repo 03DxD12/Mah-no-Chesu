@@ -28,6 +28,7 @@
                 </div>
             </div>
 
+            <div class="header-actions">
                 <button id="btn-loadout-toggle" class="btn-icon" title="Element Loadout" aria-label="Element Loadout">
                     <svg viewBox="0 0 24 24" class="icon-svg"><path d="M12 2l2.4 6.9 7.1.3-5.5 4.5 1.9 6.8-5.9-4-5.9 4 1.9-6.8-5.5-4.5 7.1-.3z"/></svg>
                 </button>
@@ -177,28 +178,28 @@
                     </div>
                 </div>
 
+                <!-- Developer Mode Drawer (Collapsible) -->
+                <details id="dev-panel" class="dev-panel">
+                    <summary class="dev-summary">Developer & Perft Console</summary>
+                    <div class="dev-content">
+                        <div class="dev-row">
+                            <input type="text" id="fen-input" class="dev-input" placeholder="Paste FEN position...">
+                            <button id="btn-load-fen" class="btn-small">Load FEN</button>
+                            <button id="btn-export-fen" class="btn-small">Export FEN</button>
+                        </div>
+                        <div class="dev-row">
+                            <button id="btn-run-perft" class="btn-small btn-perft">Run Perft (Depths 1-4)</button>
+                            <button id="btn-toggle-eval" class="btn-small">Eval Gauge</button>
+                            <span id="eval-score" class="eval-score">+0.00</span>
+                        </div>
+                        <pre id="dev-console" class="dev-console">Perft output & engine diagnostics ready.</pre>
+                    </div>
+                </details>
+
                 <!-- Live Screen Reader Announcement Zone -->
                 <div id="sr-announcements" class="sr-only" aria-live="polite"></div>
             </aside>
         </main>
-
-        <!-- Developer Mode Drawer (Collapsible) -->
-        <details id="dev-panel" class="dev-panel">
-            <summary class="dev-summary">Developer & Perft Console</summary>
-            <div class="dev-content">
-                <div class="dev-row">
-                    <input type="text" id="fen-input" class="dev-input" placeholder="Paste FEN position...">
-                    <button id="btn-load-fen" class="btn-small">Load FEN</button>
-                    <button id="btn-export-fen" class="btn-small">Export FEN</button>
-                </div>
-                <div class="dev-row">
-                    <button id="btn-run-perft" class="btn-small btn-perft">Run Perft (Depths 1-4)</button>
-                    <button id="btn-toggle-eval" class="btn-small">Eval Gauge</button>
-                    <span id="eval-score" class="eval-score">+0.00</span>
-                </div>
-                <pre id="dev-console" class="dev-console">Perft output & engine diagnostics ready.</pre>
-            </div>
-        </details>
     </div>
 
     <!-- ================= MODALS & OVERLAYS ================= -->

@@ -207,13 +207,22 @@ class UIManager {
         document.getElementById('btn-resign')?.addEventListener('click', () => this.onResignRequest && this.onResignRequest());
 
         const historyPanel = document.getElementById('history-panel');
-        document.getElementById('btn-history')?.addEventListener('click', () => {
+        document.getElementById('btn-history')?.addEventListener('click', (e) => {
+            e.stopPropagation();
             this.audio.playUiClick();
             historyPanel?.classList.toggle('history-open');
         });
-        document.getElementById('btn-close-history')?.addEventListener('click', () => {
+        document.getElementById('btn-close-history')?.addEventListener('click', (e) => {
+            e.stopPropagation();
             this.audio.playUiClick();
             historyPanel?.classList.remove('history-open');
+        });
+        document.addEventListener('click', (e) => {
+            if (historyPanel?.classList.contains('history-open')) {
+                if (!historyPanel.contains(e.target) && !document.getElementById('btn-history')?.contains(e.target)) {
+                    historyPanel.classList.remove('history-open');
+                }
+            }
         });
     }
 
