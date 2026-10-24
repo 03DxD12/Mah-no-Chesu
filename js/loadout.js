@@ -368,6 +368,11 @@ class LoadoutManager {
         this.STORAGE_KEY_BLACK = 'maho_loadout_black_v1';
         this.STORAGE_KEY_CUSTOM_PRESETS = 'maho_custom_presets_v1';
         this.STORAGE_KEY_AI_CONFIG = 'maho_ai_loadout_config_v1';
+        this.STORAGE_KEY_SAVED_ARMIES = 'maho_saved_armies_v2';
+        this.STORAGE_KEY_FAVORITE_ARMY = 'maho_favorite_army_id_v2';
+        this.STORAGE_KEY_CUSTOM_NAMES = 'maho_custom_army_names_v2';
+        this.STORAGE_KEY_FAV_EFFECTS = 'maho_favorite_effects_v1';
+        this.STORAGE_KEY_RECENT_EFFECTS = 'maho_recent_effects_v1';
 
         // Load or initialize White and Black loadouts
         this.whiteLoadout = this.loadStoredLoadout(this.STORAGE_KEY_WHITE, { ...PRESETS.classic.loadout });
@@ -376,8 +381,13 @@ class LoadoutManager {
         // AI configuration: 'classic' | 'random' | 'match_player'
         this.aiLoadoutType = localStorage.getItem(this.STORAGE_KEY_AI_CONFIG) || 'classic';
 
-        // Custom Presets
+        // Custom Presets & Saved Armies
         this.customPresets = this.loadCustomPresets();
+        this.savedArmies = this.loadSavedArmies();
+        this.favoriteArmyId = localStorage.getItem(this.STORAGE_KEY_FAVORITE_ARMY) || (this.savedArmies[0]?.id || 'army_inferno');
+        this.customArmyNames = this.loadCustomArmyNames();
+        this.favoriteEffects = this.loadFavoriteEffects();
+        this.recentlyTested = this.loadRecentlyTested();
     }
 
     loadStoredLoadout(key, fallback) {
@@ -439,6 +449,217 @@ class LoadoutManager {
             delete this.customPresets[id];
             this.saveCustomPresets();
         }
+    }
+
+    /**
+     * Saved Armies System (Sections 42 - 44)
+     */
+    loadSavedArmies() {
+        const defaultArmies = [
+            {
+                id: 'army_inferno',
+                name: 'Inferno Legion',
+                loadout: { p: 'fire', n: 'fire', b: 'fire', r: 'fire', q: 'fire', k: 'fire' },
+                isFavorite: true
+            },
+            {
+                id: 'army_storm',
+                name: 'Storm Knights',
+                loadout: { p: 'lightning', n: 'lightning', b: 'wind', r: 'water', q: 'lightning', k: 'light' },
+                isFavorite: false
+            },
+            {
+                id: 'army_frozen',
+                name: 'Frozen Kingdom',
+                loadout: { p: 'ice', n: 'ice', b: 'ice', r: 'ice', q: 'ice', k: 'ice' },
+                isFavorite: false
+            },
+            {
+                id: 'army_void',
+                name: 'Void Covenant',
+                loadout: { p: 'shadow', n: 'shadow', b: 'arcane', r: 'shadow', q: 'arcane', k: 'shadow' },
+                isFavorite: false
+            },
+            {
+                id: 'army_concord',
+                name: 'Elemental Concord',
+                loadout: { p: 'fire', n: 'lightning', b: 'wind', r: 'earth', q: 'ice', k: 'light' },
+                isFavorite: false
+            },
+            {
+                id: 'army_verdant',
+                name: 'Verdant Fortress',
+                loadout: { p: 'nature', n: 'earth', b: 'nature', r: 'earth', q: 'nature', k: 'light' },
+                isFavorite: false
+            }
+        ];
+
+        try {
+            const data = localStorage.getItem(this.STORAGE_KEY_SAVED_ARMIES);
+            if (data) {
+                const parsed = JSON.parse(data);
+                if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+            }
+        } catch (e) {
+            console.warn('Could not read saved armies', e);
+        }
+        return defaultArmies;
+    }
+
+    saveArmies() {
+        try {
+            localStorage.setItem(this.STORAGE_KEY_SAVED_ARMIES, JSON.stringify(this.savedArmies));
+            localStorage.setItem(this.STORAGE_KEY_FAVORITE_ARMY, this.favoriteArmyId);
+        } catch (e) {
+            console.warn('Could not persist saved armies', e);
+        }
+    }
+
+    saveArmy(name, loadout) {
+        const id = 'army_' + Date.now();
+        const newArmy = {
+            id,
+            name: (name && name.trim()) ? name.trim() : this.generateArmyName(loadout),
+            loadout: { ...loadout },
+            isFavorite: this.savedArmies.length === 0
+        };
+        this.savedArmies.push(newArmy);
+        this.saveArmies();
+        return newArmy;
+    }
+
+    deleteArmy(id) {
+        this.savedArmies = this.savedArmies.filter(a => a.id !== id);
+        if (this.favoriteArmyId === id) {
+            this.favoriteArmyId = this.savedArmies[0]?.id || null;
+        }
+        this.saveArmies();
+    }
+
+    renameArmy(id, newName) {
+        const army = this.savedArmies.find(a => a.id === id);
+        if (army && newName && newName.trim()) {
+            army.name = newName.trim();
+            this.saveArmies();
+        }
+    }
+
+    setFavoriteArmy(id) {
+        this.favoriteArmyId = id;
+        this.savedArmies.forEach(a => {
+            a.isFavorite = (a.id === id);
+        });
+        this.saveArmies();
+    }
+
+    getFavoriteArmy() {
+        return this.savedArmies.find(a => a.id === this.favoriteArmyId) || this.savedArmies[0] || null;
+    }
+
+    getSavedArmies() {
+        return this.savedArmies;
+    }
+
+    /**
+     * Custom Army Name per side (Section 41)
+     */
+    loadCustomArmyNames() {
+        try {
+            const data = localStorage.getItem(this.STORAGE_KEY_CUSTOM_NAMES);
+            if (data) return JSON.parse(data);
+        } catch (e) {}
+        return { white: '', black: '' };
+    }
+
+    getCustomArmyName(side = 'white') {
+        return this.customArmyNames[side] || '';
+    }
+
+    setCustomArmyName(side = 'white', name = '') {
+        this.customArmyNames[side] = (name || '').trim();
+        try {
+            localStorage.setItem(this.STORAGE_KEY_CUSTOM_NAMES, JSON.stringify(this.customArmyNames));
+        } catch (e) {}
+    }
+
+    getEffectiveArmyName(side = 'white', loadout = null) {
+        const custom = this.getCustomArmyName(side);
+        if (custom) return custom;
+        const targetLoadout = loadout || (side === 'white' ? this.whiteLoadout : this.blackLoadout);
+        return this.generateArmyName(targetLoadout);
+    }
+
+    /**
+     * Randomize All Elements (Section 46 & 47)
+     */
+    generateRandomLoadout(allowDuplicates = true) {
+        const pieces = ['p', 'n', 'b', 'r', 'q', 'k'];
+        const elementKeys = Object.keys(ELEMENTS);
+        const result = {};
+
+        if (allowDuplicates) {
+            pieces.forEach(p => {
+                const rand = elementKeys[Math.floor(Math.random() * elementKeys.length)];
+                result[p] = rand;
+            });
+        } else {
+            // Unique elements only
+            const shuffled = [...elementKeys].sort(() => Math.random() - 0.5);
+            pieces.forEach((p, idx) => {
+                result[p] = shuffled[idx];
+            });
+        }
+        return result;
+    }
+
+    /**
+     * Favorite Effects & Rating System (Section 63 & 75)
+     */
+    loadFavoriteEffects() {
+        try {
+            const data = localStorage.getItem(this.STORAGE_KEY_FAV_EFFECTS);
+            if (data) return JSON.parse(data);
+        } catch (e) {}
+        return {};
+    }
+
+    isFavoriteEffect(pieceType, element) {
+        const key = `${pieceType}_${element}`;
+        return !!this.favoriteEffects[key];
+    }
+
+    toggleFavoriteEffect(pieceType, element) {
+        const key = `${pieceType}_${element}`;
+        this.favoriteEffects[key] = !this.favoriteEffects[key];
+        try {
+            localStorage.setItem(this.STORAGE_KEY_FAV_EFFECTS, JSON.stringify(this.favoriteEffects));
+        } catch (e) {}
+        return this.favoriteEffects[key];
+    }
+
+    /**
+     * Recently Tested History (Section 76)
+     */
+    loadRecentlyTested() {
+        try {
+            const data = localStorage.getItem(this.STORAGE_KEY_RECENT_EFFECTS);
+            if (data) return JSON.parse(data);
+        } catch (e) {}
+        return [
+            { piece: 'n', element: 'fire', attack: 'Blazing Charge' },
+            { piece: 'q', element: 'shadow', attack: 'Abyssal Dominion' },
+            { piece: 'r', element: 'earth', attack: 'Earth Breaker' },
+            { piece: 'b', element: 'wind', attack: 'Wind Slash' }
+        ];
+    }
+
+    addRecentlyTested(piece, element) {
+        const ability = this.getAbilityDetails(piece, element);
+        const entry = { piece, element, attack: ability.name, timestamp: Date.now() };
+        this.recentlyTested = [entry, ...this.recentlyTested.filter(e => !(e.piece === piece && e.element === element))].slice(0, 8);
+        try {
+            localStorage.setItem(this.STORAGE_KEY_RECENT_EFFECTS, JSON.stringify(this.recentlyTested));
+        } catch (e) {}
     }
 
     /**
@@ -705,35 +926,41 @@ class LoadoutManager {
         const topCount = entries[0] ? entries[0][1] : 0;
         const secondElem = entries[1] ? entries[1][0] : null;
 
-        // Pure Armies (6 of same)
+        // Pure Armies (6 of same) (Section 38 & 89)
         if (topCount === 6) {
             const pureNames = {
                 fire: 'Inferno Legion',
-                lightning: 'Thunder Squadron',
-                wind: 'Tempest Order',
-                earth: 'Titan Citadel',
-                ice: 'Glacial Dominion',
-                water: 'Tidal Sovereignty',
-                light: 'Solar Covenant',
-                shadow: 'Abyssal Horde',
-                nature: 'Verdant Crusade',
-                arcane: 'Astral Enclave'
+                lightning: 'Storm Legion',
+                wind: 'Tempest Legion',
+                earth: "Titan's Host",
+                ice: 'Frozen Kingdom',
+                water: 'Oceanic Dominion',
+                light: 'Celestial Realm',
+                shadow: 'Abyssal Legion',
+                nature: 'Verdant Realm',
+                arcane: 'Arcane Sanctum'
             };
             return pureNames[topElem] || `${topElem.toUpperCase()} LEGION`;
         }
 
-        // Two-Element Hybrids
+        // 6 Unique elements = Elemental Concord (Section 40 & 89)
+        if (Object.keys(counts).length >= 5) {
+            return 'Elemental Concord';
+        }
+
+        // Two-Element Hybrids (Section 39)
         if (secondElem) {
             const pair = [topElem, secondElem].sort().join('+');
             const hybridNames = {
-                'fire+lightning': 'Stormfire Vanguard',
-                'fire+wind': 'Tempest Flame',
+                'fire+wind': 'Firestorm Legion',
+                'lightning+water': 'Storm Surge Legion',
                 'earth+nature': 'Verdant Fortress',
+                'arcane+light': 'Celestial Order',
+                'arcane+shadow': 'Void Covenant',
+                'fire+lightning': 'Stormfire Vanguard',
                 'ice+water': 'Frozen Tide',
-                'light+shadow': 'Twilight Equilibrium',
+                'light+shadow': 'Eclipse Clash',
                 'light+nature': 'Solar Bloom',
-                'arcane+light': 'Luminous Mystic',
-                'arcane+shadow': 'Void Conclave',
                 'earth+fire': 'Magma Citadel',
                 'lightning+wind': 'Thunderstorm Brigade',
                 'ice+wind': 'Blizzard Vanguard',
@@ -741,11 +968,6 @@ class LoadoutManager {
                 'earth+lightning': 'Seismic Voltage'
             };
             if (hybridNames[pair]) return hybridNames[pair];
-        }
-
-        // 5 or 6 Unique elements
-        if (Object.keys(counts).length >= 5) {
-            return 'Elemental Convergence';
         }
 
         const prefixes = {

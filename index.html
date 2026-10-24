@@ -237,13 +237,13 @@
                     <span>ENTER BATTLE</span>
                 </button>
                 <button id="menu-btn-quick-play" class="btn-menu btn-quick-play">
-                    <span>⚡ QUICK MATCH (LAST LOADOUT)</span>
+                    <span>⚡ QUICK MATCH (FAVORITE ARMY)</span>
                 </button>
                 <button id="menu-btn-loadout" class="btn-menu">
                     <span>ELEMENT LOADOUT</span>
                 </button>
                 <button id="menu-btn-laboratory" class="btn-menu btn-gold">
-                    <span>⚗️ ELEMENT LABORATORY</span>
+                    <span>⚗️ ELEMENT LAB</span>
                 </button>
                 <button id="menu-btn-guide" class="btn-menu">
                     <span>ELEMENT GUIDE</span>
@@ -768,18 +768,27 @@
         </div>
     </div>
 
-    <!-- Custom Element Loadout Modal (Specs 101 - 129) -->
-    <div id="modal-loadout" class="modal-overlay">
+    <!-- Custom Element Loadout Modal (Sections 1 - 6, 38 - 50) -->
+    <div id="modal-loadout" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="loadout-modal-title">
         <div class="modal-card loadout-card">
+            <!-- Modal Header -->
             <div class="modal-header">
                 <div class="loadout-title-group">
-                    <h2 class="modal-title">ELEMENT LOADOUT</h2>
-                    <span class="loadout-subtitle">Customize Your Elemental Chess Army</span>
+                    <h2 class="modal-title" id="loadout-modal-title">YOUR ELEMENTAL ARMY</h2>
+                    <span class="loadout-subtitle">Forge Your Magical Chess Legion &bull; 6 Piece Classes &bull; 10 Elements</span>
                 </div>
-                <button class="btn-close modal-close">&times;</button>
+                <div class="loadout-header-actions">
+                    <button type="button" id="btn-toggle-saved-armies" class="btn-action-small btn-highlight" title="Manage Saved Armies">
+                        <span>📜 My Armies</span>
+                    </button>
+                    <button type="button" id="btn-loadout-open-lab" class="btn-action-small" title="Open Element Laboratory Sandbox">
+                        <span>⚗️ Element Lab</span>
+                    </button>
+                    <button class="btn-close modal-close">&times;</button>
+                </div>
             </div>
 
-            <!-- Side Tabs (PvP: White vs Black, PvC: Player vs AI Options) -->
+            <!-- Side Tabs & Copy Bar -->
             <div class="loadout-tabs-bar">
                 <div class="loadout-side-tabs" role="tablist">
                     <button class="loadout-tab-btn active" id="tab-loadout-white" data-target="white" role="tab" aria-selected="true">
@@ -793,9 +802,6 @@
                 </div>
                 
                 <div class="loadout-quick-actions">
-                    <button id="btn-loadout-open-lab" class="btn-action-small" title="Open Element Laboratory Sandbox">
-                        <span>⚗️ Laboratory</span>
-                    </button>
                     <button id="btn-copy-p1-loadout" class="btn-action-small" title="Copy White Loadout to Black">
                         <span>Copy White Army</span>
                     </button>
@@ -814,113 +820,37 @@
                 </div>
             </div>
 
-            <!-- Presets Bar (Spec 117 & 118) -->
-            <div class="loadout-presets-bar">
-                <div class="preset-selector-group">
-                    <span class="preset-label">Presets:</span>
-                    <div class="preset-buttons" id="preset-buttons-container">
-                        <!-- Built-in presets injected dynamically -->
-                    </div>
-                </div>
-
-                <div class="custom-preset-group">
-                    <select id="custom-presets-dropdown" class="select-preset" aria-label="Custom Presets">
-                        <option value="">-- Custom Presets --</option>
-                    </select>
-                    <button id="btn-save-custom-preset" class="btn-action-small" title="Save current loadout as custom preset">+ Save Preset</button>
-                    <button id="btn-delete-custom-preset" class="btn-action-small btn-danger" title="Delete selected custom preset">Delete</button>
-                </div>
-            </div>
-
-            <!-- Main Loadout Editor Container: Piece List + Element Grid + Live Preview -->
-            <div class="loadout-workspace">
-                <!-- 1. Piece Selector List -->
-                <div class="piece-selector-column" aria-label="Select Chess Piece">
-                    <span class="workspace-col-title">Piece Class</span>
-                    <div class="piece-roster-list" id="piece-roster-list">
-                        <!-- Injected: Pawn, Knight, Bishop, Rook, Queen, King -->
-                    </div>
-                </div>
-
-                <!-- 2. Element Grid for Selected Piece -->
-                <div class="element-picker-column" aria-label="Available Elements">
-                    <div class="picker-header">
-                        <span class="workspace-col-title" id="picker-piece-heading">Select Element</span>
-                        <div class="allow-dup-toggle">
-                            <label for="check-allow-duplicates" class="dup-label">
-                                <input type="checkbox" id="check-allow-duplicates" checked>
-                                <span>Allow Duplicates</span>
-                            </label>
-                        </div>
-                    </div>
-                    <div class="elements-grid" id="elements-grid">
-                        <!-- Injected 10 elements -->
-                    </div>
-                </div>
-
-                <!-- 3. Live Preview Card (Spec 107 & Point 2) -->
-                <div class="element-preview-column" aria-label="Element Preview">
-                    <span class="workspace-col-title">Combat Preview</span>
-                    <div class="preview-card" id="preview-card">
-                        <div class="preview-piece-display" id="preview-piece-display">
-                            <div class="preview-svg-container" id="preview-svg-container"></div>
-                        </div>
-                        <div class="preview-details">
-                            <div class="preview-badge-row">
-                                <div class="preview-elem-badge" id="preview-elem-badge"></div>
-                            </div>
-                            <div class="preview-field">
-                                <span class="field-label">Attack:</span>
-                                <span class="field-value attack-name-val" id="preview-attack-name">FIRE BLAST</span>
-                            </div>
-                            <div class="preview-field">
-                                <span class="field-label">Description:</span>
-                                <span class="field-value desc-val" id="preview-desc-val">Small projectile followed by an ember explosion.</span>
-                            </div>
-                            <div class="preview-field">
-                                <span class="field-label">Movement:</span>
-                                <span class="field-value" id="preview-trail-val">Flame Trail</span>
-                            </div>
-                            <div class="preview-field">
-                                <span class="field-label">Capture FX:</span>
-                                <span class="field-value" id="preview-capture-val">Fire Nova Explosion</span>
-                            </div>
-                            <div class="preview-field">
-                                <span class="field-label">Aura:</span>
-                                <span class="field-value" id="preview-aura-val">Burning embers and heat distortion</span>
-                            </div>
-
-                            <!-- Live Test Attack Button (Point 2) -->
-                            <button type="button" class="btn-preview-live-test" id="btn-preview-live-test">
-                                <span class="test-icon">⚡</span>
-                                <span>LIVE TEST ATTACK</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Thematic Army Name Generator Banner (Point 48) -->
+            <!-- Thematic Army Identity Banner (Sections 38 - 41) -->
             <div class="loadout-army-name-banner" id="loadout-army-name-banner">
                 <div class="army-crest-wrap">
                     <span class="army-crest-icon">⚔️</span>
                 </div>
                 <div class="army-name-info">
-                    <span class="army-label">CUSTOM ARMY IDENTITY</span>
+                    <div class="army-label-row">
+                        <span class="army-label">ARMY IDENTITY</span>
+                        <button type="button" id="btn-rename-army" class="btn-rename-army-mini" title="Customize Army Name">✎ Rename</button>
+                    </div>
                     <h3 class="army-name-text" id="loadout-army-name-text">INFERNO LEGION</h3>
                 </div>
-                <span class="army-badge-pill" id="loadout-army-pill">Level 5 Synergy</span>
+                <span class="army-badge-pill" id="loadout-army-pill">PURE FIRE ARMY</span>
             </div>
 
-            <!-- Active Synergies & Army Affinities Bar (Specs 144 - 156) -->
+            <!-- 3x2 Elemental Army Piece Grid (Sections 1 & 2) -->
+            <div class="army-grid-container" aria-label="Elemental Army Roster">
+                <div class="army-roster-grid" id="army-roster-grid">
+                    <!-- Injected dynamically: 6 Cards (Pawn, Knight, Bishop / Rook, Queen, King) -->
+                </div>
+            </div>
+
+            <!-- Active Synergies Bar (Sections 48 - 50) -->
             <div class="loadout-synergies-bar" id="loadout-synergies-bar">
                 <div class="synergy-status-group">
-                    <span class="synergy-header-label">ARMY SYNERGY:</span>
+                    <span class="synergy-header-label">ACTIVE SYNERGIES:</span>
                     <div class="synergy-badge-main" id="synergy-badge-main">
-                        <span class="synergy-title-text" id="synergy-title-text">PURE FIRE ARMY</span>
-                        <span class="synergy-level-pill" id="synergy-level-pill">Level 5</span>
+                        <span class="synergy-title-text" id="synergy-title-text">ELEMENTAL CONCORD</span>
+                        <span class="synergy-level-pill" id="synergy-level-pill">Harmony</span>
                     </div>
-                    <span class="synergy-desc-text" id="synergy-desc-text">Full Army commanded by Fire. Board aura and themed finishers activated.</span>
+                    <span class="synergy-desc-text" id="synergy-desc-text">All 6 pieces command unique elements. Balanced prismatic synergy.</span>
                 </div>
                 <div class="synergy-hybrids-group" id="synergy-hybrids-group">
                     <span class="synergy-header-label">HYBRID AFFINITIES:</span>
@@ -930,17 +860,21 @@
                 </div>
             </div>
 
-            <!-- Footer Action Controls (Spec 102 & 114-116) -->
+            <!-- Footer Action Controls (Sections 46, 47, 83) -->
             <div class="loadout-modal-footer">
                 <div class="footer-left-actions">
-                    <button id="btn-loadout-randomize" class="btn-secondary">
-                        <span>🎲 RANDOMIZE</span>
+                    <button id="btn-loadout-randomize" class="btn-secondary" title="Randomize all piece elements">
+                        <span>🎲 RANDOMIZE ALL</span>
                     </button>
+                    <label class="dup-toggle-label" title="When unchecked, all 6 pieces receive unique elements">
+                        <input type="checkbox" id="check-allow-duplicates" checked>
+                        <span>Allow Duplicates</span>
+                    </label>
                     <button id="btn-loadout-reset" class="btn-secondary">
                         <span>↺ RESET DEFAULT</span>
                     </button>
                     <button id="btn-loadout-save" class="btn-secondary">
-                        <span>💾 SAVE LOADOUT</span>
+                        <span>💾 SAVE TO MY ARMIES</span>
                     </button>
                 </div>
                 <div class="footer-right-actions">
@@ -949,38 +883,138 @@
                     </button>
                 </div>
             </div>
+
+            <!-- ================= SUB-DRAWERS INSIDE LOADOUT ================= -->
+
+            <!-- 1. Piece Customization Panel Drawer (Section 3) -->
+            <div id="drawer-piece-customize" class="loadout-sub-drawer hidden">
+                <div class="sub-drawer-header">
+                    <div class="sub-drawer-title-group">
+                        <h3 class="sub-drawer-title" id="drawer-custom-title">CUSTOMIZE KNIGHT</h3>
+                        <span class="sub-drawer-subtitle" id="drawer-custom-subtitle">Select elemental mastery for this piece</span>
+                    </div>
+                    <button type="button" id="btn-close-custom-drawer" class="btn-drawer-close">&times;</button>
+                </div>
+                <div class="sub-drawer-body">
+                    <div class="elements-picker-palette" id="elements-picker-palette">
+                        <!-- Injected 10 Element Selection Buttons -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Dedicated Live Preview Stage Drawer (Sections 4 - 6) -->
+            <div id="drawer-live-preview" class="loadout-sub-drawer hidden">
+                <div class="sub-drawer-header">
+                    <div class="sub-drawer-title-group">
+                        <h3 class="sub-drawer-title" id="drawer-preview-title">ELEMENT PREVIEW</h3>
+                        <span class="sub-drawer-subtitle" id="drawer-preview-subtitle">Knight &bull; Lightning &bull; Thunder Strike</span>
+                    </div>
+                    <button type="button" id="btn-close-preview-drawer" class="btn-drawer-close">&times;</button>
+                </div>
+                <div class="sub-drawer-body">
+                    <div class="preview-stage-box" id="preview-stage-box">
+                        <canvas id="preview-stage-canvas" class="preview-stage-canvas" width="600" height="180"></canvas>
+                        <div class="preview-stage-overlay">
+                            <div class="preview-actor" id="preview-actor-attacker">
+                                <div class="actor-halo" id="preview-actor-halo"></div>
+                                <div class="actor-svg" id="preview-actor-svg"></div>
+                                <span class="actor-tag" id="preview-actor-tag">Knight</span>
+                            </div>
+                            <div class="preview-vs-emblem">VS</div>
+                            <div class="preview-actor" id="preview-actor-dummy">
+                                <div class="dummy-halo"></div>
+                                <div class="actor-svg dummy-svg" id="preview-dummy-svg">
+                                    <!-- Neutral silhouette or crystal -->
+                                    <svg viewBox="0 0 100 100" class="crystal-dummy-svg">
+                                        <polygon points="50,10 80,35 68,90 32,90 20,35" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+                                        <line x1="50" y1="10" x2="50" y2="90" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
+                                        <line x1="20" y1="35" x2="80" y2="35" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
+                                    </svg>
+                                </div>
+                                <span class="actor-tag">Training Target</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Preview Controls (Section 6) -->
+                    <div class="preview-stage-controls">
+                        <button type="button" id="btn-preview-play" class="btn-preview-ctl btn-primary">
+                            <span>▶ PLAY PREVIEW</span>
+                        </button>
+                        <button type="button" id="btn-preview-replay" class="btn-preview-ctl btn-secondary">
+                            <span>↻ REPLAY</span>
+                        </button>
+                        <button type="button" id="btn-preview-pause" class="btn-preview-ctl btn-secondary">
+                            <span>⏸ PAUSE</span>
+                        </button>
+                        <button type="button" id="btn-preview-reset" class="btn-preview-ctl btn-secondary">
+                            <span>↺ RESET</span>
+                        </button>
+                        <button type="button" id="btn-preview-slowmo" class="btn-preview-ctl btn-slowmo" title="Slow Motion (Preview only)">
+                            <span>🐢 SLOW MOTION</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Saved Armies Drawer (Sections 42 - 44) -->
+            <div id="drawer-saved-armies" class="loadout-sub-drawer hidden">
+                <div class="sub-drawer-header">
+                    <div class="sub-drawer-title-group">
+                        <h3 class="sub-drawer-title">MY SAVED ARMIES</h3>
+                        <span class="sub-drawer-subtitle">Manage, rename, and select your favorite army for Quick Match</span>
+                    </div>
+                    <button type="button" id="btn-close-saved-drawer" class="btn-drawer-close">&times;</button>
+                </div>
+                <div class="sub-drawer-body">
+                    <div class="saved-armies-grid" id="saved-armies-grid">
+                        <!-- Injected saved army cards -->
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Element Laboratory & Effect Gallery Modal (Points 27 & 28) -->
+    <!-- Element Laboratory & Effect Sandbox Modal (Sections 7 - 19, 51 - 82) -->
     <div id="modal-laboratory" class="modal-overlay modal-lab-overlay" role="dialog" aria-modal="true" aria-labelledby="lab-modal-title">
         <div class="modal-card lab-card">
+            <!-- Lab Header -->
             <div class="lab-header">
                 <div class="lab-title-group">
                     <span class="lab-icon">⚗️</span>
                     <div>
-                        <h2 class="modal-title" id="lab-modal-title">ELEMENT LABORATORY &amp; EFFECT GALLERY</h2>
-                        <span class="lab-subtitle">Interactive Combat Sandbox &bull; 60 Piece-Element Combinations</span>
+                        <h2 class="modal-title" id="lab-modal-title">ELEMENT LABORATORY</h2>
+                        <span class="lab-subtitle">Visual Effects Sandbox &bull; Elemental Reaction Matrix &bull; Pawn Ascension</span>
                     </div>
                 </div>
-                <button class="btn-close modal-close">&times;</button>
+                <div class="lab-header-actions">
+                    <button type="button" id="btn-lab-toggle-dev" class="btn-action-small" title="Toggle Developer HUD">
+                        <span>🛠️ Dev HUD</span>
+                    </button>
+                    <button class="btn-close modal-close">&times;</button>
+                </div>
             </div>
 
-            <!-- Laboratory View Tabs -->
+            <!-- Lab View Tabs (4 Tabs) -->
             <div class="lab-tabs-bar">
                 <button type="button" class="lab-tab-btn active" id="tab-lab-sandbox" data-target="sandbox">
                     <span>⚔️ Combat Sandbox</span>
                 </button>
+                <button type="button" class="lab-tab-btn" id="tab-lab-promo" data-target="promo">
+                    <span>✦ Promotion Lab</span>
+                </button>
+                <button type="button" class="lab-tab-btn" id="tab-lab-compare" data-target="compare">
+                    <span>⚖️ Compare Elements</span>
+                </button>
                 <button type="button" class="lab-tab-btn" id="tab-lab-gallery" data-target="gallery">
-                    <span>✦ 60-Combination Gallery</span>
+                    <span>📖 60-Combination Gallery</span>
                 </button>
             </div>
 
-            <!-- Tab 1: Interactive Combat Sandbox -->
+            <!-- TAB 1: Combat Sandbox Arena -->
             <div id="lab-view-sandbox" class="lab-view-panel">
                 <!-- Sandbox Canvas Arena -->
                 <div class="lab-arena-box" id="lab-arena-box">
-                    <canvas id="lab-canvas" class="lab-canvas" width="600" height="200"></canvas>
+                    <canvas id="lab-canvas" class="lab-canvas" width="600" height="220"></canvas>
                     <div class="lab-stage-overlay">
                         <!-- Attacker Stage Side -->
                         <div class="lab-stage-fighter" id="lab-fighter-attacker">
@@ -988,29 +1022,48 @@
                             <div class="lab-fighter-svg" id="lab-attacker-svg"></div>
                             <span class="lab-fighter-tag" id="lab-attacker-tag">White Knight</span>
                         </div>
-                        <div class="lab-vs-emblem">VS</div>
+                        <div class="lab-vs-emblem" id="lab-vs-emblem">VS</div>
                         <!-- Target Dummy Side -->
                         <div class="lab-stage-fighter" id="lab-fighter-target">
                             <div class="lab-target-halo" id="lab-target-halo"></div>
                             <div class="lab-fighter-svg" id="lab-target-svg"></div>
-                            <span class="lab-fighter-tag" id="lab-target-tag">Black King</span>
+                            <span class="lab-fighter-tag" id="lab-target-tag">Training Crystal (Ice)</span>
                         </div>
+                    </div>
+                    <!-- Reaction Clash Banner -->
+                    <div class="lab-reaction-banner hidden" id="lab-reaction-banner">
+                        <span class="reaction-tag">ELEMENTAL REACTION</span>
+                        <h4 class="reaction-title" id="lab-reaction-title">STEAM BURST</h4>
                     </div>
                 </div>
 
-                <!-- Sandbox Control Bar -->
+                <!-- Sandbox Action Selector (Sections 11 - 16) -->
+                <div class="lab-action-selector-bar">
+                    <span class="lab-action-label">ACTION:</span>
+                    <button type="button" class="btn-lab-action active" data-action="capture">⚔️ CAPTURE</button>
+                    <button type="button" class="btn-lab-action" data-action="idle">✨ IDLE AURA</button>
+                    <button type="button" class="btn-lab-action" data-action="move">🏃 MOVE TRAIL</button>
+                    <button type="button" class="btn-lab-action" data-action="check">⚠️ CHECK AURA</button>
+                    <button type="button" class="btn-lab-action" data-action="checkmate">👑 CHECKMATE</button>
+                </div>
+
+                <!-- Sandbox Playback Controls (Section 6) -->
                 <div class="lab-action-buttons">
                     <button type="button" class="btn-lab-primary" id="btn-lab-fire-attack">
-                        <span class="lab-btn-icon">⚡</span>
-                        <span>TRIGGER ATTACK</span>
+                        <span class="lab-btn-icon">▶</span>
+                        <span id="lab-execute-btn-text">PLAY ACTION</span>
                     </button>
-                    <button type="button" class="btn-lab-secondary" id="btn-lab-fire-ascension">
-                        <span class="lab-btn-icon">✦</span>
-                        <span>TEST ASCENSION</span>
+                    <button type="button" class="btn-lab-secondary" id="btn-lab-replay">
+                        <span class="lab-btn-icon">↻</span>
+                        <span>REPLAY</span>
                     </button>
                     <button type="button" class="btn-lab-secondary" id="btn-lab-reset-stage">
                         <span class="lab-btn-icon">↺</span>
                         <span>RESET STAGE</span>
+                    </button>
+                    <button type="button" class="btn-lab-secondary btn-lab-slowmo" id="btn-lab-slowmo">
+                        <span class="lab-btn-icon">🐢</span>
+                        <span>SLOW MOTION</span>
                     </button>
                 </div>
 
@@ -1023,9 +1076,7 @@
                             <span class="lab-section-label">Attacker Piece</span>
                             <button type="button" id="btn-lab-color-toggle" class="btn-lab-mini-toggle">Color: White</button>
                         </div>
-                        <div class="lab-pieces-grid" id="lab-attacker-pieces-grid">
-                            <!-- Injected: p, n, b, r, q, k -->
-                        </div>
+                        <div class="lab-pieces-grid" id="lab-attacker-pieces-grid"></div>
                     </div>
 
                     <!-- 2. Attacking Element Picker -->
@@ -1034,44 +1085,168 @@
                             <span class="lab-step-num">2</span>
                             <span class="lab-section-label">Attacking Element</span>
                         </div>
-                        <div class="lab-elements-grid" id="lab-elements-grid">
-                            <!-- Injected 10 elements -->
-                        </div>
+                        <div class="lab-elements-grid" id="lab-elements-grid"></div>
                     </div>
 
-                    <!-- 3. Target Dummy Picker -->
+                    <!-- 3. Target Dummy Type Picker (Section 59) -->
                     <div class="lab-config-section">
                         <div class="lab-section-header">
                             <span class="lab-step-num">3</span>
-                            <span class="lab-section-label">Target Dummy</span>
+                            <span class="lab-section-label">Target Dummy Type</span>
                         </div>
-                        <div class="lab-pieces-grid" id="lab-target-pieces-grid">
-                            <!-- Injected: p, n, b, r, q, k -->
+                        <div class="lab-target-types-grid" id="lab-target-types-grid">
+                            <button type="button" class="btn-target-type active" data-target="crystal">Crystal</button>
+                            <button type="button" class="btn-target-type" data-target="p">Pawn</button>
+                            <button type="button" class="btn-target-type" data-target="n">Knight</button>
+                            <button type="button" class="btn-target-type" data-target="k">King</button>
                         </div>
+                    </div>
+
+                    <!-- 4. Target Element Picker (Section 60 & 61) -->
+                    <div class="lab-config-section">
+                        <div class="lab-section-header">
+                            <span class="lab-step-num">4</span>
+                            <span class="lab-section-label">Defender Element</span>
+                            <button type="button" id="btn-lab-random-target-elem" class="btn-lab-mini-toggle">🎲 Random</button>
+                        </div>
+                        <div class="lab-elements-grid" id="lab-target-elements-grid"></div>
+                    </div>
+                </div>
+
+                <!-- Integration & Favorite Bar (Sections 63 - 66, 75 - 76) -->
+                <div class="lab-integration-bar">
+                    <button type="button" id="btn-lab-use-in-loadout" class="btn-lab-integrate">
+                        <span>⚔️ USE THIS ELEMENT IN LOADOUT</span>
+                    </button>
+                    <button type="button" id="btn-lab-fav-effect" class="btn-lab-fav">
+                        <span id="fav-star-icon">☆</span>
+                        <span>FAVORITE EFFECT</span>
+                    </button>
+                    <div class="lab-recent-group">
+                        <span class="recent-label">RECENT:</span>
+                        <div class="recent-chips" id="lab-recent-chips-container"></div>
                     </div>
                 </div>
 
                 <!-- Live Attack Spec Details -->
                 <div class="lab-spec-card" id="lab-spec-card">
                     <div class="lab-spec-header">
-                        <span class="lab-spec-elem-badge" id="lab-spec-elem-badge">FIRE</span>
-                        <h4 class="lab-spec-title" id="lab-spec-title">BLAZING CHARGE</h4>
+                        <span class="lab-spec-elem-badge" id="lab-spec-elem-badge">LIGHTNING</span>
+                        <h4 class="lab-spec-title" id="lab-spec-title">THUNDER STRIKE</h4>
                     </div>
                     <div class="lab-spec-body">
                         <div class="lab-spec-row">
                             <span class="spec-label">Style:</span>
                             <span class="spec-val" id="lab-spec-style">Leaping Arc</span>
                             <span class="spec-label">Trail:</span>
-                            <span class="spec-val" id="lab-spec-trail">Flame Trail</span>
+                            <span class="spec-val" id="lab-spec-trail">Electric Trail</span>
                             <span class="spec-label">Finisher:</span>
-                            <span class="spec-val" id="lab-spec-impact">Ember Nova</span>
+                            <span class="spec-val" id="lab-spec-impact">Thunderbolt Impact</span>
                         </div>
-                        <p class="lab-spec-desc" id="lab-spec-desc">Gallops across the board enveloped in blazing fire, striking with fiery sparks.</p>
+                        <p class="lab-spec-desc" id="lab-spec-desc">Knight leaps through an electrical arc, striking the target with thunderbolts.</p>
+                    </div>
+                </div>
+
+                <!-- Developer & Performance Tools Drawer (Sections 51 - 54) -->
+                <div class="lab-dev-drawer hidden" id="lab-dev-drawer">
+                    <div class="dev-drawer-header">
+                        <span class="dev-title">DEVELOPER &amp; PERFORMANCE BENCHMARK</span>
+                        <div class="dev-metrics">
+                            <span id="dev-hud-fps">FPS: 60</span>
+                            <span id="dev-hud-particles">Particles: 0 / 150</span>
+                        </div>
+                    </div>
+                    <div class="dev-drawer-controls">
+                        <button type="button" id="btn-run-perf-benchmark" class="btn-small btn-highlight">⚡ TEST EFFECT PERFORMANCE</button>
+                        <span id="perf-recommendation-badge" class="perf-badge">Recommended: HIGH</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Tab 2: 60-Combination Effect Gallery -->
+            <!-- TAB 2: Promotion Lab (Sections 17 - 19) -->
+            <div id="lab-view-promo" class="lab-view-panel hidden">
+                <div class="promo-lab-workspace">
+                    <div class="promo-lab-config">
+                        <div class="promo-lab-step">
+                            <span class="step-num">1</span>
+                            <span class="step-label">Original Pawn Element:</span>
+                            <div class="promo-elements-row" id="promo-lab-pawn-elements"></div>
+                        </div>
+                        <div class="promo-lab-step">
+                            <span class="step-num">2</span>
+                            <span class="step-label">Promotion Piece Class:</span>
+                            <div class="promo-pieces-row" id="promo-lab-pieces"></div>
+                        </div>
+                        <div class="promo-lab-step">
+                            <span class="step-num">3</span>
+                            <span class="step-label">Elevated Element:</span>
+                            <div class="promo-elements-row" id="promo-lab-new-elements"></div>
+                        </div>
+                        <div class="promo-lab-step">
+                            <span class="step-num">4</span>
+                            <span class="step-label">Ascension Style:</span>
+                            <div class="promo-styles-row" id="promo-lab-styles"></div>
+                        </div>
+                    </div>
+                    <div class="promo-lab-preview-card">
+                        <div class="promo-lab-stage" id="promo-lab-stage">
+                            <div class="promo-stage-piece" id="promo-stage-piece"></div>
+                            <div class="promo-stage-halo" id="promo-stage-halo"></div>
+                        </div>
+                        <h4 class="promo-lab-title" id="promo-lab-title">ABYSSAL QUEEN ASCENSION</h4>
+                        <div class="promo-lab-actions">
+                            <button type="button" id="btn-promo-lab-play" class="btn-lab-primary">✦ PLAY ASCENSION</button>
+                            <button type="button" id="btn-promo-lab-set-default" class="btn-lab-secondary">★ SET AS DEFAULT QUEEN ASCENSION</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: Compare Mode (Section 62) -->
+            <div id="lab-view-compare" class="lab-view-panel hidden">
+                <div class="compare-mode-grid">
+                    <!-- Left Fighter -->
+                    <div class="compare-card" id="compare-card-left">
+                        <div class="compare-header">
+                            <span class="compare-badge">LEFT OPTION</span>
+                            <h4 class="compare-title" id="compare-left-title">KNIGHT &bull; FIRE</h4>
+                            <span class="compare-attack" id="compare-left-attack">Blazing Charge</span>
+                        </div>
+                        <div class="compare-stage" id="compare-stage-left">
+                            <div class="compare-piece-svg" id="compare-left-svg"></div>
+                        </div>
+                        <div class="compare-selectors">
+                            <select id="compare-left-piece-select" class="select-preset"></select>
+                            <select id="compare-left-elem-select" class="select-preset"></select>
+                        </div>
+                        <button type="button" id="btn-compare-play-left" class="btn-lab-secondary">▶ PLAY LEFT</button>
+                    </div>
+
+                    <!-- Compare Central Controls -->
+                    <div class="compare-center-controls">
+                        <button type="button" id="btn-compare-play-both" class="btn-lab-primary">⚡ PLAY SEQUENTIALLY</button>
+                    </div>
+
+                    <!-- Right Fighter -->
+                    <div class="compare-card" id="compare-card-right">
+                        <div class="compare-header">
+                            <span class="compare-badge">RIGHT OPTION</span>
+                            <h4 class="compare-title" id="compare-right-title">KNIGHT &bull; LIGHTNING</h4>
+                            <span class="compare-attack" id="compare-right-attack">Thunder Strike</span>
+                        </div>
+                        <div class="compare-stage" id="compare-stage-right">
+                            <div class="compare-piece-svg" id="compare-right-svg"></div>
+                        </div>
+                        <div class="compare-selectors">
+                            <select id="compare-right-piece-select" class="select-preset"></select>
+                            <select id="compare-right-elem-select" class="select-preset"></select>
+                        </div>
+                        <button type="button" id="btn-compare-play-right" class="btn-lab-secondary">▶ PLAY RIGHT</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: 60-Combination Effect Gallery -->
             <div id="lab-view-gallery" class="lab-view-panel hidden">
                 <div class="gallery-filter-bar">
                     <span class="gallery-filter-label">Filter:</span>

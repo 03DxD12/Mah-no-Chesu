@@ -1118,7 +1118,331 @@ class EffectsManager {
             }
         }
 
+        // 4. Element vs Element Reaction Clash (Sections 20 - 37)
+        if (defenderElement) {
+            const reaction = this.getElementReaction(elem, defenderElement);
+            if (reaction) {
+                this.playElementReactionFX(reaction, to.x, to.y, pType === 'q' || pType === 'k' || pType === 'r');
+            }
+        }
+
         await new Promise(r => setTimeout(r, 220));
+    }
+
+    /**
+     * Element vs Element Reactions (Sections 20 - 37)
+     * Attacker Element + Defender Element = Reaction Effect
+     */
+    getElementReaction(attackerElement, defenderElement) {
+        if (!attackerElement || !defenderElement || attackerElement === defenderElement) {
+            return null;
+        }
+        const a = (attackerElement || '').toLowerCase();
+        const d = (defenderElement || '').toLowerCase();
+        const pair = [a, d].sort().join('+');
+
+        if (pair === 'fire+ice') {
+            return {
+                id: 'steam_burst',
+                name: 'STEAM BURST',
+                desc: 'Fire melts Ice, erupting thick boiling vapor clouds.',
+                primaryColor: '#e0f2fe',
+                secondaryColor: '#f97316',
+                impactType: 'steam'
+            };
+        }
+        if (pair === 'fire+water') {
+            return {
+                id: 'steam_impact',
+                name: 'STEAM IMPACT',
+                desc: 'Boiling water and sputtering embers create a high-pressure steam wave.',
+                primaryColor: '#38bdf8',
+                secondaryColor: '#f97316',
+                impactType: 'steam'
+            };
+        }
+        if (pair === 'earth+fire') {
+            return {
+                id: 'magma_impact',
+                name: 'MAGMA IMPACT',
+                desc: 'Intense heat melts stone into glowing molten fissures and smoke.',
+                primaryColor: '#ea580c',
+                secondaryColor: '#78350f',
+                impactType: 'magma'
+            };
+        }
+        if (pair === 'fire+wind') {
+            return {
+                id: 'firestorm',
+                name: 'FIRESTORM',
+                desc: 'Gale currents fan the blaze into an expanding fire vortex.',
+                primaryColor: '#f97316',
+                secondaryColor: '#34d399',
+                impactType: 'firestorm'
+            };
+        }
+        if (pair === 'lightning+water') {
+            return {
+                id: 'storm_surge',
+                name: 'STORM SURGE',
+                desc: 'Electrical currents arc violently through splashing water droplets.',
+                primaryColor: '#0284c7',
+                secondaryColor: '#38bdf8',
+                impactType: 'surge'
+            };
+        }
+        if (pair === 'earth+lightning') {
+            return {
+                id: 'ground_discharge',
+                name: 'GROUND DISCHARGE',
+                desc: 'Electric bolts ground through stone, illuminating glowing fractures.',
+                primaryColor: '#facc15',
+                secondaryColor: '#b45309',
+                impactType: 'discharge'
+            };
+        }
+        if (pair === 'lightning+wind') {
+            return {
+                id: 'thunderstorm',
+                name: 'THUNDERSTORM',
+                desc: 'Cyclonic wind spirals entangle with crackling lightning forks.',
+                primaryColor: '#38bdf8',
+                secondaryColor: '#a78bfa',
+                impactType: 'thunderstorm'
+            };
+        }
+        if (pair === 'ice+water') {
+            return {
+                id: 'frozen_tide',
+                name: 'FROZEN TIDE',
+                desc: 'Swirling water flash-freezes into crystalline ice shells that shatter.',
+                primaryColor: '#bae6fd',
+                secondaryColor: '#0284c7',
+                impactType: 'frozentide'
+            };
+        }
+        if (pair === 'earth+nature') {
+            return {
+                id: 'living_fortress',
+                name: 'LIVING FORTRESS',
+                desc: 'Ancient roots and vines burst through cracked stone, scattering foliage.',
+                primaryColor: '#22c55e',
+                secondaryColor: '#854d0e',
+                impactType: 'fortress'
+            };
+        }
+        if (pair === 'light+shadow') {
+            return {
+                id: 'eclipse_clash',
+                name: 'ECLIPSE CLASH',
+                desc: 'Divine luminescence collides with the void, creating an annular shockwave.',
+                primaryColor: '#fef08a',
+                secondaryColor: '#a855f7',
+                impactType: 'eclipse'
+            };
+        }
+        if (a === 'arcane' || d === 'arcane') {
+            const otherElem = a === 'arcane' ? d : a;
+            const otherMeta = window.ELEMENTS ? window.ELEMENTS[otherElem] : { name: 'Elemental', color: '#c084fc' };
+            return {
+                id: 'runic_resonance',
+                name: `RUNIC ${otherMeta.name.toUpperCase()}`,
+                desc: `Arcane geometric runes orbit and amplify the ${otherMeta.name} power.`,
+                primaryColor: '#ec4899',
+                secondaryColor: otherMeta.color || '#a855f7',
+                impactType: 'runic'
+            };
+        }
+
+        return null;
+    }
+
+    /**
+     * Play Elemental Reaction Clashing Visual FX (Sections 20 - 37)
+     */
+    playElementReactionFX(reaction, x, y, isHeavy = false) {
+        if (!reaction) return;
+
+        // Subtitle notification on attack banner
+        if (this.attackBanner && this.attackBanner.classList.contains('active')) {
+            const sub = document.createElement('span');
+            sub.className = 'reaction-subtitle';
+            sub.textContent = ` [REACTION: ${reaction.name}]`;
+            sub.style.color = reaction.primaryColor;
+            this.attackBanner.appendChild(sub);
+        }
+
+        const count = isHeavy ? 35 : 22;
+
+        switch (reaction.impactType) {
+            case 'steam':
+                // Rising dense steam vapor clouds
+                this.addShockwave(x, y, 60, reaction.primaryColor, 3);
+                for (let i = 0; i < count; i++) {
+                    const ang = Math.random() * Math.PI * 2;
+                    const spd = 1.5 + Math.random() * 3.5;
+                    this.spawnParticle({
+                        x: x + (Math.random() - 0.5) * 20,
+                        y: y + (Math.random() - 0.5) * 20,
+                        vx: Math.cos(ang) * spd,
+                        vy: -2 - Math.random() * 3.5,
+                        radius: 6 + Math.random() * 8,
+                        color: reaction.primaryColor,
+                        decay: 0.02,
+                        shape: 'circle'
+                    });
+                }
+                break;
+
+            case 'magma':
+                // Molten lava fissures and glowing debris
+                this.addShockwave(x, y, 65, reaction.primaryColor, 4.5);
+                for (let i = 0; i < count; i++) {
+                    const ang = Math.random() * Math.PI * 2;
+                    const spd = 2 + Math.random() * 6;
+                    this.spawnParticle({
+                        x,
+                        y,
+                        vx: Math.cos(ang) * spd,
+                        vy: Math.sin(ang) * spd - 2,
+                        radius: 4 + Math.random() * 4,
+                        color: Math.random() > 0.4 ? reaction.primaryColor : reaction.secondaryColor,
+                        decay: 0.03,
+                        shape: 'spark'
+                    });
+                }
+                break;
+
+            case 'firestorm':
+                // Spiraling vortex flame ring
+                this.addShockwave(x, y, 75, reaction.primaryColor, 4);
+                for (let i = 0; i < count; i++) {
+                    const ang = (i * Math.PI * 2) / count;
+                    this.spawnParticle({
+                        x: x + Math.cos(ang) * 15,
+                        y: y + Math.sin(ang) * 15,
+                        vx: -Math.sin(ang) * 5 + Math.cos(ang) * 2,
+                        vy: Math.cos(ang) * 5 + Math.sin(ang) * 2,
+                        radius: 5 + Math.random() * 4,
+                        color: Math.random() > 0.5 ? reaction.primaryColor : reaction.secondaryColor,
+                        decay: 0.035,
+                        shape: 'streak'
+                    });
+                }
+                break;
+
+            case 'surge':
+                // Water splash with lightning arcs
+                this.addShockwave(x, y, 70, reaction.secondaryColor, 3.5);
+                for (let i = 0; i < count; i++) {
+                    const ang = Math.random() * Math.PI * 2;
+                    const spd = 3 + Math.random() * 7;
+                    this.spawnParticle({
+                        x,
+                        y,
+                        vx: Math.cos(ang) * spd,
+                        vy: Math.sin(ang) * spd,
+                        radius: 3 + Math.random() * 4,
+                        color: Math.random() > 0.3 ? reaction.secondaryColor : reaction.primaryColor,
+                        decay: 0.04,
+                        shape: 'spark'
+                    });
+                }
+                break;
+
+            case 'discharge':
+                // Ground fissures glowing with electric bolts
+                this.addShockwave(x, y, 65, reaction.primaryColor, 4);
+                for (let i = 0; i < count; i++) {
+                    const ang = Math.random() * Math.PI * 2;
+                    this.spawnParticle({
+                        x: x + (Math.random() - 0.5) * 25,
+                        y: y + (Math.random() - 0.5) * 25,
+                        vx: Math.cos(ang) * 4,
+                        vy: Math.sin(ang) * 4,
+                        radius: 3 + Math.random() * 3,
+                        color: reaction.primaryColor,
+                        decay: 0.045,
+                        shape: 'spark'
+                    });
+                }
+                break;
+
+            case 'frozentide':
+                // Shattering crystalline ice shell
+                this.addShockwave(x, y, 70, reaction.primaryColor, 4);
+                for (let i = 0; i < count; i++) {
+                    const ang = Math.random() * Math.PI * 2;
+                    const spd = 3 + Math.random() * 6;
+                    this.spawnParticle({
+                        x,
+                        y,
+                        vx: Math.cos(ang) * spd,
+                        vy: Math.sin(ang) * spd,
+                        radius: 3.5 + Math.random() * 4,
+                        color: Math.random() > 0.4 ? reaction.primaryColor : reaction.secondaryColor,
+                        decay: 0.035,
+                        shape: 'spark'
+                    });
+                }
+                break;
+
+            case 'fortress':
+                // Roots and leaves bursting through stone
+                this.addShockwave(x, y, 65, reaction.primaryColor, 3.5);
+                for (let i = 0; i < count; i++) {
+                    const ang = Math.random() * Math.PI * 2;
+                    this.spawnParticle({
+                        x: x + (Math.random() - 0.5) * 20,
+                        y: y + (Math.random() - 0.5) * 20,
+                        vx: Math.cos(ang) * 3,
+                        vy: -2 - Math.random() * 4,
+                        radius: 4 + Math.random() * 4,
+                        color: Math.random() > 0.4 ? reaction.primaryColor : reaction.secondaryColor,
+                        decay: 0.03,
+                        shape: 'streak'
+                    });
+                }
+                break;
+
+            case 'eclipse':
+                // Annular light vs shadow shockwave (photosensitive friendly)
+                this.addShockwave(x, y, 80, reaction.primaryColor, 4);
+                this.addShockwave(x, y, 55, reaction.secondaryColor, 3);
+                for (let i = 0; i < count; i++) {
+                    const ang = (i * Math.PI * 2) / count;
+                    this.spawnParticle({
+                        x: x + Math.cos(ang) * 25,
+                        y: y + Math.sin(ang) * 25,
+                        vx: Math.cos(ang) * 4,
+                        vy: Math.sin(ang) * 4,
+                        radius: 3.5 + Math.random() * 3.5,
+                        color: (i % 2 === 0) ? reaction.primaryColor : reaction.secondaryColor,
+                        decay: 0.03,
+                        shape: 'circle'
+                    });
+                }
+                break;
+
+            case 'runic':
+            default:
+                // Rotating geometric glyphs
+                this.addMagicRing(x, y, 45, reaction.primaryColor, 20);
+                for (let i = 0; i < count; i++) {
+                    const ang = Math.random() * Math.PI * 2;
+                    this.spawnParticle({
+                        x: x + Math.cos(ang) * 20,
+                        y: y + Math.sin(ang) * 20,
+                        vx: Math.cos(ang) * 3,
+                        vy: Math.sin(ang) * 3,
+                        radius: 3 + Math.random() * 3,
+                        color: reaction.primaryColor,
+                        decay: 0.035,
+                        shape: 'spark'
+                    });
+                }
+                break;
+        }
     }
 
     /**
