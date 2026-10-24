@@ -686,6 +686,138 @@ class LoadoutManager {
         // 'classic'
         return { ...PRESETS.classic.loadout };
     }
+
+    /**
+     * Automatic Thematic Army Name Generator (Point 48)
+     * Names the army based on dominant synergy, hybrid pairs, or convergence
+     */
+    generateArmyName(loadout) {
+        if (!loadout) return 'Elemental Legion';
+        const counts = {};
+        const pieces = ['p', 'n', 'b', 'r', 'q', 'k'];
+        pieces.forEach(p => {
+            const el = (loadout[p] || 'fire').toLowerCase();
+            counts[el] = (counts[el] || 0) + 1;
+        });
+
+        const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+        const topElem = entries[0] ? entries[0][0] : 'fire';
+        const topCount = entries[0] ? entries[0][1] : 0;
+        const secondElem = entries[1] ? entries[1][0] : null;
+
+        // Pure Armies (6 of same)
+        if (topCount === 6) {
+            const pureNames = {
+                fire: 'Inferno Legion',
+                lightning: 'Thunder Squadron',
+                wind: 'Tempest Order',
+                earth: 'Titan Citadel',
+                ice: 'Glacial Dominion',
+                water: 'Tidal Sovereignty',
+                light: 'Solar Covenant',
+                shadow: 'Abyssal Horde',
+                nature: 'Verdant Crusade',
+                arcane: 'Astral Enclave'
+            };
+            return pureNames[topElem] || `${topElem.toUpperCase()} LEGION`;
+        }
+
+        // Two-Element Hybrids
+        if (secondElem) {
+            const pair = [topElem, secondElem].sort().join('+');
+            const hybridNames = {
+                'fire+lightning': 'Stormfire Vanguard',
+                'fire+wind': 'Tempest Flame',
+                'earth+nature': 'Verdant Fortress',
+                'ice+water': 'Frozen Tide',
+                'light+shadow': 'Twilight Equilibrium',
+                'light+nature': 'Solar Bloom',
+                'arcane+light': 'Luminous Mystic',
+                'arcane+shadow': 'Void Conclave',
+                'earth+fire': 'Magma Citadel',
+                'lightning+wind': 'Thunderstorm Brigade',
+                'ice+wind': 'Blizzard Vanguard',
+                'arcane+ice': 'Frost Rune Coven',
+                'earth+lightning': 'Seismic Voltage'
+            };
+            if (hybridNames[pair]) return hybridNames[pair];
+        }
+
+        // 5 or 6 Unique elements
+        if (Object.keys(counts).length >= 5) {
+            return 'Elemental Convergence';
+        }
+
+        const prefixes = {
+            fire: 'Blazing',
+            lightning: 'Thunderous',
+            wind: 'Gale-Force',
+            earth: 'Stone-Clad',
+            ice: 'Frost-Bound',
+            water: 'Tidal',
+            light: 'Radiant',
+            shadow: 'Shadow-Forged',
+            nature: 'Verdant',
+            arcane: 'Mystic'
+        };
+
+        const suffixes = {
+            fire: 'Inferno',
+            lightning: 'Thunder',
+            wind: 'Storm',
+            earth: 'Bastion',
+            ice: 'Glacier',
+            water: 'Surge',
+            light: 'Radiance',
+            shadow: 'Void',
+            nature: 'Wilds',
+            arcane: 'Enclave'
+        };
+
+        return `${prefixes[topElem] || 'Elemental'} ${suffixes[secondElem] || 'Battalion'}`;
+    }
+
+    /**
+     * Get all 60 piece-element combinations (6 pieces x 10 elements)
+     * For Element Laboratory & Effect Gallery (Points 27 & 28)
+     */
+    getAllCombinations() {
+        const pieces = [
+            { type: 'p', name: 'Pawn' },
+            { type: 'n', name: 'Knight' },
+            { type: 'b', name: 'Bishop' },
+            { type: 'r', name: 'Rook' },
+            { type: 'q', name: 'Queen' },
+            { type: 'k', name: 'King' }
+        ];
+
+        const elements = Object.keys(ELEMENTS);
+        const combinations = [];
+
+        pieces.forEach(p => {
+            elements.forEach(el => {
+                const ability = this.getAbilityDetails(p.type, el);
+                const elemMeta = this.getElementMeta(el);
+                const ascensionTitle = this.getAscensionTitle(p.type, el, 'elemental');
+                combinations.push({
+                    pieceType: p.type,
+                    pieceName: p.name,
+                    element: el,
+                    elementKey: el,
+                    elementName: elemMeta.name,
+                    elementColor: elemMeta.color,
+                    elementMeta: elemMeta,
+                    attackName: ability.name,
+                    description: ability.desc,
+                    impact: ability.impact,
+                    motionTrail: ability.motionTrail,
+                    ascensionTitle: ascensionTitle
+                });
+            });
+        });
+
+        return combinations;
+    }
 }
 
 // Global instance for convenience

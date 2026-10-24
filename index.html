@@ -67,6 +67,7 @@
                         <span class="player-name" id="black-player-name">Black (Shadow Core)</span>
                         <span class="player-role" id="black-player-type">Human</span>
                     </div>
+                    <div class="player-clock" id="clock-black" title="Black Chess Clock">--:--</div>
                     <div class="turn-gem" id="black-turn-indicator" title="Turn Active Indicator"></div>
                 </div>
                 <div class="captured-box" id="black-captured-box">
@@ -126,6 +127,7 @@
                         <span class="player-name" id="white-player-name">White (Light Core)</span>
                         <span class="player-role" id="white-player-type">Human</span>
                     </div>
+                    <div class="player-clock" id="clock-white" title="White Chess Clock">--:--</div>
                     <div class="turn-gem active" id="white-turn-indicator" title="Turn Active Indicator"></div>
                 </div>
                 <div class="captured-box" id="white-captured-box">
@@ -234,8 +236,14 @@
                     <span class="btn-glow"></span>
                     <span>ENTER BATTLE</span>
                 </button>
+                <button id="menu-btn-quick-play" class="btn-menu btn-quick-play">
+                    <span>⚡ QUICK MATCH (LAST LOADOUT)</span>
+                </button>
                 <button id="menu-btn-loadout" class="btn-menu">
                     <span>ELEMENT LOADOUT</span>
+                </button>
+                <button id="menu-btn-laboratory" class="btn-menu btn-gold">
+                    <span>⚗️ ELEMENT LABORATORY</span>
                 </button>
                 <button id="menu-btn-guide" class="btn-menu">
                     <span>ELEMENT GUIDE</span>
@@ -277,6 +285,19 @@
                         <p>Face the Arcane AI powered by Minimax & Alpha-Beta pruning.</p>
                     </div>
                 </button>
+            </div>
+
+            <!-- Match Timer Selector (Point 15) -->
+            <div class="match-timer-section">
+                <span class="timer-section-title">⏱️ CHESS CLOCK TIMER</span>
+                <div class="timer-chips-grid" id="timer-chips-grid">
+                    <button type="button" class="btn-timer-chip active" data-timer="none">No Timer</button>
+                    <button type="button" class="btn-timer-chip" data-timer="1m">1m Bullet</button>
+                    <button type="button" class="btn-timer-chip" data-timer="3m">3m Blitz</button>
+                    <button type="button" class="btn-timer-chip" data-timer="5m">5m Rapid</button>
+                    <button type="button" class="btn-timer-chip" data-timer="10m">10m Standard</button>
+                    <button type="button" class="btn-timer-chip" data-timer="15m">15m Classic</button>
+                </div>
             </div>
 
             <!-- AI Settings Sub-view -->
@@ -772,6 +793,9 @@
                 </div>
                 
                 <div class="loadout-quick-actions">
+                    <button id="btn-loadout-open-lab" class="btn-action-small" title="Open Element Laboratory Sandbox">
+                        <span>⚗️ Laboratory</span>
+                    </button>
                     <button id="btn-copy-p1-loadout" class="btn-action-small" title="Copy White Loadout to Black">
                         <span>Copy White Army</span>
                     </button>
@@ -834,7 +858,7 @@
                     </div>
                 </div>
 
-                <!-- 3. Live Preview Card (Spec 107) -->
+                <!-- 3. Live Preview Card (Spec 107 & Point 2) -->
                 <div class="element-preview-column" aria-label="Element Preview">
                     <span class="workspace-col-title">Combat Preview</span>
                     <div class="preview-card" id="preview-card">
@@ -865,9 +889,27 @@
                                 <span class="field-label">Aura:</span>
                                 <span class="field-value" id="preview-aura-val">Burning embers and heat distortion</span>
                             </div>
+
+                            <!-- Live Test Attack Button (Point 2) -->
+                            <button type="button" class="btn-preview-live-test" id="btn-preview-live-test">
+                                <span class="test-icon">⚡</span>
+                                <span>LIVE TEST ATTACK</span>
+                            </button>
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- Thematic Army Name Generator Banner (Point 48) -->
+            <div class="loadout-army-name-banner" id="loadout-army-name-banner">
+                <div class="army-crest-wrap">
+                    <span class="army-crest-icon">⚔️</span>
+                </div>
+                <div class="army-name-info">
+                    <span class="army-label">CUSTOM ARMY IDENTITY</span>
+                    <h3 class="army-name-text" id="loadout-army-name-text">INFERNO LEGION</h3>
+                </div>
+                <span class="army-badge-pill" id="loadout-army-pill">Level 5 Synergy</span>
             </div>
 
             <!-- Active Synergies & Army Affinities Bar (Specs 144 - 156) -->
@@ -906,6 +948,148 @@
                         <span>⚔️ START MATCH</span>
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Element Laboratory & Effect Gallery Modal (Points 27 & 28) -->
+    <div id="modal-laboratory" class="modal-overlay modal-lab-overlay" role="dialog" aria-modal="true" aria-labelledby="lab-modal-title">
+        <div class="modal-card lab-card">
+            <div class="lab-header">
+                <div class="lab-title-group">
+                    <span class="lab-icon">⚗️</span>
+                    <div>
+                        <h2 class="modal-title" id="lab-modal-title">ELEMENT LABORATORY &amp; EFFECT GALLERY</h2>
+                        <span class="lab-subtitle">Interactive Combat Sandbox &bull; 60 Piece-Element Combinations</span>
+                    </div>
+                </div>
+                <button class="btn-close modal-close">&times;</button>
+            </div>
+
+            <!-- Laboratory View Tabs -->
+            <div class="lab-tabs-bar">
+                <button type="button" class="lab-tab-btn active" id="tab-lab-sandbox" data-target="sandbox">
+                    <span>⚔️ Combat Sandbox</span>
+                </button>
+                <button type="button" class="lab-tab-btn" id="tab-lab-gallery" data-target="gallery">
+                    <span>✦ 60-Combination Gallery</span>
+                </button>
+            </div>
+
+            <!-- Tab 1: Interactive Combat Sandbox -->
+            <div id="lab-view-sandbox" class="lab-view-panel">
+                <!-- Sandbox Canvas Arena -->
+                <div class="lab-arena-box" id="lab-arena-box">
+                    <canvas id="lab-canvas" class="lab-canvas" width="600" height="200"></canvas>
+                    <div class="lab-stage-overlay">
+                        <!-- Attacker Stage Side -->
+                        <div class="lab-stage-fighter" id="lab-fighter-attacker">
+                            <div class="lab-fighter-halo" id="lab-attacker-halo"></div>
+                            <div class="lab-fighter-svg" id="lab-attacker-svg"></div>
+                            <span class="lab-fighter-tag" id="lab-attacker-tag">White Knight</span>
+                        </div>
+                        <div class="lab-vs-emblem">VS</div>
+                        <!-- Target Dummy Side -->
+                        <div class="lab-stage-fighter" id="lab-fighter-target">
+                            <div class="lab-target-halo" id="lab-target-halo"></div>
+                            <div class="lab-fighter-svg" id="lab-target-svg"></div>
+                            <span class="lab-fighter-tag" id="lab-target-tag">Black King</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sandbox Control Bar -->
+                <div class="lab-action-buttons">
+                    <button type="button" class="btn-lab-primary" id="btn-lab-fire-attack">
+                        <span class="lab-btn-icon">⚡</span>
+                        <span>TRIGGER ATTACK</span>
+                    </button>
+                    <button type="button" class="btn-lab-secondary" id="btn-lab-fire-ascension">
+                        <span class="lab-btn-icon">✦</span>
+                        <span>TEST ASCENSION</span>
+                    </button>
+                    <button type="button" class="btn-lab-secondary" id="btn-lab-reset-stage">
+                        <span class="lab-btn-icon">↺</span>
+                        <span>RESET STAGE</span>
+                    </button>
+                </div>
+
+                <!-- Sandbox Configuration Grid -->
+                <div class="lab-config-grid">
+                    <!-- 1. Attacker Piece Picker -->
+                    <div class="lab-config-section">
+                        <div class="lab-section-header">
+                            <span class="lab-step-num">1</span>
+                            <span class="lab-section-label">Attacker Piece</span>
+                            <button type="button" id="btn-lab-color-toggle" class="btn-lab-mini-toggle">Color: White</button>
+                        </div>
+                        <div class="lab-pieces-grid" id="lab-attacker-pieces-grid">
+                            <!-- Injected: p, n, b, r, q, k -->
+                        </div>
+                    </div>
+
+                    <!-- 2. Attacking Element Picker -->
+                    <div class="lab-config-section">
+                        <div class="lab-section-header">
+                            <span class="lab-step-num">2</span>
+                            <span class="lab-section-label">Attacking Element</span>
+                        </div>
+                        <div class="lab-elements-grid" id="lab-elements-grid">
+                            <!-- Injected 10 elements -->
+                        </div>
+                    </div>
+
+                    <!-- 3. Target Dummy Picker -->
+                    <div class="lab-config-section">
+                        <div class="lab-section-header">
+                            <span class="lab-step-num">3</span>
+                            <span class="lab-section-label">Target Dummy</span>
+                        </div>
+                        <div class="lab-pieces-grid" id="lab-target-pieces-grid">
+                            <!-- Injected: p, n, b, r, q, k -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Attack Spec Details -->
+                <div class="lab-spec-card" id="lab-spec-card">
+                    <div class="lab-spec-header">
+                        <span class="lab-spec-elem-badge" id="lab-spec-elem-badge">FIRE</span>
+                        <h4 class="lab-spec-title" id="lab-spec-title">BLAZING CHARGE</h4>
+                    </div>
+                    <div class="lab-spec-body">
+                        <div class="lab-spec-row">
+                            <span class="spec-label">Style:</span>
+                            <span class="spec-val" id="lab-spec-style">Leaping Arc</span>
+                            <span class="spec-label">Trail:</span>
+                            <span class="spec-val" id="lab-spec-trail">Flame Trail</span>
+                            <span class="spec-label">Finisher:</span>
+                            <span class="spec-val" id="lab-spec-impact">Ember Nova</span>
+                        </div>
+                        <p class="lab-spec-desc" id="lab-spec-desc">Gallops across the board enveloped in blazing fire, striking with fiery sparks.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: 60-Combination Effect Gallery -->
+            <div id="lab-view-gallery" class="lab-view-panel hidden">
+                <div class="gallery-filter-bar">
+                    <span class="gallery-filter-label">Filter:</span>
+                    <button type="button" class="gallery-chip active" data-filter="all">All 60</button>
+                    <button type="button" class="gallery-chip" data-filter="p">Pawns</button>
+                    <button type="button" class="gallery-chip" data-filter="n">Knights</button>
+                    <button type="button" class="gallery-chip" data-filter="b">Bishops</button>
+                    <button type="button" class="gallery-chip" data-filter="r">Rooks</button>
+                    <button type="button" class="gallery-chip" data-filter="q">Queens</button>
+                    <button type="button" class="gallery-chip" data-filter="k">Kings</button>
+                </div>
+                <div class="gallery-cards-grid" id="gallery-cards-grid">
+                    <!-- Injected: 60 rich cards -->
+                </div>
+            </div>
+
+            <div class="lab-footer">
+                <button type="button" class="btn-secondary modal-close">Return to Menu</button>
             </div>
         </div>
     </div>

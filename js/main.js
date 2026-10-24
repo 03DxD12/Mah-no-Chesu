@@ -26,9 +26,23 @@ class MahoNoChesuApp {
         this.loadoutActiveSide = 'white'; // 'white' | 'black'
         this.loadoutActivePiece = 'p'; // 'p' | 'n' | 'b' | 'r' | 'q' | 'k'
 
+        // Match Clock State (Point 15: 1m, 3m, 5m, 10m, 15m, none)
+        this.timerMode = 'none'; // 'none' | '1m' | '3m' | '5m' | '10m' | '15m'
+        this.whiteTimeSeconds = 0;
+        this.blackTimeSeconds = 0;
+        this.clockTimerInterval = null;
+
+        // Element Laboratory Sandbox State (Point 27 & 28)
+        this.labAttackerPiece = 'n';
+        this.labAttackerColor = 'w';
+        this.labAttackerElement = 'lightning';
+        this.labTargetPiece = 'k';
+        this.labActiveTab = 'sandbox'; // 'sandbox' | 'gallery'
+
         this.initSettingsHooks();
         this.initMenuModals();
         this.initLoadoutModal();
+        this.initLaboratoryModal();
         this.initDeveloperPanel();
         this.initGameLoop();
     }
@@ -63,6 +77,21 @@ class MahoNoChesuApp {
             this.audio.playUiClick();
             modalMainMenu.classList.remove('active');
             modalModeSelect.classList.add('active');
+        });
+
+        // Quick Match using Last-Saved Loadout (Point 17)
+        document.getElementById('menu-btn-quick-play')?.addEventListener('click', () => {
+            this.audio.playUiClick();
+            modalMainMenu.classList.remove('active');
+            this.gameMode = 'pvp';
+            this.startNewMatch('pvp');
+        });
+
+        // Element Laboratory & Effect Gallery (Point 27 & 28)
+        document.getElementById('menu-btn-laboratory')?.addEventListener('click', () => {
+            this.audio.playUiClick();
+            modalMainMenu.classList.remove('active');
+            this.openLaboratoryModal();
         });
 
         // Direct Loadout from Main Menu & Top Bar
@@ -127,6 +156,16 @@ class MahoNoChesuApp {
             modalModeSelect.classList.remove('active');
             this.gameMode = 'pvp';
             this.openLoadoutModal('white');
+        });
+
+        // Match Clock Timers (Point 15)
+        document.querySelectorAll('.btn-timer-chip').forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.audio.playUiClick();
+                document.querySelectorAll('.btn-timer-chip').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                this.timerMode = btn.dataset.time || 'none';
+            });
         });
 
         // Mode: PvC Toggle
@@ -243,6 +282,7 @@ class MahoNoChesuApp {
 
         this.ui.onRestartRequest = () => {
             this.audio.playUiClick();
+            this.stopMatchClock();
             this.startNewMatch(this.gameMode);
         };
 
@@ -263,6 +303,7 @@ class MahoNoChesuApp {
 
             const onAccept = () => {
                 cleanUp();
+                this.stopMatchClock();
                 this.ui.showGameOver({
                     gameOver: true,
                     winner: null,
@@ -283,6 +324,7 @@ class MahoNoChesuApp {
         this.ui.onResignRequest = () => {
             if (this.isAnimating) return;
             this.audio.playUiClick();
+            this.stopMatchClock();
             const resigningColor = this.engine.turn;
             const winner = resigningColor === 'w' ? 'b' : 'w';
             this.ui.showGameOver({
@@ -336,6 +378,7 @@ class MahoNoChesuApp {
         this.ui.renderMoveHistory(this.moveHistoryLog);
         this.ui.renderCapturedPieces();
         this.updateStatusDisplay();
+        this.startMatchClock();
 
         // If PvC and AI plays White, trigger AI first move
         if (this.gameMode === 'pvc' && this.playerColor === 'b') {
@@ -571,8 +614,10 @@ class MahoNoChesuApp {
         this.updateBoardSynergyTheme();
         this.ui.renderBoard();
         this.updateStatusDisplay();
+        this.updateClockDisplay();
 
         if (status.gameOver) {
+            this.stopMatchClock();
             this.audio.playVictory();
             if (status.reason === 'checkmate' || status.checkmate) {
                 const winningColor = this.engine.turn === 'w' ? 'b' : 'w';
@@ -747,7 +792,13 @@ class MahoNoChesuApp {
             }
         });
 
-        // 8. Start Match Button
+        // 8. Live Test Attack Preview (Point 2)
+        document.getElementById('btn-preview-live-test')?.addEventListener('click', () => {
+            this.audio.playUiClick();
+            this.runLoadoutPreviewTest();
+        });
+
+        // 9. Start Match Button
         document.getElementById('btn-loadout-start')?.addEventListener('click', () => {
             this.audio.playUiClick();
             document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
@@ -1003,6 +1054,21 @@ class MahoNoChesuApp {
             descEl.textContent = syn.synergyDesc;
         }
 
+        // Thematic Army Name Generator (Point 48)
+        const armyNameEl = document.getElementById('loadout-army-name-text');
+        const armyPillEl = document.getElementById('loadout-army-pill');
+        if (armyNameEl) {
+            const generatedName = this.loadout.generateArmyName(activeLoadout);
+            armyNameEl.textContent = generatedName;
+            armyNameEl.style.color = dominantMeta.color;
+            armyNameEl.style.textShadow = `0 0 14px ${dominantMeta.color}`;
+        }
+        if (armyPillEl) {
+            armyPillEl.textContent = `${this.loadoutActiveSide.toUpperCase()} ARMY • ${dominantMeta.name.toUpperCase()} SYNERGY`;
+            armyPillEl.style.borderColor = dominantMeta.color;
+            armyPillEl.style.color = dominantMeta.color;
+        }
+
         if (badgeMain) {
             badgeMain.style.borderColor = dominantMeta.color;
             if (syn.isPureArmy) {
@@ -1079,6 +1145,518 @@ class MahoNoChesuApp {
         if (c.length === 3) c = c.split('').map(x => x + x).join('');
         const num = parseInt(c, 16);
         return `${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}`;
+    }
+
+    /**
+     * ==========================================================================
+     * CHESS CLOCKS & MATCH TIMERS (Point 15)
+     * ==========================================================================
+     */
+    getTimerSeconds(mode) {
+        switch (mode) {
+            case '1m': return 60;
+            case '3m': return 180;
+            case '5m': return 300;
+            case '10m': return 600;
+            case '15m': return 900;
+            default: return 0;
+        }
+    }
+
+    startMatchClock() {
+        this.stopMatchClock();
+
+        const seconds = this.getTimerSeconds(this.timerMode);
+        const clockWhite = document.getElementById('clock-white');
+        const clockBlack = document.getElementById('clock-black');
+
+        if (seconds === 0 || this.timerMode === 'none') {
+            if (clockWhite) clockWhite.style.display = 'none';
+            if (clockBlack) clockBlack.style.display = 'none';
+            return;
+        }
+
+        this.whiteTimeSeconds = seconds;
+        this.blackTimeSeconds = seconds;
+
+        if (clockWhite) clockWhite.style.display = 'inline-flex';
+        if (clockBlack) clockBlack.style.display = 'inline-flex';
+
+        this.updateClockDisplay();
+
+        this.clockTimerInterval = setInterval(() => {
+            if (this.engine.getGameStatus().gameOver) {
+                this.stopMatchClock();
+                return;
+            }
+
+            if (this.engine.turn === 'w') {
+                this.whiteTimeSeconds--;
+                if (this.whiteTimeSeconds <= 0) {
+                    this.whiteTimeSeconds = 0;
+                    this.updateClockDisplay();
+                    this.handleTimeout('w');
+                    return;
+                }
+            } else {
+                this.blackTimeSeconds--;
+                if (this.blackTimeSeconds <= 0) {
+                    this.blackTimeSeconds = 0;
+                    this.updateClockDisplay();
+                    this.handleTimeout('b');
+                    return;
+                }
+            }
+
+            this.updateClockDisplay();
+        }, 1000);
+    }
+
+    stopMatchClock() {
+        if (this.clockTimerInterval) {
+            clearInterval(this.clockTimerInterval);
+            this.clockTimerInterval = null;
+        }
+    }
+
+    updateClockDisplay() {
+        if (this.timerMode === 'none') return;
+
+        const formatTime = (secs) => {
+            const m = Math.floor(secs / 60).toString().padStart(2, '0');
+            const s = (secs % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        };
+
+        const timeWhiteEl = document.getElementById('clock-white-time');
+        const timeBlackEl = document.getElementById('clock-black-time');
+        const clockWhite = document.getElementById('clock-white');
+        const clockBlack = document.getElementById('clock-black');
+
+        if (timeWhiteEl) timeWhiteEl.textContent = formatTime(this.whiteTimeSeconds);
+        if (timeBlackEl) timeBlackEl.textContent = formatTime(this.blackTimeSeconds);
+
+        if (clockWhite) {
+            clockWhite.classList.toggle('active-turn', this.engine.turn === 'w');
+            clockWhite.classList.toggle('low-time', this.whiteTimeSeconds <= 20 && this.whiteTimeSeconds > 0);
+        }
+        if (clockBlack) {
+            clockBlack.classList.toggle('active-turn', this.engine.turn === 'b');
+            clockBlack.classList.toggle('low-time', this.blackTimeSeconds <= 20 && this.blackTimeSeconds > 0);
+        }
+    }
+
+    handleTimeout(loserColor) {
+        this.stopMatchClock();
+        const winner = loserColor === 'w' ? 'Black' : 'White';
+        this.ui.showGameOver({
+            gameOver: true,
+            winner,
+            reason: 'timeout',
+            description: `${loserColor === 'w' ? 'White' : 'Black'} ran out of time! ${winner} claims victory!`
+        });
+    }
+
+    /**
+     * Live Attack Preview in Loadout Builder (Point 2)
+     */
+    runLoadoutPreviewTest() {
+        const activeLoadout = this.loadoutActiveSide === 'white' ? this.loadout.whiteLoadout : this.loadout.blackLoadout;
+        const pType = this.loadoutActivePiece;
+        const elemKey = activeLoadout[pType] || 'fire';
+        const abilityDetails = this.loadout.getAbilityDetails(pType, elemKey);
+        const elemMeta = this.loadout.getElementMeta(elemKey);
+
+        this.audio.playElementSound(elemKey);
+        this.effects.showAttackName(`${elemMeta.name.toUpperCase()} • ${abilityDetails.name}`);
+
+        const previewContainer = document.getElementById('preview-svg-container');
+        if (previewContainer) {
+            previewContainer.style.transform = 'scale(1.25) translateY(-8px)';
+            previewContainer.style.filter = `drop-shadow(0 0 28px ${elemMeta.color})`;
+            setTimeout(() => {
+                previewContainer.style.transform = 'scale(1) translateY(0)';
+                previewContainer.style.filter = `drop-shadow(0 0 16px ${elemMeta.color})`;
+            }, 350);
+        }
+    }
+
+    /**
+     * ==========================================================================
+     * ELEMENT LABORATORY & COMBAT SANDBOX (Points 27 & 28)
+     * ==========================================================================
+     */
+    initLaboratoryModal() {
+        // Tab switching: Sandbox vs 60-Combination Gallery
+        const tabSandbox = document.getElementById('tab-lab-sandbox');
+        const tabGallery = document.getElementById('tab-lab-gallery');
+        const viewSandbox = document.getElementById('lab-view-sandbox');
+        const viewGallery = document.getElementById('lab-view-gallery');
+
+        tabSandbox?.addEventListener('click', () => {
+            this.audio.playUiClick();
+            this.labActiveTab = 'sandbox';
+            tabSandbox.classList.add('active');
+            tabGallery?.classList.remove('active');
+            viewSandbox?.classList.remove('hidden');
+            viewGallery?.classList.add('hidden');
+            this.renderLabStage();
+        });
+
+        tabGallery?.addEventListener('click', () => {
+            this.audio.playUiClick();
+            this.labActiveTab = 'gallery';
+            tabGallery.classList.add('active');
+            tabSandbox?.classList.remove('active');
+            viewGallery?.classList.remove('hidden');
+            viewSandbox?.classList.add('hidden');
+            this.renderEffectGallery('all');
+        });
+
+        // Trigger Attack Button in Sandbox
+        document.getElementById('btn-lab-fire-attack')?.addEventListener('click', () => {
+            this.audio.playUiClick();
+            this.runLabAttack();
+        });
+
+        // Test Ascension Button in Sandbox
+        document.getElementById('btn-lab-fire-ascension')?.addEventListener('click', () => {
+            this.audio.playUiClick();
+            this.runLabAscension();
+        });
+
+        // Reset Stage Button in Sandbox
+        document.getElementById('btn-lab-reset-stage')?.addEventListener('click', () => {
+            this.audio.playUiClick();
+            this.renderLabStage();
+        });
+
+        // Attacker Color Toggle
+        document.getElementById('btn-lab-color-toggle')?.addEventListener('click', (e) => {
+            this.audio.playUiClick();
+            this.labAttackerColor = this.labAttackerColor === 'w' ? 'b' : 'w';
+            e.target.textContent = `Color: ${this.labAttackerColor === 'w' ? 'White' : 'Black'}`;
+            this.renderLabAttackerPieces();
+            this.renderLabStage();
+        });
+
+        // Gallery Filter Chips
+        document.querySelectorAll('.gallery-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                this.audio.playUiClick();
+                document.querySelectorAll('.gallery-chip').forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                this.renderEffectGallery(chip.dataset.filter || 'all');
+            });
+        });
+    }
+
+    openLaboratoryModal() {
+        const modal = document.getElementById('modal-laboratory');
+        if (!modal) return;
+
+        // Close other modals
+        document.querySelectorAll('.modal-overlay').forEach(m => {
+            if (m.id !== 'modal-laboratory') m.classList.remove('active');
+        });
+
+        this.renderLabAttackerPieces();
+        this.renderLabElements();
+        this.renderLabTargetPieces();
+        this.renderLabStage();
+        modal.classList.add('active');
+    }
+
+    renderLabAttackerPieces() {
+        const grid = document.getElementById('lab-attacker-pieces-grid');
+        if (!grid) return;
+        const pieces = [
+            { type: 'p', name: 'Pawn' },
+            { type: 'n', name: 'Knight' },
+            { type: 'b', name: 'Bishop' },
+            { type: 'r', name: 'Rook' },
+            { type: 'q', name: 'Queen' },
+            { type: 'k', name: 'King' }
+        ];
+
+        grid.innerHTML = '';
+        pieces.forEach(p => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = `btn-lab-piece-chip ${p.type === this.labAttackerPiece ? 'active' : ''}`;
+            btn.innerHTML = `
+                <div class="lab-chip-svg">${this.ui.getPieceSVG(p.type, this.labAttackerColor)}</div>
+                <span>${p.name}</span>
+            `;
+            btn.addEventListener('click', () => {
+                this.audio.playUiClick();
+                this.labAttackerPiece = p.type;
+                this.renderLabAttackerPieces();
+                this.renderLabStage();
+            });
+            grid.appendChild(btn);
+        });
+    }
+
+    renderLabElements() {
+        const grid = document.getElementById('lab-elements-grid');
+        if (!grid) return;
+
+        grid.innerHTML = '';
+        Object.values(ELEMENTS).forEach(elem => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            const isSelected = elem.id === this.labAttackerElement;
+            btn.className = `btn-lab-elem-chip ${isSelected ? 'active' : ''}`;
+            btn.style.color = elem.color;
+            btn.style.borderColor = isSelected ? elem.color : 'rgba(212, 175, 55, 0.2)';
+            if (isSelected) {
+                btn.style.background = `rgba(${this.hexToRgb(elem.color)}, 0.16)`;
+            }
+            btn.innerHTML = `
+                <span class="lab-elem-svg">${elem.svg}</span>
+                <span>${elem.name}</span>
+            `;
+            btn.addEventListener('click', () => {
+                this.audio.playElementSound(elem.id);
+                this.labAttackerElement = elem.id;
+                this.renderLabElements();
+                this.renderLabStage();
+            });
+            grid.appendChild(btn);
+        });
+    }
+
+    renderLabTargetPieces() {
+        const grid = document.getElementById('lab-target-pieces-grid');
+        if (!grid) return;
+        const targetColor = this.labAttackerColor === 'w' ? 'b' : 'w';
+        const pieces = [
+            { type: 'p', name: 'Pawn' },
+            { type: 'n', name: 'Knight' },
+            { type: 'b', name: 'Bishop' },
+            { type: 'r', name: 'Rook' },
+            { type: 'q', name: 'Queen' },
+            { type: 'k', name: 'King' }
+        ];
+
+        grid.innerHTML = '';
+        pieces.forEach(p => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = `btn-lab-piece-chip ${p.type === this.labTargetPiece ? 'active' : ''}`;
+            btn.innerHTML = `
+                <div class="lab-chip-svg">${this.ui.getPieceSVG(p.type, targetColor)}</div>
+                <span>${p.name}</span>
+            `;
+            btn.addEventListener('click', () => {
+                this.audio.playUiClick();
+                this.labTargetPiece = p.type;
+                this.renderLabTargetPieces();
+                this.renderLabStage();
+            });
+            grid.appendChild(btn);
+        });
+    }
+
+    renderLabStage() {
+        const attackerSvgEl = document.getElementById('lab-attacker-svg');
+        const attackerTagEl = document.getElementById('lab-attacker-tag');
+        const attackerHaloEl = document.getElementById('lab-attacker-halo');
+        const fighterAttacker = document.getElementById('lab-fighter-attacker');
+
+        const targetSvgEl = document.getElementById('lab-target-svg');
+        const targetTagEl = document.getElementById('lab-target-tag');
+        const fighterTarget = document.getElementById('lab-fighter-target');
+
+        const targetColor = this.labAttackerColor === 'w' ? 'b' : 'w';
+        const elemMeta = this.loadout.getElementMeta(this.labAttackerElement);
+        const ability = this.loadout.getAbilityDetails(this.labAttackerPiece, this.labAttackerElement);
+
+        const pieceNames = { p: 'Pawn', n: 'Knight', b: 'Bishop', r: 'Rook', q: 'Queen', k: 'King' };
+
+        if (attackerSvgEl) attackerSvgEl.innerHTML = this.ui.getPieceSVG(this.labAttackerPiece, this.labAttackerColor);
+        if (attackerTagEl) attackerTagEl.textContent = `${this.labAttackerColor === 'w' ? 'White' : 'Black'} ${pieceNames[this.labAttackerPiece]}`;
+        if (attackerHaloEl) {
+            attackerHaloEl.style.background = `radial-gradient(circle, ${elemMeta.color} 0%, transparent 70%)`;
+        }
+
+        if (targetSvgEl) targetSvgEl.innerHTML = this.ui.getPieceSVG(this.labTargetPiece, targetColor);
+        if (targetTagEl) targetTagEl.textContent = `${targetColor === 'w' ? 'White' : 'Black'} ${pieceNames[this.labTargetPiece]}`;
+
+        if (fighterAttacker) {
+            fighterAttacker.className = 'lab-stage-fighter';
+            fighterAttacker.style.transform = '';
+        }
+        if (fighterTarget) {
+            fighterTarget.className = 'lab-stage-fighter';
+            fighterTarget.style.transform = '';
+        }
+
+        // Update Spec Card
+        const badgeEl = document.getElementById('lab-spec-elem-badge');
+        const titleEl = document.getElementById('lab-spec-title');
+        const styleEl = document.getElementById('lab-spec-style');
+        const trailEl = document.getElementById('lab-spec-trail');
+        const impactEl = document.getElementById('lab-spec-impact');
+        const descEl = document.getElementById('lab-spec-desc');
+
+        if (badgeEl) {
+            badgeEl.textContent = elemMeta.name.toUpperCase();
+            badgeEl.style.color = elemMeta.color;
+            badgeEl.style.borderColor = elemMeta.color;
+            badgeEl.style.background = `rgba(${this.hexToRgb(elemMeta.color)}, 0.15)`;
+        }
+        if (titleEl) {
+            titleEl.textContent = ability.name;
+            titleEl.style.color = elemMeta.color;
+            titleEl.style.textShadow = `0 0 14px ${elemMeta.color}`;
+        }
+        if (styleEl) styleEl.textContent = ability.style;
+        if (trailEl) trailEl.textContent = ability.motionTrail;
+        if (impactEl) impactEl.textContent = ability.impact;
+        if (descEl) descEl.textContent = ability.desc;
+
+        // Clear canvas
+        const canvas = document.getElementById('lab-canvas');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+    }
+
+    runLabAttack() {
+        const fighterAttacker = document.getElementById('lab-fighter-attacker');
+        const fighterTarget = document.getElementById('lab-fighter-target');
+        const canvas = document.getElementById('lab-canvas');
+        const elemMeta = this.loadout.getElementMeta(this.labAttackerElement);
+        const ability = this.loadout.getAbilityDetails(this.labAttackerPiece, this.labAttackerElement);
+
+        this.audio.playElementSound(this.labAttackerElement);
+        this.effects.showAttackName(`${elemMeta.name.toUpperCase()} • ${ability.name}`);
+
+        if (fighterAttacker) {
+            fighterAttacker.style.transition = 'transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+            fighterAttacker.style.transform = 'translateX(90px) scale(1.15)';
+            setTimeout(() => {
+                fighterAttacker.style.transform = 'translateX(0) scale(1)';
+            }, 320);
+        }
+
+        setTimeout(() => {
+            if (fighterTarget) {
+                fighterTarget.classList.add('piece-target-hit');
+                fighterTarget.style.transition = 'transform 0.15s ease-out';
+                fighterTarget.style.transform = 'translateX(25px) scale(0.92)';
+                setTimeout(() => {
+                    fighterTarget.style.transform = 'translateX(0) scale(1)';
+                    fighterTarget.classList.remove('piece-target-hit');
+                }, 300);
+            }
+
+            // Draw energetic impact burst on sandbox canvas
+            if (canvas) {
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const targetX = canvas.width * 0.75;
+                const targetY = canvas.height * 0.5;
+
+                for (let i = 0; i < 24; i++) {
+                    const angle = (Math.PI * 2 * i) / 24;
+                    const dist = 30 + Math.random() * 45;
+                    ctx.beginPath();
+                    ctx.arc(targetX + Math.cos(angle) * dist, targetY + Math.sin(angle) * dist, 3 + Math.random() * 4, 0, Math.PI * 2);
+                    ctx.fillStyle = elemMeta.color;
+                    ctx.shadowColor = elemMeta.color;
+                    ctx.shadowBlur = 12;
+                    ctx.fill();
+                }
+
+                setTimeout(() => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }, 400);
+            }
+        }, 180);
+    }
+
+    runLabAscension() {
+        const fighterAttacker = document.getElementById('lab-fighter-attacker');
+        const elemMeta = this.loadout.getElementMeta(this.labAttackerElement);
+
+        this.audio.playElementSound(this.labAttackerElement);
+        this.effects.showAttackName(`ASCENSION • ${elemMeta.name.toUpperCase()}`);
+
+        if (fighterAttacker) {
+            fighterAttacker.style.transition = 'transform 0.4s ease-out, filter 0.4s ease-out';
+            fighterAttacker.style.transform = 'scale(1.3) translateY(-14px)';
+            fighterAttacker.style.filter = `drop-shadow(0 0 25px ${elemMeta.color})`;
+            setTimeout(() => {
+                fighterAttacker.style.transform = 'scale(1) translateY(0)';
+                fighterAttacker.style.filter = '';
+            }, 600);
+        }
+    }
+
+    renderEffectGallery(filter = 'all') {
+        const container = document.getElementById('gallery-cards-grid');
+        if (!container) return;
+
+        const allCombos = this.loadout.getAllCombinations();
+        const filtered = filter === 'all' ? allCombos : allCombos.filter(c => c.pieceType === filter);
+
+        container.innerHTML = '';
+        filtered.forEach(combo => {
+            const card = document.createElement('div');
+            card.className = 'gallery-card';
+            card.style.borderColor = `rgba(${this.hexToRgb(combo.elementColor)}, 0.25)`;
+
+            card.innerHTML = `
+                <div class="gallery-card-header">
+                    <div class="gallery-card-svg">${this.ui.getPieceSVG(combo.pieceType, 'w')}</div>
+                    <div class="gallery-card-meta">
+                        <span class="gallery-elem-badge" style="color: ${combo.elementColor}; border-color: ${combo.elementColor}; background: rgba(${this.hexToRgb(combo.elementColor)}, 0.12);">
+                            ${combo.elementName}
+                        </span>
+                        <h4 class="gallery-attack-title" style="color: ${combo.elementColor};">${combo.attackName}</h4>
+                    </div>
+                </div>
+                <div class="gallery-card-body">
+                    <p class="gallery-card-desc">${combo.description}</p>
+                    <div class="gallery-card-tags">
+                        <span class="gallery-tag">Trail: ${combo.motionTrail}</span>
+                        <span class="gallery-tag">Impact: ${combo.impact}</span>
+                    </div>
+                </div>
+                <button type="button" class="btn-gallery-test" style="border-color: ${combo.elementColor}; color: ${combo.elementColor};">
+                    Test in Sandbox &rarr;
+                </button>
+            `;
+
+            card.querySelector('.btn-gallery-test')?.addEventListener('click', () => {
+                this.audio.playUiClick();
+                this.labAttackerPiece = combo.pieceType;
+                this.labAttackerElement = combo.elementKey;
+
+                // Switch to sandbox tab
+                const tabSandbox = document.getElementById('tab-lab-sandbox');
+                const tabGallery = document.getElementById('tab-lab-gallery');
+                const viewSandbox = document.getElementById('lab-view-sandbox');
+                const viewGallery = document.getElementById('lab-view-gallery');
+
+                tabSandbox?.classList.add('active');
+                tabGallery?.classList.remove('active');
+                viewSandbox?.classList.remove('hidden');
+                viewGallery?.classList.add('hidden');
+
+                this.renderLabAttackerPieces();
+                this.renderLabElements();
+                this.renderLabTargetPieces();
+                this.renderLabStage();
+                setTimeout(() => this.runLabAttack(), 200);
+            });
+
+            container.appendChild(card);
+        });
     }
 
     initDeveloperPanel() {

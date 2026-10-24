@@ -448,14 +448,29 @@ class UIManager {
         const attackName = this.loadout.getAttackName(piece.type, elemKey);
 
         badge.style.borderColor = elemMeta.color;
-        badge.innerHTML = `
-            <span class="badge-elem-icon" style="color: ${elemMeta.color};">${elemMeta.svg}</span>
-            <span class="badge-piece-title">${colorName} ${pieceNames[piece.type]}</span>
-            <span class="badge-divider">&bull;</span>
-            <span class="badge-elem-name" style="color: ${elemMeta.color};">${elemMeta.name}</span>
-            <span class="badge-divider">&bull;</span>
-            <span class="badge-attack-name">${attackName}</span>
-        `;
+        let identityHTML = '';
+        if (piece.promoted) {
+            identityHTML = `
+                <span class="badge-ascended-crest" style="color: var(--text-gold); font-weight: 800; font-size: 0.76rem; letter-spacing: 0.05em;" title="Ascended Piece">✦ ASCENDED</span>
+                <span class="badge-piece-title">${colorName} ${pieceNames[piece.type]}</span>
+                <span class="badge-divider">&bull;</span>
+                <span class="badge-elem-name" style="color: ${elemMeta.color}; font-weight: 700;">${elemMeta.name}</span>
+                <span class="badge-divider">&bull;</span>
+                <span class="badge-origin" style="color: var(--text-gold); font-size: 0.68rem; font-weight: 700; background: rgba(212,175,55,0.15); padding: 0.1rem 0.4rem; border-radius: 4px;">Originally Pawn</span>
+                <span class="badge-divider">&bull;</span>
+                <span class="badge-attack-name">${attackName}</span>
+            `;
+        } else {
+            identityHTML = `
+                <span class="badge-elem-icon" style="color: ${elemMeta.color};">${elemMeta.svg}</span>
+                <span class="badge-piece-title">${colorName} ${pieceNames[piece.type]}</span>
+                <span class="badge-divider">&bull;</span>
+                <span class="badge-elem-name" style="color: ${elemMeta.color};">${elemMeta.name}</span>
+                <span class="badge-divider">&bull;</span>
+                <span class="badge-attack-name">${attackName}</span>
+            `;
+        }
+        badge.innerHTML = identityHTML;
         badge.classList.remove('hidden');
     }
 
@@ -917,6 +932,11 @@ class UIManager {
             if (titleEl) titleEl.textContent = 'RESIGNATION';
             if (subEl) subEl.textContent = `${winnerName} WINS BY FORFEIT`;
             if (reasonEl) reasonEl.textContent = 'The battlefield was conceded.';
+        } else if (status.reason === 'timeout') {
+            const winnerName = status.winner === 'w' ? 'WHITE (Light)' : 'BLACK (Shadow)';
+            if (titleEl) titleEl.textContent = 'TIME EXPIRED';
+            if (subEl) subEl.textContent = `${winnerName} WINS ON TIME`;
+            if (reasonEl) reasonEl.textContent = 'The opponent clock ran out of time.';
         } else {
             if (titleEl) titleEl.textContent = 'TRUCE DECLARED';
             if (subEl) subEl.textContent = 'THE BATTLE ENDS IN A DRAW';
