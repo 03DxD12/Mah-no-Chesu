@@ -96,7 +96,21 @@ class AudioManager {
         return buffer;
     }
 
+    /**
+     * Mobile Haptic Feedback (Android Vibration API with graceful Apple iOS fallback)
+     */
+    triggerHaptic(pattern = 15) {
+        if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+            try {
+                navigator.vibrate(pattern);
+            } catch (e) {
+                // Non-fatal if vibration is restricted by policy
+            }
+        }
+    }
+
     playUiClick() {
+        this.triggerHaptic(10);
         if (!this.sfxEnabled || !this.ctx) return;
         this.initContext();
         const t = this.ctx.currentTime;
@@ -117,6 +131,7 @@ class AudioManager {
     }
 
     playPieceSelect() {
+        this.triggerHaptic(15);
         if (!this.sfxEnabled || !this.ctx) return;
         this.initContext();
         const t = this.ctx.currentTime;
@@ -137,6 +152,7 @@ class AudioManager {
     }
 
     playMoveSound() {
+        this.triggerHaptic(20);
         if (!this.sfxEnabled || !this.ctx) return;
         this.initContext();
         const t = this.ctx.currentTime;
@@ -559,6 +575,7 @@ class AudioManager {
     playLightAttack() { this.playJudgmentOfLight(); }
 
     playElementSound(element) {
+        this.triggerHaptic([30, 25, 45]);
         const elem = (element || 'fire').toLowerCase();
         switch (elem) {
             case 'fire': this.playFireAttack(); break;
@@ -575,6 +592,7 @@ class AudioManager {
         }
     }
     playCastling() {
+        this.triggerHaptic([20, 30, 20]);
         if (!this.sfxEnabled || !this.ctx) return;
         this.initContext();
         const t = this.ctx.currentTime;
@@ -596,6 +614,7 @@ class AudioManager {
      * Promotion Sound (Ascending Arpeggio)
      */
     playPromotion() {
+        this.triggerHaptic([30, 40, 50]);
         if (!this.sfxEnabled || !this.ctx) return;
         this.initContext();
         const t = this.ctx.currentTime;
@@ -617,6 +636,7 @@ class AudioManager {
      * Check Warning (Ominous Bell)
      */
     playCheck() {
+        this.triggerHaptic([40, 30, 40]);
         if (!this.sfxEnabled || !this.ctx) return;
         this.initContext();
         const t = this.ctx.currentTime;

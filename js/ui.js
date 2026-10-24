@@ -199,6 +199,14 @@ class UIManager {
             this.boardEl.appendChild(sqEl);
         }
 
+        // Prevent rubberband pull-to-refresh / bouncing on mobile board area (iOS Safari & Android Chrome)
+        const boardWrapper = document.getElementById('board-wrapper');
+        if (boardWrapper) {
+            boardWrapper.addEventListener('touchmove', (e) => {
+                if (e.cancelable) e.preventDefault();
+            }, { passive: false });
+        }
+
         // Action Buttons
         document.getElementById('btn-flip')?.addEventListener('click', () => this.toggleFlip());
         document.getElementById('btn-undo')?.addEventListener('click', () => this.onUndoRequest && this.onUndoRequest());
