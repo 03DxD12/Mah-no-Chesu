@@ -1554,6 +1554,10 @@ class EffectsManager {
     /**
      * ASCENSION TRANSFORMATION SEQUENCE (Specs 163 - 181, 190)
      */
+    async playPawnAscensionSequence(options) {
+        return this.playAscensionSequence(options);
+    }
+
     async playAscensionSequence({ squareIndex, isFlipped = false, element = 'fire', pieceType = 'q', style = 'elemental', isReducedMotion = false }) {
         const pt = this.getSquareCenter(squareIndex, isFlipped);
         const elem = (element || 'fire').toLowerCase();

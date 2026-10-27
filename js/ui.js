@@ -35,6 +35,8 @@ class UIManager {
         this.lastMove = null;
         this.isFlipped = false;
         this.focusedSquare = 0; // for keyboard navigation
+        this.isBoardLocked = false;
+        this.isAnimating = false;
 
         // Callbacks hooked by main.js
         this.onPlayerMoveRequest = null; // (move) => Promise<void>
@@ -355,6 +357,29 @@ class UIManager {
         return null;
     }
 
+    setBoardLocked(locked) {
+        this.isBoardLocked = Boolean(locked);
+        if (this.boardEl) {
+            this.boardEl.classList.toggle('board-locked', this.isBoardLocked);
+        }
+    }
+
+    highlightMoveSquares(fromSq, toSq) {
+        if (!this.boardEl) return;
+        for (let i = 0; i < 64; i++) {
+            const el = this.boardEl.children[i];
+            if (el) {
+                el.classList.remove('last-move', 'move-origin', 'move-dest');
+                const sq = parseInt(el.dataset.square, 10);
+                if (sq === fromSq || sq === toSq) {
+                    el.classList.add('last-move');
+                    if (sq === fromSq) el.classList.add('move-origin');
+                    if (sq === toSq) el.classList.add('move-dest');
+                }
+            }
+        }
+    }
+
     renderBoardFromFEN(fen) {
         if (!fen) return;
         const parts = fen.split(' ');
@@ -423,7 +448,7 @@ class UIManager {
     }
 
     handleSquareClick(sq) {
-        if (this.isAnimating) return;
+        if (this.isAnimating || this.isBoardLocked) return;
 
         const piece = this.engine.board[sq];
 

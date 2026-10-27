@@ -7148,3 +7148,18 @@ body.screenshot-clean-view #board-container {
         align-items: flex-start;
     }
 }
+
+/* Board locking & click-through enhancements */
+.board-locked {
+    pointer-events: none !important;
+}
+
+.piece-svg-wrapper,
+.piece-svg-wrapper * {
+    pointer-events: none;
+}
+
+.move-marker-dot,
+.move-marker-ring {
+    pointer-events: none;
+}

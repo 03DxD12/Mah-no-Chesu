@@ -655,6 +655,22 @@ class AudioManager {
     /**
      * Checkmate / Victory Fanfare
      */
+    playCheckmate() {
+        this.playVictory();
+    }
+
+    playDraw() {
+        this.playCastling();
+    }
+
+    playGameOver() {
+        this.playVictory();
+    }
+
+    playError() {
+        this.playUiClick();
+    }
+
     playVictory() {
         if (!this.sfxEnabled || !this.ctx) return;
         this.initContext();

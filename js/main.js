@@ -411,6 +411,28 @@ class MahoNoChesuApp {
         };
     }
 
+    getTimerSeconds(mode) {
+        switch (mode) {
+            case '1m': return 60;
+            case '3m': return 180;
+            case '5m': return 300;
+            case '10m': return 600;
+            case '15m': return 900;
+            default: return 0;
+        }
+    }
+
+    handleTimeout(color) {
+        const winner = color === 'w' ? 'Black' : 'White';
+        this.ui.setStatus(`Time out! ${winner} wins on time.`, false);
+        this.ui.showGameOver({
+            reason: 'timeout',
+            winner: color === 'w' ? 'b' : 'w',
+            title: `${winner.toUpperCase()} WINS ON TIME`,
+            description: `${color === 'w' ? 'White' : 'Black'} ran out of time.`
+        });
+    }
+
     startNewMatch(mode = 'pvp') {
         this.gameMode = mode;
         this.engine.reset();
