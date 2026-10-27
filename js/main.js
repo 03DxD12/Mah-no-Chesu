@@ -328,7 +328,7 @@ class MahoNoChesuApp {
         });
 
         // Match History Modal (Spec 77 - 79)
-        document.getElementById('btn-history') || document.getElementById('menu-btn-match-history')?.addEventListener('click', () => {
+        (document.getElementById('btn-history') || document.getElementById('menu-btn-match-history'))?.addEventListener('click', () => {
             this.audio.playUiClick();
             if (this.presentation) {
                 this.presentation.openMatchHistoryModal();
@@ -665,7 +665,7 @@ class MahoNoChesuApp {
             savedDrawer?.classList.add('hidden');
         });
 
-        document.getElementById('btn-loadout-save') || document.getElementById('btn-save-current-army')?.addEventListener('click', () => {
+        (document.getElementById('btn-loadout-save') || document.getElementById('btn-save-current-army'))?.addEventListener('click', () => {
             this.audio.playUiClick();
             const defaultName = this.loadout.getEffectiveArmyName(
                 this.loadoutActiveSide === 'white' ? this.loadout.whiteLoadout : this.loadout.blackLoadout,
@@ -681,9 +681,10 @@ class MahoNoChesuApp {
         });
 
         // 4. Randomize All Button (Specs 46 & 47)
-        document.getElementById('btn-loadout-randomize') || document.getElementById('btn-loadout-random')?.addEventListener('click', () => {
+        (document.getElementById('btn-loadout-randomize') || document.getElementById('btn-loadout-random'))?.addEventListener('click', () => {
             this.audio.playUiClick();
-            const allowDup = document.getElementById('check-allow-duplicates') || document.getElementById('chk-allow-duplicates')?.checked ?? true;
+            const checkDupEl = document.getElementById('check-allow-duplicates') || document.getElementById('chk-allow-duplicates');
+            const allowDup = checkDupEl ? Boolean(checkDupEl.checked) : true;
             const randomized = this.loadout.generateRandomLoadout(allowDup);
             if (this.loadoutActiveSide === 'white') {
                 this.loadout.whiteLoadout = randomized;
@@ -718,7 +719,7 @@ class MahoNoChesuApp {
         });
 
         // 7. Start Match Button
-        document.getElementById('btn-loadout-start') || document.getElementById('btn-loadout-start-match')?.addEventListener('click', () => {
+        (document.getElementById('btn-loadout-start') || document.getElementById('btn-loadout-start-match'))?.addEventListener('click', () => {
             this.audio.playUiClick();
             modal?.classList.remove('active');
             this.loadout.saveLoadouts();
@@ -727,7 +728,7 @@ class MahoNoChesuApp {
 
         // 8. Customization Drawer Controls (Specs 1 - 3)
         const customizeDrawer = document.getElementById('drawer-piece-customize');
-        document.getElementById('btn-close-custom-drawer') || document.getElementById('btn-close-customize-drawer')?.addEventListener('click', () => {
+        (document.getElementById('btn-close-custom-drawer') || document.getElementById('btn-close-customize-drawer'))?.addEventListener('click', () => {
             this.audio.playUiClick();
             customizeDrawer?.classList.add('hidden');
         });
@@ -1248,7 +1249,7 @@ class MahoNoChesuApp {
         });
 
         // 3. Stage Action Controls (Play, Replay, Reset, Slow Motion, Intensity)
-        document.getElementById('btn-lab-fire-attack') || document.getElementById('btn-lab-play')?.addEventListener('click', () => {
+        (document.getElementById('btn-lab-fire-attack') || document.getElementById('btn-lab-play'))?.addEventListener('click', () => {
             this.audio.playUiClick();
             this.runLabAction();
         });
@@ -1258,7 +1259,7 @@ class MahoNoChesuApp {
             this.runLabAction();
         });
 
-        document.getElementById('btn-lab-reset-stage') || document.getElementById('btn-lab-reset')?.addEventListener('click', () => {
+        (document.getElementById('btn-lab-reset-stage') || document.getElementById('btn-lab-reset'))?.addEventListener('click', () => {
             this.audio.playUiClick();
             this.resetLabSandboxStage();
         });
@@ -1291,7 +1292,7 @@ class MahoNoChesuApp {
         });
 
         // 5. Random Defender Element
-        document.getElementById('btn-lab-random-target-elem') || document.getElementById('btn-random-target-elem')?.addEventListener('click', () => {
+        (document.getElementById('btn-lab-random-target-elem') || document.getElementById('btn-random-target-elem'))?.addEventListener('click', () => {
             this.audio.playUiClick();
             const keys = Object.keys(ELEMENTS);
             this.labState.targetElement = keys[Math.floor(Math.random() * keys.length)];
@@ -1317,7 +1318,7 @@ class MahoNoChesuApp {
         });
 
         // 7. Developer HUD Drawer & Benchmark (Specs 52 - 54)
-        document.getElementById('btn-lab-toggle-dev') || document.getElementById('btn-toggle-dev-tools')?.addEventListener('click', () => {
+        (document.getElementById('btn-lab-toggle-dev') || document.getElementById('btn-toggle-dev-tools'))?.addEventListener('click', () => {
             const drawer = document.getElementById('drawer-dev-tools');
             drawer?.classList.toggle('hidden');
         });
@@ -1721,7 +1722,7 @@ class MahoNoChesuApp {
             });
         }
 
-        document.getElementById('btn-promo-lab-play') || document.getElementById('btn-play-promo-ascension')?.addEventListener('click', () => {
+        (document.getElementById('btn-promo-lab-play') || document.getElementById('btn-play-promo-ascension'))?.addEventListener('click', () => {
             this.audio.playUiClick();
             this.effects.showAttackName(`ASCENSION: ${this.promoLabState.style.toUpperCase()}`);
             this.effects.playPawnAscensionSequence({
@@ -1750,17 +1751,17 @@ class MahoNoChesuApp {
             this.audio.playElementSound(this.compareRightElem);
         };
 
-        document.getElementById('btn-compare-play-left') || document.getElementById('btn-compare-left')?.addEventListener('click', () => {
+        (document.getElementById('btn-compare-play-left') || document.getElementById('btn-compare-left'))?.addEventListener('click', () => {
             this.audio.playUiClick();
             runLeft();
         });
 
-        document.getElementById('btn-compare-play-right') || document.getElementById('btn-compare-right')?.addEventListener('click', () => {
+        (document.getElementById('btn-compare-play-right') || document.getElementById('btn-compare-right'))?.addEventListener('click', () => {
             this.audio.playUiClick();
             runRight();
         });
 
-        document.getElementById('btn-compare-play-both') || document.getElementById('btn-compare-both')?.addEventListener('click', () => {
+        (document.getElementById('btn-compare-play-both') || document.getElementById('btn-compare-both'))?.addEventListener('click', () => {
             this.audio.playUiClick();
             runLeft();
             setTimeout(() => runRight(), 800);
