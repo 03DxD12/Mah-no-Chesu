@@ -418,6 +418,15 @@ class MatchPresentationController {
                     synergyInfo: null
                 });
 
+                // Immediately dissolve the captured target piece upon elemental impact
+                const targetSqEl = this.app.ui.getSquareElement(targetSq);
+                const targetWrapper = targetSqEl ? targetSqEl.querySelector('.piece-svg-wrapper') : null;
+                if (targetWrapper) {
+                    targetWrapper.style.transition = 'opacity 0.15s ease, transform 0.15s ease';
+                    targetWrapper.style.opacity = '0';
+                    targetWrapper.style.transform = 'scale(0.3)';
+                }
+
                 // Spawn temporary fading board reaction (Spec 32 - 34)
                 this.spawnTemporaryBoardReaction(move.to, element);
             }

@@ -821,7 +821,7 @@ class EffectsManager {
      * Master Capture Attack Dispatcher (Specs 123, 131, 132, 134 - 143, 158 - 159)
      * Piece + Selected Element + Synergy = Unique Ability & Distinct Animation
      */
-    async playElementalAttack({ pieceType, element, attackName, fromSq, toSq, color, isFlipped, synergyInfo = null }) {
+    async playElementalAttack({ pieceType, element, defenderElement = null, attackName, fromSq, toSq, color, isFlipped, synergyInfo = null }) {
         const elem = (element || 'fire').toLowerCase();
         const pType = (pieceType || 'p').toLowerCase();
         const aName = attackName || `${pType.toUpperCase()} ${elem.toUpperCase()} STRIKE`;
