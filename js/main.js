@@ -156,6 +156,7 @@ class MahoNoChesuApp {
             this.audio.playUiClick();
             modalModeSelect.classList.remove('active');
             modalMainMenu.classList.add('active');
+            aiSubConfig.classList.add('hidden');
         });
 
         // Close generic modal buttons
