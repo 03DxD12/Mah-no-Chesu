@@ -560,7 +560,7 @@ body {
     position: relative;
 }
 
-/* Square State Overlays & Tactile Finishes */
+/* Square State Overlays & Tactile Finishes - Hardware-Accelerated Fast Hover */
 .square {
     position: relative;
     display: flex;
@@ -568,7 +568,7 @@ body {
     justify-content: center;
     cursor: pointer;
     overflow: hidden;
-    transition: background 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, filter 0.15s ease;
+    transition: background-color 0.08s ease, box-shadow 0.08s ease;
 }
 
 .square.light {
@@ -582,7 +582,8 @@ body {
 }
 
 .square:hover {
-    filter: brightness(1.12);
+    background-color: rgba(255, 255, 255, 0.07);
+    box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.4);
 }
 
 /* Selected Square - White (Radiant Sun Gold / Amber Flame) */
@@ -765,7 +766,7 @@ body {
     box-shadow: 0 0 24px rgba(255, 42, 95, 0.9), inset 0 0 18px rgba(255, 42, 95, 0.5);
 }
 
-/* Piece SVG Wrapper & Elemental Idle Hover Effects */
+/* Piece SVG Wrapper & Elemental Idle Hover Effects - GPU Accelerated Instant 120fps */
 .piece-svg-wrapper {
     position: relative;
     width: 86%;
@@ -775,80 +776,49 @@ body {
     justify-content: center;
     pointer-events: none;
     z-index: 3;
-    transition: transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.2), filter 0.25s ease;
-    will-change: transform, filter;
+    transition: transform 0.1s cubic-bezier(0.2, 0, 0, 1);
+    will-change: transform;
 }
 
 .piece-svg-wrapper svg {
     width: 100%;
     height: 100%;
     filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.6));
-    transition: filter 0.25s ease;
 }
 
-/* Smooth Interactive Piece Hover States */
+/* Snappy Zero-Lag Piece Hover States */
 .square:hover .piece-svg-wrapper {
-    transform: translateY(-4px) scale(1.1);
+    transform: translate3d(0, -4px, 0) scale(1.08);
 }
 
 /* 1. Pawn (Fire) */
 .square:hover .piece-p svg {
-    filter: drop-shadow(0 0 10px rgba(249, 115, 22, 0.9)) drop-shadow(0 -4px 8px rgba(234, 88, 12, 0.6)) drop-shadow(0 6px 8px rgba(0, 0, 0, 0.7));
-    animation: flame-flicker 1.4s infinite alternate ease-in-out;
-}
-
-@keyframes flame-flicker {
-    0% { filter: drop-shadow(0 0 8px rgba(249, 115, 22, 0.8)) drop-shadow(0 -3px 6px rgba(234, 88, 12, 0.5)); }
-    100% { filter: drop-shadow(0 0 14px rgba(251, 146, 60, 1)) drop-shadow(0 -6px 12px rgba(249, 115, 22, 0.8)); }
+    filter: drop-shadow(0 0 10px rgba(249, 115, 22, 0.95)) drop-shadow(0 4px 6px rgba(0, 0, 0, 0.7));
 }
 
 /* 2. Knight (Lightning) */
 .square:hover .piece-n svg {
-    filter: drop-shadow(0 0 12px rgba(56, 189, 248, 0.95)) drop-shadow(0 0 4px #e0f2fe) drop-shadow(0 6px 8px rgba(0, 0, 0, 0.7));
-    animation: spark-flicker 0.8s infinite alternate ease-in-out;
-}
-
-@keyframes spark-flicker {
-    0%, 100% { filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.85)) drop-shadow(0 0 3px #bae6fd); }
-    50% { filter: drop-shadow(0 0 16px rgba(14, 165, 233, 1)) drop-shadow(0 0 7px #ffffff); }
+    filter: drop-shadow(0 0 12px rgba(56, 189, 248, 0.95)) drop-shadow(0 4px 6px rgba(0, 0, 0, 0.7));
 }
 
 /* 3. Bishop (Wind) */
 .square:hover .piece-b svg {
-    filter: drop-shadow(0 0 12px rgba(52, 211, 153, 0.9)) drop-shadow(0 0 4px #ecfdf5) drop-shadow(0 6px 8px rgba(0, 0, 0, 0.7));
+    filter: drop-shadow(0 0 12px rgba(52, 211, 153, 0.95)) drop-shadow(0 4px 6px rgba(0, 0, 0, 0.7));
 }
 
 /* 4. Rook (Earth) */
 .square:hover .piece-r svg {
-    filter: drop-shadow(0 0 12px rgba(217, 119, 6, 0.95)) drop-shadow(0 0 4px #fef3c7) drop-shadow(0 6px 8px rgba(0, 0, 0, 0.7));
-    animation: earth-pulse 1.6s infinite alternate ease-in-out;
-}
-
-@keyframes earth-pulse {
-    0% { transform: scale(1); }
-    100% { transform: scale(1.03); }
+    filter: drop-shadow(0 0 12px rgba(217, 119, 6, 0.95)) drop-shadow(0 4px 6px rgba(0, 0, 0, 0.7));
 }
 
 /* 5. Queen (Ice & Arcane) */
 .square:hover .piece-q svg {
-    filter: drop-shadow(0 0 16px rgba(168, 85, 247, 0.95)) drop-shadow(0 0 8px #38bdf8) drop-shadow(0 6px 8px rgba(0, 0, 0, 0.7));
-    animation: arcane-glow 1.8s infinite alternate ease-in-out;
-}
-
-@keyframes arcane-glow {
-    0% { filter: drop-shadow(0 0 12px rgba(168, 85, 247, 0.8)) drop-shadow(0 0 6px #38bdf8); }
-    100% { filter: drop-shadow(0 0 20px rgba(192, 132, 252, 1)) drop-shadow(0 0 12px #93c5fd); }
+    filter: drop-shadow(0 0 15px rgba(168, 85, 247, 0.95)) drop-shadow(0 4px 6px rgba(0, 0, 0, 0.7));
 }
 
 /* 6. King (Sacred Light) */
 .square:hover .piece-k svg {
-    filter: drop-shadow(0 0 18px rgba(250, 204, 21, 0.95)) drop-shadow(0 0 7px #ffffff) drop-shadow(0 6px 8px rgba(0, 0, 0, 0.7));
-    animation: solar-pulse 2s infinite alternate ease-in-out;
-}
-
-@keyframes solar-pulse {
-    0% { filter: drop-shadow(0 0 14px rgba(250, 204, 21, 0.8)) drop-shadow(0 0 5px #fef08a); }
-    100% { filter: drop-shadow(0 0 24px rgba(253, 224, 71, 1)) drop-shadow(0 0 10px #ffffff); }
+    filter: drop-shadow(0 0 16px rgba(250, 204, 21, 0.95)) drop-shadow(0 4px 6px rgba(0, 0, 0, 0.7));
 }
 
 /* Floating Piece Layer for Silky Smooth Piece Movement */

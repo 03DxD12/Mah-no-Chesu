@@ -335,7 +335,7 @@ class EffectsManager {
                 gravity: -0.06 // rising heat
             });
         }
-        await new Promise(r => setTimeout(r, 180));
+        await new Promise(r => setTimeout(r, 40));
     }
 
     /**
@@ -412,7 +412,7 @@ class EffectsManager {
                 shape: 'spark'
             });
         }
-        await new Promise(r => setTimeout(r, 75));
+        await new Promise(r => setTimeout(r, 40));
     }
 
     /**
@@ -453,7 +453,7 @@ class EffectsManager {
                     shape: 'streak'
                 });
             }
-            await new Promise(r => setTimeout(r, 13));
+            await new Promise(r => setTimeout(r, 4));
         }
 
         // Violent cross-slice pressure wave
@@ -474,7 +474,7 @@ class EffectsManager {
                 shape: 'streak'
             });
         }
-        await new Promise(r => setTimeout(r, 170));
+        await new Promise(r => setTimeout(r, 40));
     }
 
     /**
@@ -535,7 +535,7 @@ class EffectsManager {
                 shape: 'rock'
             });
         }
-        await new Promise(r => setTimeout(r, 260));
+        await new Promise(r => setTimeout(r, 45));
     }
 
     /**
@@ -583,7 +583,7 @@ class EffectsManager {
                 shape: 'crystal'
             });
         }
-        await new Promise(r => setTimeout(r, 260));
+        await new Promise(r => setTimeout(r, 45));
     }
 
     /**
@@ -631,7 +631,7 @@ class EffectsManager {
                 shape: 'spark'
             });
         }
-        await new Promise(r => setTimeout(r, 260));
+        await new Promise(r => setTimeout(r, 45));
     }
 
     /**
@@ -669,7 +669,7 @@ class EffectsManager {
                 shape: 'circle'
             });
         }
-        await new Promise(r => setTimeout(r, 240));
+        await new Promise(r => setTimeout(r, 45));
     }
 
     /**
@@ -717,7 +717,7 @@ class EffectsManager {
                 shape: 'circle'
             });
         }
-        await new Promise(r => setTimeout(r, 240));
+        await new Promise(r => setTimeout(r, 45));
     }
 
     /**
@@ -754,7 +754,7 @@ class EffectsManager {
                 shape: 'streak'
             });
         }
-        await new Promise(r => setTimeout(r, 240));
+        await new Promise(r => setTimeout(r, 45));
     }
 
     /**
@@ -802,7 +802,7 @@ class EffectsManager {
                 shape: 'spark'
             });
         }
-        await new Promise(r => setTimeout(r, 250));
+        await new Promise(r => setTimeout(r, 45));
     }
 
     // Reusable elemental methods (Spec 124)
@@ -1126,7 +1126,7 @@ class EffectsManager {
             }
         }
 
-        await new Promise(r => setTimeout(r, 220));
+        await new Promise(r => setTimeout(r, 50));
     }
 
     /**
@@ -1922,7 +1922,7 @@ class EffectsManager {
             }
         }
 
-        // 1. Ambient Background Particles
+        // 1. Ambient Background Particles - Zero save/restore allocation overhead
         if (this.ambientCtx && this.ambientParticles.length > 0) {
             this.ambientCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
             for (let i = 0; i < this.ambientParticles.length; i++) {
@@ -1937,14 +1937,13 @@ class EffectsManager {
                     p.alpha = 0.25 + Math.random() * 0.4;
                 }
 
-                this.ambientCtx.save();
                 this.ambientCtx.globalAlpha = Math.max(0, p.alpha);
                 this.ambientCtx.fillStyle = p.color;
                 this.ambientCtx.beginPath();
                 this.ambientCtx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
                 this.ambientCtx.fill();
-                this.ambientCtx.restore();
             }
+            this.ambientCtx.globalAlpha = 1.0;
         }
 
         // 2. Board Battlefield FX Canvas
@@ -2118,7 +2117,7 @@ class EffectsManager {
                 this.boardCtx.restore();
             }
 
-            // G. Particles (All Elements)
+            // G. Particles (All Elements) - Fast Path for Standard Circular Particles
             for (let i = this.particles.length - 1; i >= 0; i--) {
                 const p = this.particles[i];
                 p.x += p.vx;
@@ -2134,25 +2133,28 @@ class EffectsManager {
                     continue;
                 }
 
-                this.boardCtx.save();
                 this.boardCtx.globalAlpha = Math.max(0, p.alpha);
                 this.boardCtx.fillStyle = p.color;
 
                 if (p.shape === 'spark' || p.shape === 'streak') {
+                    this.boardCtx.save();
                     this.boardCtx.translate(p.x, p.y);
                     this.boardCtx.rotate(p.rotation);
                     this.boardCtx.fillRect(-p.radius, -1.2, p.radius * 2, 2.4);
+                    this.boardCtx.restore();
                 } else if (p.shape === 'rock' || p.shape === 'crystal') {
+                    this.boardCtx.save();
                     this.boardCtx.translate(p.x, p.y);
                     this.boardCtx.rotate(p.rotation);
                     this.boardCtx.fillRect(-p.radius / 2, -p.radius / 2, p.radius, p.radius);
+                    this.boardCtx.restore();
                 } else {
                     this.boardCtx.beginPath();
                     this.boardCtx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
                     this.boardCtx.fill();
                 }
-                this.boardCtx.restore();
             }
+            this.boardCtx.globalAlpha = 1.0;
         }
 
         requestAnimationFrame(this.animate);

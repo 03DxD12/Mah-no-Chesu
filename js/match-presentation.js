@@ -383,7 +383,7 @@ class MatchPresentationController {
 
             // Step 2: Piece-Specific Movement & Personality (Spec 3 & 4)
             const speedSetting = this.app.settings.settings.animationSpeed || 'normal';
-            const moveDuration = speedSetting === 'fast' ? 100 : (speedSetting === 'cinematic' ? 300 : 160);
+            const moveDuration = speedSetting === 'fast' ? 75 : (speedSetting === 'cinematic' ? 240 : 120);
 
             // Play movement trail and sound
             if (!isCapture && !move.isCastling) {
@@ -391,7 +391,7 @@ class MatchPresentationController {
                 this.app.effects.moveTrail(piece, move.from, move.to, this.app.ui.isFlipped, element);
             }
 
-            // Step 3: Capture Choreography (Spec 5 - 9)
+            // Step 3: Capture Choreography (Spec 5 - 9) - Overlapped & Responsive
             if (isCapture) {
                 const defenderColor = piece.color === 'w' ? 'b' : 'w';
                 const capturedTargetPiece = move.captured || this.app.engine.board[move.to] || (move.isEnPassant ? { type: 'p' } : null);
@@ -405,8 +405,8 @@ class MatchPresentationController {
                 this.app.ui.triggerPieceTargetReaction(targetSq, `piece-target-${defenderElement}`);
                 this.app.audio.playElementSound(element);
 
-                // Real-match elemental reaction clash VFX (Spec 9)
-                await this.app.effects.playElementalAttack({
+                // Trigger piece animation and elemental attack in parallel for instant responsiveness
+                const attackPromise = this.app.effects.playElementalAttack({
                     pieceType: piece.type,
                     element,
                     defenderElement,
@@ -418,21 +418,26 @@ class MatchPresentationController {
                     synergyInfo: null
                 });
 
-                // Immediately dissolve the captured target piece upon elemental impact
+                // Immediately dissolve the captured target piece upon strike
                 const targetSqEl = this.app.ui.getSquareElement(targetSq);
                 const targetWrapper = targetSqEl ? targetSqEl.querySelector('.piece-svg-wrapper') : null;
                 if (targetWrapper) {
-                    targetWrapper.style.transition = 'opacity 0.15s ease, transform 0.15s ease';
+                    targetWrapper.style.transition = 'opacity 0.12s ease, transform 0.12s ease';
                     targetWrapper.style.opacity = '0';
                     targetWrapper.style.transform = 'scale(0.3)';
                 }
 
-                // Spawn temporary fading board reaction (Spec 32 - 34)
                 this.spawnTemporaryBoardReaction(move.to, element);
-            }
 
-            // Animate piece gliding into position with personality motion
-            await this.animatePieceWithPersonality(move.from, move.to, moveDuration, piece.type, element);
+                // Execute both attack VFX and piece gliding simultaneously
+                await Promise.all([
+                    attackPromise,
+                    this.animatePieceWithPersonality(move.from, move.to, moveDuration, piece.type, element)
+                ]);
+            } else {
+                // Animate piece gliding into position with personality motion
+                await this.animatePieceWithPersonality(move.from, move.to, moveDuration, piece.type, element);
+            }
 
             // Step 4: Promotion Presentation (Ascension) (Spec 29 - 31)
             let promotedPieceType = null;
@@ -558,7 +563,7 @@ class MatchPresentationController {
 
                 // Trigger AI reply if it's computer's turn in PvC
                 if (this.app.gameMode === 'pvc' && this.app.engine.turn !== this.app.playerColor) {
-                    setTimeout(() => this.app.triggerAIMove(), 350);
+                    setTimeout(() => this.app.triggerAIMove(), 80);
                 }
             }
 
