@@ -541,6 +541,8 @@ class MahoNoChesuApp {
         classesToRemove.forEach(c => frame.classList.remove(c));
 
         const turnColor = this.engine ? this.engine.turn : 'w';
+        frame.classList.toggle('turn-white', turnColor === 'w');
+        frame.classList.toggle('turn-black', turnColor === 'b');
         const currentLoadout = turnColor === 'w' ? this.loadout.whiteLoadout : this.loadout.blackLoadout;
         const themeCls = this.loadout.getBoardThemeClass(currentLoadout);
         if (themeCls) {

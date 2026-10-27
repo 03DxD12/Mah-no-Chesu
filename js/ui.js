@@ -323,11 +323,22 @@ class UIManager {
             // Selection state
             if (this.selectedSquare === sq) {
                 sqEl.classList.add('selected');
+                if (piece && piece.color === 'b') {
+                    sqEl.classList.add('selected-black');
+                } else {
+                    sqEl.classList.add('selected-white');
+                }
             }
 
             // Last move state
             if (this.lastMove && (this.lastMove.from === sq || this.lastMove.to === sq)) {
                 sqEl.classList.add('last-move');
+                const lastMoveColor = this.lastMove.color || (this.engine.turn === 'w' ? 'b' : 'w');
+                if (lastMoveColor === 'b') {
+                    sqEl.classList.add('last-move-black');
+                } else {
+                    sqEl.classList.add('last-move-white');
+                }
             }
 
             // King in check state
@@ -372,13 +383,15 @@ class UIManager {
 
     highlightMoveSquares(fromSq, toSq) {
         if (!this.boardEl) return;
+        const lastMoveColor = this.lastMove ? this.lastMove.color : (this.engine.turn === 'w' ? 'b' : 'w');
         for (let i = 0; i < 64; i++) {
             const el = this.boardEl.children[i];
             if (el) {
-                el.classList.remove('last-move', 'move-origin', 'move-dest');
+                el.classList.remove('last-move', 'last-move-white', 'last-move-black', 'move-origin', 'move-dest');
                 const sq = parseInt(el.dataset.square, 10);
                 if (sq === fromSq || sq === toSq) {
                     el.classList.add('last-move');
+                    el.classList.add(lastMoveColor === 'b' ? 'last-move-black' : 'last-move-white');
                     if (sq === fromSq) el.classList.add('move-origin');
                     if (sq === toSq) el.classList.add('move-dest');
                 }
@@ -434,6 +447,8 @@ class UIManager {
 
     renderMoveHints() {
         if (!this.settings.settings.moveHints || this.selectedSquare === null) return;
+        const selectedPiece = this.engine.board[this.selectedSquare];
+        const isBlackMoving = selectedPiece && selectedPiece.color === 'b';
 
         for (let i = 0; i < this.legalMovesForSelected.length; i++) {
             const move = this.legalMovesForSelected[i];
@@ -445,7 +460,9 @@ class UIManager {
                 if (parseInt(el.dataset.square, 10) === targetSq) {
                     const isCapture = !!(move.captured || move.isEnPassant || this.engine.board[targetSq]);
                     const marker = document.createElement('div');
-                    marker.className = isCapture ? 'move-marker-ring' : 'move-marker-dot';
+                    marker.className = isCapture 
+                        ? (isBlackMoving ? 'move-marker-ring move-marker-ring-black' : 'move-marker-ring') 
+                        : (isBlackMoving ? 'move-marker-dot move-marker-dot-black' : 'move-marker-dot');
                     el.appendChild(marker);
                     break;
                 }
@@ -564,6 +581,15 @@ class UIManager {
 
     updateActivePlayerIndicator() {
         const isWhiteTurn = this.engine.turn === 'w';
+        if (this.boardEl) {
+            this.boardEl.classList.toggle('turn-white', isWhiteTurn);
+            this.boardEl.classList.toggle('turn-black', !isWhiteTurn);
+        }
+        const frame = document.getElementById('board-frame');
+        if (frame) {
+            frame.classList.toggle('turn-white', isWhiteTurn);
+            frame.classList.toggle('turn-black', !isWhiteTurn);
+        }
         if (this.whiteTurnGem && this.blackTurnGem) {
             this.whiteTurnGem.classList.toggle('active', isWhiteTurn);
             this.blackTurnGem.classList.toggle('active', !isWhiteTurn);
