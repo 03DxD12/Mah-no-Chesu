@@ -873,8 +873,8 @@ class MatchPresentationController {
             return `${m}:${s}`;
         };
 
-        const timeWhiteEl = document.getElementById('clock-white-time');
-        const timeBlackEl = document.getElementById('clock-black-time');
+        const timeWhiteEl = document.getElementById('clock-white-time') || document.getElementById('clock-white');
+        const timeBlackEl = document.getElementById('clock-black-time') || document.getElementById('clock-black');
         const clockWhite = document.getElementById('clock-white');
         const clockBlack = document.getElementById('clock-black');
 
@@ -1184,6 +1184,89 @@ class MatchPresentationController {
         document.getElementById('modal-pause-menu')?.classList.remove('active');
         this.startClockForActiveTurn();
     }
+
+    openMatchHistoryModal() {
+        const modal = document.getElementById('modal-match-history');
+        if (!modal) return;
+
+        // Load lifetime stats
+        let stats = { games: 0, wins: 0, losses: 0, draws: 0, checkmates: 0, promotions: 0, captures: 0 };
+        try {
+            const raw = localStorage.getItem('maho_lifetime_stats');
+            if (raw) stats = { ...stats, ...JSON.parse(raw) };
+        } catch (e) {}
+
+        const gamesEl = document.getElementById('prof-stat-games');
+        const winsEl = document.getElementById('prof-stat-wins');
+        const winrateEl = document.getElementById('prof-stat-winrate');
+        const matesEl = document.getElementById('prof-stat-mates');
+        const capturesEl = document.getElementById('prof-stat-captures');
+
+        if (gamesEl) gamesEl.textContent = stats.games;
+        if (winsEl) winsEl.textContent = stats.wins;
+        if (winrateEl) {
+            winrateEl.textContent = stats.games > 0 ? `${Math.round((stats.wins / stats.games) * 100)}%` : 'N/A';
+        }
+        if (matesEl) matesEl.textContent = stats.checkmates;
+        if (capturesEl) capturesEl.textContent = stats.captures;
+
+        // Load recent matches
+        const container = document.getElementById('recent-matches-container');
+        if (container) {
+            container.innerHTML = '';
+            let history = [];
+            try {
+                const raw = localStorage.getItem('maho_match_history');
+                if (raw) history = JSON.parse(raw);
+            } catch (e) {}
+
+            if (!history || history.length === 0) {
+                container.innerHTML = '<div class="empty-state-card" style="padding: 24px; text-align: center; color: var(--text-muted, #94a3b8);">No battle records found yet. Play a match to forge your chronicle!</div>';
+            } else {
+                history.forEach(m => {
+                    const row = document.createElement('div');
+                    row.className = 'history-match-item';
+                    row.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:10px 14px; margin-bottom:8px; background:rgba(255,255,255,0.05); border-radius:6px; font-size:0.875rem;';
+                    const resultColor = m.winner === 'White' ? '#38bdf8' : (m.winner === 'Black' ? '#f43f5e' : '#a855f7');
+                    row.innerHTML = `
+                        <div style="display:flex; flex-direction:column; gap:2px;">
+                            <span style="font-weight:600; color:${resultColor};">${m.winner ? m.winner + ' Victory' : 'Draw'} (${m.reason || 'Concluded'})</span>
+                            <span style="font-size:0.75rem; color:#94a3b8;">${m.date} &bull; ${m.whiteArmy || 'White'} vs ${m.blackArmy || 'Black'} &bull; ${m.moves || 0} moves</span>
+                        </div>
+                        <div style="font-size:0.75rem; color:#cbd5e1; text-align:right;">
+                            <span>⏱ ${m.duration || '0:00'}</span>
+                            ${m.topElement ? `<div style="color:var(--accent-glow, #38bdf8);">${m.topElement}</div>` : ''}
+                        </div>
+                    `;
+                    container.appendChild(row);
+                });
+            }
+        }
+
+        // Wire clear button if not already wired
+        const clearBtn = document.getElementById('btn-clear-match-history');
+        if (clearBtn && !clearBtn._hasClearHandler) {
+            clearBtn._hasClearHandler = true;
+            clearBtn.addEventListener('click', () => {
+                localStorage.removeItem('maho_match_history');
+                localStorage.removeItem('maho_lifetime_stats');
+                this.openMatchHistoryModal();
+            });
+        }
+
+        // Wire modal close buttons
+        modal.querySelectorAll('.modal-close').forEach(b => {
+            if (!b._hasCloseHandler) {
+                b._hasCloseHandler = true;
+                b.addEventListener('click', () => {
+                    modal.classList.remove('active');
+                });
+            }
+        });
+
+        modal.classList.add('active');
+    }
+
 }
 
 // Export to global window scope

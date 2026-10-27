@@ -225,18 +225,18 @@ class MahoNoChesuApp {
         });
 
         // Game Over Buttons
-        document.getElementById('btn-game-over-rematch')?.addEventListener('click', () => {
-            document.getElementById('modal-game-over')?.classList.remove('active');
+        document.getElementById('btn-results-rematch')?.addEventListener('click', () => {
+            document.getElementById('modal-match-results')?.classList.remove('active');
             this.startNewMatch(this.gameMode);
         });
 
-        document.getElementById('btn-game-over-new')?.addEventListener('click', () => {
-            document.getElementById('modal-game-over')?.classList.remove('active');
+        document.getElementById('btn-results-menu')?.addEventListener('click', () => {
+            document.getElementById('modal-match-results')?.classList.remove('active');
             modalModeSelect.classList.add('active');
         });
 
-        document.getElementById('btn-game-over-menu')?.addEventListener('click', () => {
-            document.getElementById('modal-game-over')?.classList.remove('active');
+        document.getElementById('btn-results-menu')?.addEventListener('click', () => {
+            document.getElementById('modal-match-results')?.classList.remove('active');
             modalMainMenu.classList.add('active');
         });
 
@@ -293,8 +293,42 @@ class MahoNoChesuApp {
             }
         });
 
+        
+        // Loadout modal extra actions (Specs 20 - 25)
+        document.getElementById('btn-loadout-open-lab')?.addEventListener('click', () => {
+            this.audio.playUiClick();
+            document.getElementById('modal-loadout-builder')?.classList.remove('active');
+            document.getElementById('modal-element-lab')?.classList.add('active');
+            this.openLaboratoryModal();
+        });
+
+        document.getElementById('btn-copy-p1-loadout')?.addEventListener('click', () => {
+            this.audio.playUiClick();
+            this.loadout.blackLoadout = { ...this.loadout.whiteLoadout };
+            this.loadout.saveLoadouts();
+            this.effects.showAttackName('COPIED WHITE LOADOUT TO BLACK');
+            this.renderLoadoutBuilder();
+        });
+
+        // Lab color toggle & promo default queen
+        document.getElementById('btn-lab-color-toggle')?.addEventListener('click', (e) => {
+            this.audio.playUiClick();
+            this.labState.color = (this.labState.color === 'b') ? 'w' : 'b';
+            e.currentTarget.textContent = `Color: ${this.labState.color === 'w' ? 'White' : 'Black'}`;
+            this.renderLabSandboxStage();
+        });
+
+        document.getElementById('btn-promo-lab-set-default')?.addEventListener('click', () => {
+            this.audio.playUiClick();
+            if (this.promoLabState && this.promoLabState.element) {
+                this.loadout.whiteLoadout['q'] = this.promoLabState.element;
+                this.loadout.saveLoadouts();
+                this.effects.showAttackName(`DEFAULT QUEEN SET TO ${this.promoLabState.element.toUpperCase()}`);
+            }
+        });
+
         // Match History Modal (Spec 77 - 79)
-        document.getElementById('btn-match-history-toggle')?.addEventListener('click', () => {
+        document.getElementById('btn-history') || document.getElementById('menu-btn-match-history')?.addEventListener('click', () => {
             this.audio.playUiClick();
             if (this.presentation) {
                 this.presentation.openMatchHistoryModal();
@@ -631,7 +665,7 @@ class MahoNoChesuApp {
             savedDrawer?.classList.add('hidden');
         });
 
-        document.getElementById('btn-save-current-army')?.addEventListener('click', () => {
+        document.getElementById('btn-loadout-save') || document.getElementById('btn-save-current-army')?.addEventListener('click', () => {
             this.audio.playUiClick();
             const defaultName = this.loadout.getEffectiveArmyName(
                 this.loadoutActiveSide === 'white' ? this.loadout.whiteLoadout : this.loadout.blackLoadout,
@@ -647,9 +681,9 @@ class MahoNoChesuApp {
         });
 
         // 4. Randomize All Button (Specs 46 & 47)
-        document.getElementById('btn-loadout-random')?.addEventListener('click', () => {
+        document.getElementById('btn-loadout-randomize') || document.getElementById('btn-loadout-random')?.addEventListener('click', () => {
             this.audio.playUiClick();
-            const allowDup = document.getElementById('chk-allow-duplicates')?.checked ?? true;
+            const allowDup = document.getElementById('check-allow-duplicates') || document.getElementById('chk-allow-duplicates')?.checked ?? true;
             const randomized = this.loadout.generateRandomLoadout(allowDup);
             if (this.loadoutActiveSide === 'white') {
                 this.loadout.whiteLoadout = randomized;
@@ -684,7 +718,7 @@ class MahoNoChesuApp {
         });
 
         // 7. Start Match Button
-        document.getElementById('btn-loadout-start-match')?.addEventListener('click', () => {
+        document.getElementById('btn-loadout-start') || document.getElementById('btn-loadout-start-match')?.addEventListener('click', () => {
             this.audio.playUiClick();
             modal?.classList.remove('active');
             this.loadout.saveLoadouts();
@@ -693,7 +727,7 @@ class MahoNoChesuApp {
 
         // 8. Customization Drawer Controls (Specs 1 - 3)
         const customizeDrawer = document.getElementById('drawer-piece-customize');
-        document.getElementById('btn-close-customize-drawer')?.addEventListener('click', () => {
+        document.getElementById('btn-close-custom-drawer') || document.getElementById('btn-close-customize-drawer')?.addEventListener('click', () => {
             this.audio.playUiClick();
             customizeDrawer?.classList.add('hidden');
         });
@@ -773,8 +807,8 @@ class MahoNoChesuApp {
         const dominantMeta = this.loadout.getElementMeta(syn.dominantElement);
 
         const iconEl = document.getElementById('loadout-army-icon');
-        const nameEl = document.getElementById('loadout-army-name');
-        const badgeEl = document.getElementById('loadout-army-synergy-badge');
+        const nameEl = document.getElementById('loadout-army-name-text') || document.getElementById('loadout-army-name');
+        const badgeEl = document.getElementById('synergy-badge-main') || document.getElementById('loadout-army-synergy-badge');
 
         if (iconEl) iconEl.textContent = dominantMeta.icon || '⚔️';
         if (nameEl) {
@@ -884,7 +918,7 @@ class MahoNoChesuApp {
     }
 
     renderSynergiesBreakdown() {
-        const container = document.getElementById('loadout-synergies-breakdown');
+        const container = document.getElementById('synergy-chips-list') || document.getElementById('loadout-synergies-breakdown');
         if (!container) return;
 
         const activeLoadout = this.loadoutActiveSide === 'white' ? this.loadout.whiteLoadout : this.loadout.blackLoadout;
@@ -919,9 +953,9 @@ class MahoNoChesuApp {
         const color = this.loadoutActiveSide === 'white' ? 'w' : 'b';
         const activeLoadout = this.loadoutActiveSide === 'white' ? this.loadout.whiteLoadout : this.loadout.blackLoadout;
 
-        const nameEl = document.getElementById('customize-target-piece-name');
+        const nameEl = document.getElementById('drawer-custom-title') || document.getElementById('customize-target-piece-name');
         const svgEl = document.getElementById('customize-target-piece-svg');
-        const grid = document.getElementById('custom-elem-options-grid');
+        const grid = document.getElementById('elements-picker-palette') || document.getElementById('custom-elem-options-grid');
 
         if (nameEl) nameEl.textContent = `CUSTOMIZE ${pieceNames[pieceType].toUpperCase()}`;
         if (svgEl) svgEl.innerHTML = this.ui.getPieceSVG(pieceType, color);
@@ -967,9 +1001,9 @@ class MahoNoChesuApp {
         const ability = this.loadout.getAbilityDetails(pieceType, elemKey);
         const color = this.loadoutActiveSide === 'white' ? 'w' : 'b';
 
-        const heroPieceName = document.getElementById('preview-hero-piece-name');
+        const heroPieceName = document.getElementById('drawer-preview-title') || document.getElementById('preview-hero-piece-name');
         const heroElemName = document.getElementById('preview-hero-elem-name');
-        const heroAttackName = document.getElementById('preview-hero-attack-name');
+        const heroAttackName = document.getElementById('drawer-preview-subtitle') || document.getElementById('preview-hero-attack-name');
         const attackerActor = document.getElementById('preview-actor-attacker');
 
         if (heroPieceName) heroPieceName.textContent = pieceNames[pieceType].toUpperCase();
@@ -1001,7 +1035,7 @@ class MahoNoChesuApp {
             clearTimeout(this.previewAnimationTimer);
             this.previewAnimationTimer = null;
         }
-        const canvas = document.getElementById('preview-live-canvas');
+        const canvas = document.getElementById('preview-stage-canvas') || document.getElementById('preview-live-canvas');
         if (canvas) {
             const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -1015,7 +1049,7 @@ class MahoNoChesuApp {
     runDedicatedPreview(pieceType, isReplay = false) {
         this.resetDedicatedPreview();
 
-        const canvas = document.getElementById('preview-live-canvas');
+        const canvas = document.getElementById('preview-stage-canvas') || document.getElementById('preview-live-canvas');
         if (!canvas) return;
 
         // Size canvas to container
@@ -1093,7 +1127,7 @@ class MahoNoChesuApp {
     }
 
     renderSavedArmiesList() {
-        const container = document.getElementById('saved-armies-list-container');
+        const container = document.getElementById('saved-armies-grid') || document.getElementById('saved-armies-list-container');
         if (!container) return;
 
         const armies = this.loadout.getSavedArmies();
@@ -1191,9 +1225,9 @@ class MahoNoChesuApp {
                 document.querySelectorAll('.lab-tab-btn').forEach(t => t.classList.remove('active'));
                 tab.classList.add('active');
 
-                const targetTab = tab.dataset.labTab;
+                const targetTab = tab.dataset.labTab || tab.dataset.target;
                 document.querySelectorAll('.lab-tab-content').forEach(c => c.classList.add('hidden'));
-                document.getElementById(`lab-tab-${targetTab}`)?.classList.remove('hidden');
+                (document.getElementById(`lab-view-${targetTab}`) || document.getElementById(`lab-tab-${targetTab}`))?.classList.remove('hidden');
 
                 if (targetTab === 'sandbox') this.renderLabSandboxStage();
                 if (targetTab === 'promo') this.renderPromotionLabWorkspace();
@@ -1214,7 +1248,7 @@ class MahoNoChesuApp {
         });
 
         // 3. Stage Action Controls (Play, Replay, Reset, Slow Motion, Intensity)
-        document.getElementById('btn-lab-play')?.addEventListener('click', () => {
+        document.getElementById('btn-lab-fire-attack') || document.getElementById('btn-lab-play')?.addEventListener('click', () => {
             this.audio.playUiClick();
             this.runLabAction();
         });
@@ -1224,7 +1258,7 @@ class MahoNoChesuApp {
             this.runLabAction();
         });
 
-        document.getElementById('btn-lab-reset')?.addEventListener('click', () => {
+        document.getElementById('btn-lab-reset-stage') || document.getElementById('btn-lab-reset')?.addEventListener('click', () => {
             this.audio.playUiClick();
             this.resetLabSandboxStage();
         });
@@ -1257,7 +1291,7 @@ class MahoNoChesuApp {
         });
 
         // 5. Random Defender Element
-        document.getElementById('btn-random-target-elem')?.addEventListener('click', () => {
+        document.getElementById('btn-lab-random-target-elem') || document.getElementById('btn-random-target-elem')?.addEventListener('click', () => {
             this.audio.playUiClick();
             const keys = Object.keys(ELEMENTS);
             this.labState.targetElement = keys[Math.floor(Math.random() * keys.length)];
@@ -1283,7 +1317,7 @@ class MahoNoChesuApp {
         });
 
         // 7. Developer HUD Drawer & Benchmark (Specs 52 - 54)
-        document.getElementById('btn-toggle-dev-tools')?.addEventListener('click', () => {
+        document.getElementById('btn-lab-toggle-dev') || document.getElementById('btn-toggle-dev-tools')?.addEventListener('click', () => {
             const drawer = document.getElementById('drawer-dev-tools');
             drawer?.classList.toggle('hidden');
         });
@@ -1612,10 +1646,10 @@ class MahoNoChesuApp {
 
     renderPromotionLabWorkspace() {
         // Setup chips for Promotion Lab (Specs 17 - 19)
-        const pawnElemsContainer = document.getElementById('promo-pawn-elem-chips');
-        const targetPiecesContainer = document.getElementById('promo-target-piece-chips');
-        const newElemsContainer = document.getElementById('promo-new-elem-chips');
-        const stylesContainer = document.getElementById('promo-style-chips');
+        const pawnElemsContainer = document.getElementById('promo-lab-pawn-elements') || document.getElementById('promo-pawn-elem-chips');
+        const targetPiecesContainer = document.getElementById('promo-lab-pieces') || document.getElementById('promo-target-piece-chips');
+        const newElemsContainer = document.getElementById('promo-lab-new-elements') || document.getElementById('promo-new-elem-chips');
+        const stylesContainer = document.getElementById('promo-lab-styles') || document.getElementById('promo-style-chips');
 
         this.promoLabState = this.promoLabState || {
             pawnElem: 'fire',
@@ -1687,7 +1721,7 @@ class MahoNoChesuApp {
             });
         }
 
-        document.getElementById('btn-play-promo-ascension')?.addEventListener('click', () => {
+        document.getElementById('btn-promo-lab-play') || document.getElementById('btn-play-promo-ascension')?.addEventListener('click', () => {
             this.audio.playUiClick();
             this.effects.showAttackName(`ASCENSION: ${this.promoLabState.style.toUpperCase()}`);
             this.effects.playPawnAscensionSequence({
@@ -1716,17 +1750,17 @@ class MahoNoChesuApp {
             this.audio.playElementSound(this.compareRightElem);
         };
 
-        document.getElementById('btn-compare-left')?.addEventListener('click', () => {
+        document.getElementById('btn-compare-play-left') || document.getElementById('btn-compare-left')?.addEventListener('click', () => {
             this.audio.playUiClick();
             runLeft();
         });
 
-        document.getElementById('btn-compare-right')?.addEventListener('click', () => {
+        document.getElementById('btn-compare-play-right') || document.getElementById('btn-compare-right')?.addEventListener('click', () => {
             this.audio.playUiClick();
             runRight();
         });
 
-        document.getElementById('btn-compare-both')?.addEventListener('click', () => {
+        document.getElementById('btn-compare-play-both') || document.getElementById('btn-compare-both')?.addEventListener('click', () => {
             this.audio.playUiClick();
             runLeft();
             setTimeout(() => runRight(), 800);
@@ -1845,6 +1879,18 @@ class MahoNoChesuApp {
                 } catch (e) {
                     if (devConsole) devConsole.textContent = `Error loading FEN: ${e.message}`;
                 }
+            }
+        });
+
+        
+        const toggleEvalBtn = document.getElementById('btn-toggle-eval');
+        const evalScore = document.getElementById('eval-score');
+        toggleEvalBtn?.addEventListener('click', () => {
+            if (this.ai && evalScore) {
+                const score = this.ai.evaluatePosition(this.engine);
+                const pawnScore = (score / 100).toFixed(2);
+                evalScore.textContent = (score >= 0 ? '+' : '') + pawnScore;
+                if (devConsole) devConsole.textContent = `Static Evaluation: ${pawnScore} pawns (Perspective: White)`;
             }
         });
 

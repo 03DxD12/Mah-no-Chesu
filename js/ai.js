@@ -96,7 +96,19 @@ class ChessAI {
     /**
      * Choose Best Move for given FEN and Difficulty
      */
-    async getBestMove(fen, difficulty = 'normal', engine = null) {
+    async getBestMove(fenOrEngine, difficulty = 'normal', engine = null) {
+        let fen;
+        if (typeof fenOrEngine === 'string') {
+            fen = fenOrEngine;
+        } else if (fenOrEngine && typeof fenOrEngine === 'object') {
+            engine = fenOrEngine;
+            fen = engine.exportFEN ? engine.exportFEN() : null;
+        }
+        if (!engine && fen && typeof ChessEngine !== 'undefined') {
+            engine = new ChessEngine();
+            engine.loadFEN(fen);
+        }
+
         let depth = 3;
         if (difficulty === 'easy') depth = 2;
         else if (difficulty === 'hard') depth = 4;

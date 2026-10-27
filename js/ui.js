@@ -998,10 +998,15 @@ class UIManager {
      * Modal: Game Over / Victory Screen
      */
     showGameOver(status) {
-        const modal = document.getElementById('modal-game-over');
-        const titleEl = document.getElementById('victory-title');
-        const subEl = document.getElementById('victory-subtitle');
-        const reasonEl = document.getElementById('victory-reason');
+        if (window.app?.presentation?.showMatchResultsModal) {
+            const winnerName = status.winner === 'w' ? 'White' : (status.winner === 'b' ? 'Black' : 'Draw');
+            window.app.presentation.showMatchResultsModal(winnerName, status.description || status.reason || 'Game Over');
+            return;
+        }
+        const modal = document.getElementById('modal-match-results') || document.getElementById('modal-game-over');
+        const titleEl = document.getElementById('results-outcome-title') || document.getElementById('victory-title');
+        const subEl = document.getElementById('results-outcome-desc') || document.getElementById('victory-subtitle');
+        const reasonEl = document.getElementById('results-stat-final-attack') || document.getElementById('victory-reason');
         if (!modal) return;
 
         if (status.reason === 'checkmate') {

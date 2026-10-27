@@ -115,6 +115,11 @@ class ChessEngine {
         return fen;
     }
 
+    getPieceAt(sq) {
+        if (typeof sq === 'string') sq = this.algebraicToSquare(sq);
+        return (sq >= 0 && sq < 64) ? this.board[sq] : null;
+    }
+
     squareToAlgebraic(sq) {
         const file = String.fromCharCode('a'.charCodeAt(0) + (sq % 8));
         const rank = Math.floor(sq / 8) + 1;
@@ -513,6 +518,8 @@ class ChessEngine {
      * Commit a move to the board and save state for unmaking
      */
     makeMove(move) {
+        if (typeof move.from === 'string') move.from = this.algebraicToSquare(move.from);
+        if (typeof move.to === 'string') move.to = this.algebraicToSquare(move.to);
         const piece = this.board[move.from];
         const stateRecord = {
             move,

@@ -885,7 +885,7 @@ class ProgressionManager {
     }
 
     updateProfileUI() {
-        const lvlEl = document.getElementById('profile-hud-level');
+        const lvlEl = document.getElementById('profile-level-badge') || document.getElementById('profile-hud-level');
         if (lvlEl) lvlEl.textContent = `LVL ${this.state.playerLevel}`;
     }
 }
@@ -1597,3 +1597,6 @@ class LearningManager {
         modal.classList.add('active');
     }
 }
+// Global Window Exports
+window.ProgressionManager = ProgressionManager;
+window.LearningManager = LearningManager;
