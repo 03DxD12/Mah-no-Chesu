@@ -312,6 +312,9 @@ class UIManager {
                 pieceHTML = `<div class="piece-svg-wrapper piece-${piece.type} aura-${elem}">${this.getPieceSVG(piece.type, piece.color)}</div>`;
             }
 
+            const oldMarker = sqEl.querySelector('.move-marker-dot, .move-marker-ring');
+            if (oldMarker) oldMarker.remove();
+
             if (sqEl._currentPieceHTML !== pieceHTML) {
                 sqEl.innerHTML = pieceHTML;
                 sqEl._currentPieceHTML = pieceHTML;
