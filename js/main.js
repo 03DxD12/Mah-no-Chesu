@@ -925,7 +925,7 @@ class MahoNoChesuApp {
         const activeLoadout = this.loadoutActiveSide === 'white' ? this.loadout.whiteLoadout : this.loadout.blackLoadout;
         const syn = this.loadout.calculateElementSynergies(activeLoadout);
 
-        const breakdown = Object.entries(syn.elementCounts)
+        const breakdown = Object.entries(syn.elementCounts || syn.counts || {})
             .sort((a, b) => b[1] - a[1])
             .map(([elemKey, count]) => {
                 const meta = this.loadout.getElementMeta(elemKey);
