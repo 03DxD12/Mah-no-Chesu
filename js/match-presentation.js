@@ -383,7 +383,7 @@ class MatchPresentationController {
 
             // Step 2: Piece-Specific Movement & Personality (Spec 3 & 4)
             const speedSetting = this.app.settings.settings.animationSpeed || 'normal';
-            const moveDuration = speedSetting === 'fast' ? 140 : (speedSetting === 'cinematic' ? 360 : 220);
+            const moveDuration = speedSetting === 'fast' ? 100 : (speedSetting === 'cinematic' ? 300 : 160);
 
             // Play movement trail and sound
             if (!isCapture && !move.isCastling) {

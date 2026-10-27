@@ -312,7 +312,10 @@ class UIManager {
                 pieceHTML = `<div class="piece-svg-wrapper piece-${piece.type} aura-${elem}">${this.getPieceSVG(piece.type, piece.color)}</div>`;
             }
 
-            sqEl.innerHTML = pieceHTML;
+            if (sqEl._currentPieceHTML !== pieceHTML) {
+                sqEl.innerHTML = pieceHTML;
+                sqEl._currentPieceHTML = pieceHTML;
+            }
 
             // Selection state
             if (this.selectedSquare === sq) {

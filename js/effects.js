@@ -312,7 +312,7 @@ class EffectsManager {
                     decay: 0.05
                 });
             }
-            await new Promise(r => setTimeout(r, 13));
+            await new Promise(r => setTimeout(r, 5));
         }
 
         // Dual expanding shockwave rings on impact
@@ -412,7 +412,7 @@ class EffectsManager {
                 shape: 'spark'
             });
         }
-        await new Promise(r => setTimeout(r, 220));
+        await new Promise(r => setTimeout(r, 75));
     }
 
     /**
@@ -880,7 +880,7 @@ class EffectsManager {
                         decay: 0.06
                     });
                 }
-                await new Promise(r => setTimeout(r, 10));
+                await new Promise(r => setTimeout(r, 4));
             }
         } else if (pType === 'n') {
             // KNIGHT: High-Arched Airborne Leap & Landing Crater / Lightning
@@ -904,7 +904,7 @@ class EffectsManager {
                         shape: elem === 'lightning' ? 'spark' : (elem === 'nature' || elem === 'wind' ? 'streak' : 'circle')
                     });
                 }
-                await new Promise(r => setTimeout(r, 12));
+                await new Promise(r => setTimeout(r, 5));
             }
         } else if (pType === 'b') {
             // BISHOP: Diagonal Razor Slicing Blade across Path
@@ -933,7 +933,7 @@ class EffectsManager {
                         rotation: angle
                     });
                 }
-                await new Promise(r => setTimeout(r, 9));
+                await new Promise(r => setTimeout(r, 4));
             }
         } else if (pType === 'r') {
             // ROOK: Heavy Linear Shockwave / Rolling Tremor along Rank/File
@@ -994,7 +994,7 @@ class EffectsManager {
                     });
                 }
             }
-            await new Promise(r => setTimeout(r, 110));
+            await new Promise(r => setTimeout(r, 45));
         } else if (pType === 'k') {
             // KING: Sovereign Celestial / Royal Beam descending from Above
             this.activeBeams.push({
@@ -1008,7 +1008,7 @@ class EffectsManager {
             });
 
             this.addShockwave(to.x, to.y, to.width * 1.3, '#facc15', 5);
-            await new Promise(r => setTimeout(r, 90));
+            await new Promise(r => setTimeout(r, 40));
         }
 
         // 3. Elemental Impact Detonation at Target (Spec 108 & 124)
