@@ -1,11 +1,13 @@
 /**
  * MAHŌ NO CHESU | Elemental Chess
  * js/ai.js - Chess AI Coordinator with Minimax, Alpha-Beta, Piece-Square Tables & Worker Fallback
+ * Optimized for 1 to 4 Seconds Response Time with Iterative Deepening and Cancellation
  */
 
 class ChessAI {
     constructor() {
         this.worker = null;
+        this.currentRequestId = 0;
         this.initWorker();
 
         // Piece Base Values (Centipawns)
@@ -84,66 +86,86 @@ class ChessAI {
     }
 
     initWorker() {
-        try {
-            // Attempt to load Web Worker
-            this.worker = new Worker('./worker/ai-worker.js');
-        } catch (e) {
-            console.warn('Web Worker initialization unavailable (likely local file:// protocol). Using synchronous search fallback.', e);
-            this.worker = null;
+        if (typeof Worker !== 'undefined') {
+            try {
+                this.worker = new Worker('worker/ai-worker.js');
+            } catch (e) {
+                console.warn('Could not initialize AI Web Worker, using main thread fallback:', e);
+                this.worker = null;
+            }
         }
     }
 
     /**
-     * Choose Best Move for given FEN and Difficulty
+     * Cancel any pending background search immediately (on restart, undo, menu navigation)
      */
-    async getBestMove(fenOrEngine, difficulty = 'normal', engine = null) {
-        let fen;
-        if (typeof fenOrEngine === 'string') {
-            fen = fenOrEngine;
-        } else if (fenOrEngine && typeof fenOrEngine === 'object') {
-            engine = fenOrEngine;
-            fen = engine.exportFEN ? engine.exportFEN() : null;
+    cancelPendingSearch() {
+        this.currentRequestId++;
+        if (this.worker) {
+            try {
+                this.worker.terminate();
+            } catch {
+                // Ignore termination errors
+            }
+            this.worker = null;
+            this.initWorker();
         }
-        if (!engine && fen && typeof ChessEngine !== 'undefined') {
-            engine = new ChessEngine();
-            engine.loadFEN(fen);
-        }
+    }
 
-        let depth = 3;
-        if (difficulty === 'easy') depth = 2;
-        else if (difficulty === 'hard') depth = 4;
+    /**
+     * Compute the optimal move with strict time limits (Easy: 350ms, Normal: 1.2s, Hard/Arcane: 1-3s, max 4s)
+     */
+    async getBestMove(engine, difficulty = 'normal', personality = null) {
+        const fen = (typeof engine === 'string') ? engine : engine.exportFEN();
+        const engineObj = (typeof engine === 'string') ? new ChessEngine(engine) : engine;
+        const requestId = ++this.currentRequestId;
 
+        // Try Web Worker first for non-blocking UI
         if (this.worker) {
             return new Promise((resolve) => {
+                let resolved = false;
+
+                // Safety fallback timeout: 4.5s ceiling for mobile
                 const timeout = setTimeout(() => {
-                    console.warn('AI worker response timed out. Falling back to local search.');
-                    resolve(this.searchLocal(engine, depth, difficulty));
-                }, 8000);
+                    if (!resolved && requestId === this.currentRequestId) {
+                        resolved = true;
+                        console.warn('AI worker search timed out, falling back to instant search');
+                        resolve(this.searchLocal(engineObj, difficulty));
+                    }
+                }, 4500);
 
                 this.worker.onmessage = (e) => {
+                    if (resolved) return;
+                    if (e.data && e.data.requestId !== undefined && e.data.requestId !== requestId) {
+                        return; // Discard stale request
+                    }
+                    resolved = true;
                     clearTimeout(timeout);
                     if (e.data && e.data.bestMove) {
                         resolve(e.data.bestMove);
                     } else {
-                        resolve(this.searchLocal(engine, depth, difficulty));
+                        resolve(this.searchLocal(engineObj, difficulty));
                     }
                 };
 
                 this.worker.onerror = (err) => {
+                    if (resolved) return;
+                    resolved = true;
                     clearTimeout(timeout);
                     console.warn('AI worker error:', err);
-                    resolve(this.searchLocal(engine, depth, difficulty));
+                    resolve(this.searchLocal(engineObj, difficulty));
                 };
 
-                this.worker.postMessage({ fen, depth, difficulty });
+                this.worker.postMessage({ fen, difficulty, personality, requestId });
             });
         }
 
-        // Fallback synchronous search
+        // Main-thread fallback (asynchronous to allow UI render)
         return new Promise((resolve) => {
             setTimeout(() => {
-                resolve(this.searchLocal(engine, depth, difficulty));
-            }, 50);
+                if (requestId !== this.currentRequestId) return resolve(null);
+                resolve(this.searchLocal(engineObj, difficulty));
+            }, 30);
         });
     }
 
@@ -158,138 +180,264 @@ class ChessAI {
             const piece = board[sq];
             if (!piece) continue;
 
-            const val = this.pieceValues[piece.type];
-            // Lookup PST (rank 7 down to 0)
-            const rank = Math.floor(sq / 8);
-            const file = sq % 8;
-            const pstIndex = piece.color === 'w' ? (7 - rank) * 8 + file : rank * 8 + file;
-            const pstVal = this.pst[piece.type][pstIndex] || 0;
-
+            const val = this.pieceValues[piece.type] || 0;
+            const pstIndex = piece.color === 'w' ? (63 - sq) : sq;
+            const pstVal = this.pst[piece.type] ? this.pst[piece.type][pstIndex] : 0;
             const total = val + pstVal;
-            score += piece.color === 'w' ? total : -total;
+
+            if (piece.color === 'w') {
+                score += total;
+            } else {
+                score -= total;
+            }
         }
 
         return score;
     }
 
     /**
-     * MVV-LVA Move Ordering
+     * Move score for MVV-LVA, PV, and Killer Moves
      */
-    orderMoves(moves, engine) {
-        return moves.sort((a, b) => {
-            const pieceA = engine.board[a.from];
-            const pieceB = engine.board[b.from];
-            const targetA = a.captured || engine.board[a.to];
-            const targetB = b.captured || engine.board[b.to];
-
-            let scoreA = 0;
-            let scoreB = 0;
-
-            if (targetA) {
-                scoreA = 10 * this.pieceValues[targetA.type] - this.pieceValues[pieceA.type];
-            }
-            if (targetB) {
-                scoreB = 10 * this.pieceValues[targetB.type] - this.pieceValues[pieceB.type];
-            }
-
-            if (a.promotion) scoreA += 800;
-            if (b.promotion) scoreB += 800;
-
-            return scoreB - scoreA;
-        });
-    }
-
-    /**
-     * Minimax Search with Alpha-Beta Pruning
-     */
-    minimax(engine, depth, alpha, beta, isMaximizing) {
-        if (depth === 0) {
-            return this.evaluateBoard(engine);
+    scoreMove(move, engine, pvMove, k1, k2) {
+        if (pvMove && move.from === pvMove.from && move.to === pvMove.to && move.promotion === pvMove.promotion) {
+            return 1000000;
         }
 
-        const legalMoves = engine.generateLegalMoves(engine.turn);
+        const piece = engine.board[move.from];
+        const captured = engine.board[move.to] || (move.isEnPassant ? { type: 'p' } : null);
 
-        if (legalMoves.length === 0) {
-            if (engine.isKingInCheck(engine.turn)) {
-                // Checkmate
-                return isMaximizing ? -99999 - depth : 99999 + depth;
+        if (captured) {
+            const victimVal = this.pieceValues[captured.type] || 100;
+            const attackerVal = piece ? (this.pieceValues[piece.type] || 100) : 100;
+            return 100000 + (victimVal * 10) - attackerVal;
+        }
+
+        if (move.promotion) {
+            return 90000 + (this.pieceValues[move.promotion] || 0);
+        }
+
+        if (k1 && move.from === k1.from && move.to === k1.to) return 80000;
+        if (k2 && move.from === k2.from && move.to === k2.to) return 70000;
+
+        return 0;
+    }
+
+    sortMoves(moves, engine, pvMove, k1, k2) {
+        const scores = moves.map(m => this.scoreMove(m, engine, pvMove, k1, k2));
+        const indices = moves.map((_, i) => i);
+        indices.sort((a, b) => scores[b] - scores[a]);
+        return indices.map(i => moves[i]);
+    }
+
+    quiescence(engine, alpha, beta, isMaximizing, deadline, state) {
+        state.nodes++;
+        if ((state.nodes & 511) === 0 && Date.now() >= deadline) {
+            state.timeout = true;
+            return isMaximizing ? alpha : beta;
+        }
+
+        const standPat = this.evaluateBoard(engine);
+
+        if (isMaximizing) {
+            if (standPat >= beta) return beta;
+            if (standPat > alpha) alpha = standPat;
+        } else {
+            if (standPat <= alpha) return alpha;
+            if (standPat < beta) beta = standPat;
+        }
+
+        const moves = engine.generateLegalMoves(engine.turn);
+        const captures = moves.filter(m => m.captured || m.isEnPassant || engine.board[m.to]);
+        if (captures.length === 0) return standPat;
+
+        const ordered = this.sortMoves(captures, engine, null, null, null);
+
+        if (isMaximizing) {
+            for (let i = 0; i < ordered.length; i++) {
+                const m = ordered[i];
+                const searchState = engine.makeSearchMove(m);
+                const score = this.quiescence(engine, alpha, beta, false, deadline, state);
+                engine.unmakeSearchMove(searchState);
+
+                if (state.timeout) return alpha;
+                if (score >= beta) return beta;
+                if (score > alpha) alpha = score;
             }
-            // Stalemate
+            return alpha;
+        } else {
+            for (let i = 0; i < ordered.length; i++) {
+                const m = ordered[i];
+                const searchState = engine.makeSearchMove(m);
+                const score = this.quiescence(engine, alpha, beta, true, deadline, state);
+                engine.unmakeSearchMove(searchState);
+
+                if (state.timeout) return beta;
+                if (score <= alpha) return alpha;
+                if (score < beta) beta = score;
+            }
+            return beta;
+        }
+    }
+
+    search(engine, depth, ply, alpha, beta, isMaximizing, deadline, state, killers, pvMove) {
+        state.nodes++;
+        if ((state.nodes & 511) === 0 && Date.now() >= deadline) {
+            state.timeout = true;
+            return isMaximizing ? alpha : beta;
+        }
+
+        if (depth <= 0) {
+            return this.quiescence(engine, alpha, beta, isMaximizing, deadline, state);
+        }
+
+        const moves = engine.generateLegalMoves(engine.turn);
+        if (moves.length === 0) {
+            if (engine.isKingInCheck(engine.turn)) {
+                return isMaximizing ? (-50000 + ply) : (50000 - ply);
+            }
             return 0;
         }
 
-        const ordered = this.orderMoves(legalMoves, engine);
+        const k1 = killers[ply] ? killers[ply][0] : null;
+        const k2 = killers[ply] ? killers[ply][1] : null;
+        const ordered = this.sortMoves(moves, engine, pvMove, k1, k2);
+
+        let bestScore = isMaximizing ? -Infinity : Infinity;
 
         if (isMaximizing) {
-            let maxEval = -Infinity;
             for (let i = 0; i < ordered.length; i++) {
-                engine.makeMove(ordered[i]);
-                const ev = this.minimax(engine, depth - 1, alpha, beta, false);
-                engine.unmakeMove();
-                maxEval = Math.max(maxEval, ev);
-                alpha = Math.max(alpha, ev);
-                if (beta <= alpha) break; // Beta cut-off
+                const m = ordered[i];
+                const searchState = engine.makeSearchMove(m);
+                const score = this.search(engine, depth - 1, ply + 1, alpha, beta, false, deadline, state, killers, null);
+                engine.unmakeSearchMove(searchState);
+
+                if (state.timeout) return bestScore;
+
+                if (score > bestScore) bestScore = score;
+                if (score > alpha) alpha = score;
+                if (alpha >= beta) {
+                    if (!m.captured && !m.isEnPassant) {
+                        if (!killers[ply]) killers[ply] = [null, null];
+                        killers[ply][1] = killers[ply][0];
+                        killers[ply][0] = m;
+                    }
+                    break;
+                }
             }
-            return maxEval;
+            return bestScore;
         } else {
-            let minEval = Infinity;
             for (let i = 0; i < ordered.length; i++) {
-                engine.makeMove(ordered[i]);
-                const ev = this.minimax(engine, depth - 1, alpha, beta, true);
-                engine.unmakeMove();
-                minEval = Math.min(minEval, ev);
-                beta = Math.min(beta, ev);
-                if (beta <= alpha) break; // Alpha cut-off
+                const m = ordered[i];
+                const searchState = engine.makeSearchMove(m);
+                const score = this.search(engine, depth - 1, ply + 1, alpha, beta, true, deadline, state, killers, null);
+                engine.unmakeSearchMove(searchState);
+
+                if (state.timeout) return bestScore;
+
+                if (score < bestScore) bestScore = score;
+                if (score < beta) beta = score;
+                if (beta <= alpha) {
+                    if (!m.captured && !m.isEnPassant) {
+                        if (!killers[ply]) killers[ply] = [null, null];
+                        killers[ply][1] = killers[ply][0];
+                        killers[ply][0] = m;
+                    }
+                    break;
+                }
             }
-            return minEval;
+            return bestScore;
         }
     }
 
     /**
-     * Local Search Engine
+     * Local Search Engine (synchronous / fallback) with strict time budget
      */
-    searchLocal(engine, depth, difficulty) {
+    searchLocal(engine, difficulty = 'normal') {
         if (!engine) return null;
         const color = engine.turn;
         const isWhite = color === 'w';
         const legalMoves = engine.generateLegalMoves(color);
         if (legalMoves.length === 0) return null;
+        if (legalMoves.length === 1) return legalMoves[0];
 
-        const ordered = this.orderMoves(legalMoves, engine);
-
-        // Easy mode: inject deliberate random variance to top moves
-        if (difficulty === 'easy' && Math.random() < 0.35) {
-            const randomPick = ordered[Math.floor(Math.random() * Math.min(3, ordered.length))];
-            return randomPick;
+        if (difficulty === 'easy' && Math.random() < 0.4) {
+            return legalMoves[Math.floor(Math.random() * legalMoves.length)];
         }
 
-        let bestMove = ordered[0];
-        let bestValue = isWhite ? -Infinity : Infinity;
-        let alpha = -Infinity;
-        let beta = Infinity;
+        // Mate in 1 quick check
+        for (let i = 0; i < legalMoves.length; i++) {
+            const m = legalMoves[i];
+            const s = engine.makeSearchMove(m);
+            const oppMoves = engine.generateLegalMoves(engine.turn);
+            const isMate = oppMoves.length === 0 && engine.isKingInCheck(engine.turn);
+            engine.unmakeSearchMove(s);
+            if (isMate) return m;
+        }
 
-        for (let i = 0; i < ordered.length; i++) {
-            const move = ordered[i];
-            engine.makeMove(move);
-            const moveValue = this.minimax(engine, depth - 1, alpha, beta, !isWhite);
-            engine.unmakeMove();
+        let timeBudget = 1200;
+        let maxSearchDepth = 4;
+        if (difficulty === 'easy') {
+            timeBudget = 350;
+            maxSearchDepth = 2;
+        } else if (difficulty === 'normal') {
+            timeBudget = 1200;
+            maxSearchDepth = 4;
+        } else if (difficulty === 'hard' || difficulty === 'arcane') {
+            timeBudget = 2500;
+            maxSearchDepth = 5;
+        }
 
-            if (isWhite) {
-                if (moveValue > bestValue) {
-                    bestValue = moveValue;
-                    bestMove = move;
+        const deadline = Date.now() + timeBudget;
+        let bestMoveOverall = legalMoves[0];
+        let bestScoreOverall = isWhite ? -Infinity : Infinity;
+        let pvMove = null;
+        const killers = [];
+
+        for (let currentDepth = 1; currentDepth <= maxSearchDepth; currentDepth++) {
+            if (Date.now() >= deadline) break;
+
+            const state = { nodes: 0, timeout: false };
+            const ordered = this.sortMoves(legalMoves, engine, pvMove, null, null);
+
+            let depthBestMove = ordered[0];
+            let depthBestScore = isWhite ? -Infinity : Infinity;
+            let alpha = -Infinity;
+            let beta = Infinity;
+
+            for (let i = 0; i < ordered.length; i++) {
+                const m = ordered[i];
+                const searchState = engine.makeSearchMove(m);
+                const score = this.search(engine, currentDepth - 1, 1, alpha, beta, !isWhite, deadline, state, killers, null);
+                engine.unmakeSearchMove(searchState);
+
+                if (state.timeout) break;
+
+                if (isWhite) {
+                    if (score > depthBestScore) {
+                        depthBestScore = score;
+                        depthBestMove = m;
+                    }
+                    if (score > alpha) alpha = score;
+                } else {
+                    if (score < depthBestScore) {
+                        depthBestScore = score;
+                        depthBestMove = m;
+                    }
+                    if (score < beta) beta = score;
                 }
-                alpha = Math.max(alpha, moveValue);
+            }
+
+            if (!state.timeout) {
+                bestMoveOverall = depthBestMove;
+                bestScoreOverall = depthBestScore;
+                pvMove = depthBestMove;
+                if (Math.abs(bestScoreOverall) >= 40000) break;
             } else {
-                if (moveValue < bestValue) {
-                    bestValue = moveValue;
-                    bestMove = move;
-                }
-                beta = Math.min(beta, moveValue);
+                break;
             }
         }
 
-        return bestMove;
+        return bestMoveOverall;
     }
 
     getPersonality(id) {

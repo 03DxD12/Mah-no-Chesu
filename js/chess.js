@@ -677,20 +677,195 @@ class ChessEngine {
     }
 
     /**
-     * Generate strictly legal moves for side 'color'
+     * Ultra-fast move commit for AI search (zero string allocations, no history push)
+     */
+    makeSearchMove(move) {
+        const piece = this.board[move.from];
+        const captured = this.board[move.to];
+        const prevCastlingW_k = this.castling.w.k;
+        const prevCastlingW_q = this.castling.w.q;
+        const prevCastlingB_k = this.castling.b.k;
+        const prevCastlingB_q = this.castling.b.q;
+        const prevEpSquare = this.epSquare;
+        const prevHalfmove = this.halfmoveClock;
+
+        let epCaptured = null;
+        let epCapturedSq = null;
+
+        if (move.isEnPassant) {
+            epCapturedSq = (Math.floor(move.from / 8)) * 8 + (move.to % 8);
+            epCaptured = this.board[epCapturedSq];
+            this.board[epCapturedSq] = null;
+        }
+
+        this.board[move.to] = piece;
+        this.board[move.from] = null;
+
+        if (move.isCastling === 'k') {
+            if (piece.color === 'w') {
+                this.board[5] = this.board[7];
+                this.board[7] = null;
+            } else {
+                this.board[61] = this.board[63];
+                this.board[63] = null;
+            }
+        } else if (move.isCastling === 'q') {
+            if (piece.color === 'w') {
+                this.board[3] = this.board[0];
+                this.board[0] = null;
+            } else {
+                this.board[59] = this.board[56];
+                this.board[56] = null;
+            }
+        }
+
+        // Castling rights update
+        if (piece.type === 'k') {
+            this.castling[piece.color].k = false;
+            this.castling[piece.color].q = false;
+        } else if (piece.type === 'r') {
+            if (move.from === 0) this.castling.w.q = false;
+            else if (move.from === 7) this.castling.w.k = false;
+            else if (move.from === 56) this.castling.b.q = false;
+            else if (move.from === 63) this.castling.b.k = false;
+        }
+
+        if (captured && captured.type === 'r') {
+            if (move.to === 0) this.castling.w.q = false;
+            else if (move.to === 7) this.castling.w.k = false;
+            else if (move.to === 56) this.castling.b.q = false;
+            else if (move.to === 63) this.castling.b.k = false;
+        }
+
+        // Double pawn push
+        if (move.isDoublePawnPush) {
+            this.epSquare = piece.color === 'w' ? (move.from + 8) : (move.from - 8);
+        } else {
+            this.epSquare = null;
+        }
+
+        if (piece.type === 'p' || captured) {
+            this.halfmoveClock = 0;
+        } else {
+            this.halfmoveClock++;
+        }
+
+        let originalPiece = piece;
+        if (move.promotion) {
+            this.board[move.to] = { type: move.promotion, color: piece.color };
+        }
+
+        this.turn = this.turn === 'w' ? 'b' : 'w';
+
+        return {
+            move,
+            piece: originalPiece,
+            captured,
+            prevCastlingW_k,
+            prevCastlingW_q,
+            prevCastlingB_k,
+            prevCastlingB_q,
+            prevEpSquare,
+            prevHalfmove,
+            epCaptured,
+            epCapturedSq
+        };
+    }
+
+    /**
+     * Ultra-fast move unmake for AI search
+     */
+    unmakeSearchMove(state) {
+        const {
+            move,
+            piece,
+            captured,
+            prevCastlingW_k,
+            prevCastlingW_q,
+            prevCastlingB_k,
+            prevCastlingB_q,
+            prevEpSquare,
+            prevHalfmove,
+            epCaptured,
+            epCapturedSq
+        } = state;
+
+        this.turn = this.turn === 'w' ? 'b' : 'w';
+        this.board[move.from] = piece;
+        this.board[move.to] = captured;
+
+        if (move.isEnPassant && epCapturedSq !== null) {
+            this.board[epCapturedSq] = epCaptured;
+            this.board[move.to] = null;
+        }
+
+        if (move.isCastling === 'k') {
+            if (piece.color === 'w') {
+                this.board[7] = this.board[5];
+                this.board[5] = null;
+            } else {
+                this.board[63] = this.board[61];
+                this.board[61] = null;
+            }
+        } else if (move.isCastling === 'q') {
+            if (piece.color === 'w') {
+                this.board[0] = this.board[3];
+                this.board[3] = null;
+            } else {
+                this.board[56] = this.board[59];
+                this.board[59] = null;
+            }
+        }
+
+        this.castling.w.k = prevCastlingW_k;
+        this.castling.w.q = prevCastlingW_q;
+        this.castling.b.k = prevCastlingB_k;
+        this.castling.b.q = prevCastlingB_q;
+        this.epSquare = prevEpSquare;
+        this.halfmoveClock = prevHalfmove;
+    }
+
+    /**
+     * Generate strictly legal moves for side 'color' (Direct in-place verification)
      */
     generateLegalMoves(color = this.turn) {
         const pseudoMoves = this.generatePseudoLegalMoves(color);
         const legalMoves = [];
+        const opp = color === 'w' ? 'b' : 'w';
 
         for (let i = 0; i < pseudoMoves.length; i++) {
             const m = pseudoMoves[i];
-            this.makeMove(m);
-            // After making move, verify that the moving side's king is NOT in check
-            if (!this.isKingInCheck(color)) {
+            if (m.isCastling) {
+                if (this.isKingInCheck(color)) continue;
+                const transitSq = m.isCastling === 'k' ? (color === 'w' ? 5 : 61) : (color === 'w' ? 3 : 59);
+                if (this.isSquareAttacked(transitSq, opp)) continue;
+            }
+
+            const piece = this.board[m.from];
+            const captured = this.board[m.to];
+            let epCaptured = null;
+            let epCapturedSq = null;
+
+            if (m.isEnPassant) {
+                epCapturedSq = (Math.floor(m.from / 8)) * 8 + (m.to % 8);
+                epCaptured = this.board[epCapturedSq];
+                this.board[epCapturedSq] = null;
+            }
+
+            this.board[m.to] = piece;
+            this.board[m.from] = null;
+
+            const inCheck = this.isKingInCheck(color);
+
+            this.board[m.from] = piece;
+            this.board[m.to] = captured;
+            if (m.isEnPassant && epCapturedSq !== null) {
+                this.board[epCapturedSq] = epCaptured;
+            }
+
+            if (!inCheck) {
                 legalMoves.push(m);
             }
-            this.unmakeMove();
         }
 
         return legalMoves;

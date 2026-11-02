@@ -594,11 +594,13 @@ body {
 }
 
 .square.light {
+    background-color: var(--sq-light-start, #2e3a4e);
     background: linear-gradient(135deg, var(--sq-light-start) 0%, var(--sq-light-end) 100%);
     box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.08), inset -1px -1px 0 rgba(0, 0, 0, 0.2);
 }
 
 .square.dark {
+    background-color: var(--sq-dark-start, #141b27);
     background: linear-gradient(135deg, var(--sq-dark-start) 0%, var(--sq-dark-end) 100%);
     box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.03), inset -1px -1px 0 rgba(0, 0, 0, 0.35);
 }
@@ -3316,9 +3318,10 @@ body {
     :root {
         --mobile-board-size: min(
             calc(100vw - 16px - var(--sal) - var(--sar)),
-            calc(100dvh - 225px - var(--sat) - var(--sab)),
-            calc(100vh - 225px),
-            440px
+            calc(100svh - 240px - var(--sat) - var(--sab)),
+            calc(100dvh - 240px - var(--sat) - var(--sab)),
+            calc(100vh - 240px),
+            420px
         );
     }
 
@@ -3582,14 +3585,12 @@ body {
         width: var(--mobile-board-size) !important;
         height: var(--mobile-board-size) !important;
         max-width: calc(100vw - 16px - var(--sal) - var(--sar)) !important;
-        max-height: calc(100dvh - 225px - var(--sat) - var(--sab)) !important;
+        max-height: var(--mobile-board-size) !important;
         aspect-ratio: 1 / 1 !important;
         min-width: 0 !important;
         min-height: 0 !important;
         box-sizing: border-box !important;
-        transform: translateZ(0);
-        -webkit-transform: translateZ(0);
-        contain: paint;
+        contain: none !important;
         margin: 0 auto !important;
     }
 
@@ -3604,6 +3605,7 @@ body {
         grid-row: 2 !important;
         overflow: hidden !important;
         box-sizing: border-box !important;
+        contain: none !important;
     }
 
     .chess-board {
@@ -3616,6 +3618,8 @@ body {
         min-width: 0 !important;
         min-height: 0 !important;
         box-sizing: border-box !important;
+        contain: none !important;
+        background: #141b27 !important;
     }
 
     .square, .board-square {
@@ -3625,6 +3629,16 @@ body {
         min-height: 0 !important;
         aspect-ratio: 1 / 1 !important;
         box-sizing: border-box !important;
+    }
+
+    .square.light {
+        background-color: var(--sq-light-start, #2e3a4e) !important;
+        background: linear-gradient(135deg, var(--sq-light-start, #2e3a4e) 0%, var(--sq-light-end, #253143) 100%) !important;
+    }
+
+    .square.dark {
+        background-color: var(--sq-dark-start, #141b27) !important;
+        background: linear-gradient(135deg, var(--sq-dark-start, #141b27) 0%, var(--sq-dark-end, #0c111c) 100%) !important;
     }
 
     /* Disable continuous 90px box-shadow pulses on mobile to prevent GPU texture drops */
@@ -3808,27 +3822,31 @@ body {
         inset: 0 !important;
         width: 100% !important;
         height: 100% !important;
-        padding: max(0.4rem, var(--sat)) max(0.4rem, var(--sar)) max(0.4rem, var(--sab)) max(0.4rem, var(--sal));
-        align-items: center;
-        justify-content: center;
-        box-sizing: border-box;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        padding: max(0.75rem, var(--sat)) max(0.5rem, var(--sar)) max(1rem, var(--sab)) max(0.5rem, var(--sal)) !important;
+        box-sizing: border-box !important;
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
         background: rgba(6, 9, 16, 0.94) !important;
         overflow-y: auto !important;
         -webkit-overflow-scrolling: touch !important;
+        overscroll-behavior: contain !important;
     }
 
     .modal-card {
-        width: 100%;
-        max-height: calc(100dvh - var(--sat) - var(--sab) - 16px);
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-        padding: 0.85rem 0.85rem max(0.85rem, var(--sab));
-        border-radius: var(--radius-md);
-        box-sizing: border-box;
+        width: 100% !important;
+        max-width: 520px !important;
+        max-height: none !important;
+        overflow-y: visible !important;
+        padding: 0.85rem 0.85rem max(0.85rem, var(--sab)) !important;
+        border-radius: var(--radius-md) !important;
+        box-sizing: border-box !important;
         transform: none !important;
-        transition: opacity 0.2s ease !important;
+        margin: auto 0 !important;
+        flex-shrink: 0 !important;
     }
 
     /* Main Menu Modal Mobile Ergonomics */
@@ -3837,8 +3855,9 @@ body {
         padding: 0.85rem 0.75rem max(0.85rem, var(--sab)) !important;
         max-width: min(400px, 94vw) !important;
         width: 94% !important;
-        margin: auto !important;
+        margin: auto 0 !important;
         box-sizing: border-box !important;
+        flex-shrink: 0 !important;
     }
 
     .crest-emblem {

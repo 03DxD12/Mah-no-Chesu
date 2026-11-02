@@ -82,6 +82,7 @@ class MahoNoChesuApp {
 
         document.getElementById('btn-home')?.addEventListener('click', () => {
             this.audio.playUiClick();
+            if (this.ai) this.ai.cancelPendingSearch();
             // Close any other active modals to prevent overlap
             document.querySelectorAll('.modal-overlay.active').forEach(m => {
                 if (m.id !== 'modal-main-menu') m.classList.remove('active');
@@ -395,6 +396,7 @@ class MahoNoChesuApp {
         this.ui.onUndoRequest = () => {
             if (this.isAnimating) return;
             this.audio.playUiClick();
+            if (this.ai) this.ai.cancelPendingSearch();
 
             if (this.gameMode === 'pvc') {
                 // In PvC mode, undo 2 plies (AI move + Player move)
@@ -424,6 +426,7 @@ class MahoNoChesuApp {
 
         this.ui.onRestartRequest = () => {
             this.audio.playUiClick();
+            if (this.ai) this.ai.cancelPendingSearch();
             if (this.presentation) {
                 this.presentation.pauseActiveClock();
             }
@@ -494,6 +497,7 @@ class MahoNoChesuApp {
     }
 
     startNewMatch(mode = 'pvp') {
+        if (this.ai) this.ai.cancelPendingSearch();
         this.gameMode = mode;
         this.engine.reset();
         this.moveHistoryLog = [];
@@ -611,7 +615,7 @@ class MahoNoChesuApp {
         if (this.isAnimating || this.engine.getGameStatus().gameOver) return;
 
         this.ui.setStatus('Arcane AI is calculating...', true);
-        const bestMove = await this.ai.getBestMove(this.engine.exportFEN(), this.aiDifficulty, this.engine);
+        const bestMove = await this.ai.getBestMove(this.engine, this.aiDifficulty, this.selectedPersonality);
 
         if (bestMove) {
             await this.processMoveSequence(bestMove);
