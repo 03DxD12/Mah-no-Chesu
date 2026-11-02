@@ -16,7 +16,7 @@
     <!-- Icons for Apple & Android -->
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><polygon points='50,5 95,25 95,75 50,95 5,75 5,25' fill='%23121927' stroke='%23d4af37' stroke-width='6'/><circle cx='50' cy='50' r='24' fill='none' stroke='%2338bdf8' stroke-width='4'/><path d='M50 26 L50 74 M26 50 L74 50' stroke='%23f97316' stroke-width='4'/></svg>">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><polygon points='50,5 95,25 95,75 50,95 5,75 5,25' fill='%23121927' stroke='%23d4af37' stroke-width='6'/><circle cx='50' cy='50' r='24' fill='none' stroke='%2338bdf8' stroke-width='4'/><path d='M50 26 L50 74 M26 50 L74 50' stroke='%23f97316' stroke-width='4'/></svg>">
-    <link rel="stylesheet" href="./style.css?v=2.0.8">
+    <link rel="stylesheet" href="./style.css?v=2.0.9">
 </head>
 <body class="theme-dark">
     <!-- Ambient Canvas for Background Particles -->
@@ -246,6 +246,7 @@
     <!-- Main Menu Modal -->
     <div id="modal-main-menu" class="modal-overlay active">
         <div class="modal-card menu-card">
+            <button type="button" class="btn-close modal-close menu-card-close" id="btn-close-main-menu" aria-label="Close Main Menu">&times;</button>
             <div class="menu-brand">
                 <div class="crest-emblem">
                     <svg viewBox="0 0 100 100" class="crest-svg">
@@ -263,6 +264,9 @@
                 <!-- Group 1: Battle -->
                 <div class="menu-group">
                     <span class="menu-group-label">⚔️ BATTLE</span>
+                    <button type="button" id="menu-btn-resume" class="btn-menu btn-gold hidden">
+                        <span>▶ RESUME MATCH</span>
+                    </button>
                     <button id="menu-btn-play" class="btn-menu btn-primary">
                         <span class="btn-glow"></span>
                         <span>ENTER BATTLE</span>

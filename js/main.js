@@ -81,7 +81,22 @@ class MahoNoChesuApp {
         const aiSubConfig = document.getElementById('ai-sub-config');
 
         document.getElementById('btn-home')?.addEventListener('click', () => {
+            this.audio.playUiClick();
+            // Close any other active modals to prevent overlap
+            document.querySelectorAll('.modal-overlay.active').forEach(m => {
+                if (m.id !== 'modal-main-menu') m.classList.remove('active');
+            });
+            const resumeBtn = document.getElementById('menu-btn-resume');
+            if (resumeBtn) {
+                const hasActiveGame = this.engine && (this.engine.history.length > 0 || this.moveHistoryLog.length > 0);
+                resumeBtn.classList.toggle('hidden', !hasActiveGame);
+            }
             modalMainMenu.classList.add('active');
+        });
+
+        document.getElementById('menu-btn-resume')?.addEventListener('click', () => {
+            this.audio.playUiClick();
+            modalMainMenu.classList.remove('active');
         });
 
         document.getElementById('menu-btn-play')?.addEventListener('click', () => {
@@ -164,6 +179,16 @@ class MahoNoChesuApp {
             btn.addEventListener('click', (e) => {
                 this.audio.playUiClick();
                 e.target.closest('.modal-overlay')?.classList.remove('active');
+            });
+        });
+
+        // Dismiss modal on backdrop click (outside modal card)
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    this.audio?.playUiClick();
+                    overlay.classList.remove('active');
+                }
             });
         });
 
