@@ -192,7 +192,7 @@ class UIManager {
         this.boardEl.innerHTML = '';
         for (let i = 0; i < 64; i++) {
             const sqEl = document.createElement('div');
-            sqEl.className = 'square';
+            sqEl.className = 'square board-square';
             sqEl.dataset.square = i;
             sqEl.setAttribute('role', 'gridcell');
             sqEl.setAttribute('tabindex', '-1');
@@ -327,7 +327,7 @@ class UIManager {
 
             // Square coloring (light / dark)
             const isLight = (file + rank) % 2 !== 0;
-            sqEl.className = `square ${isLight ? 'light' : 'dark'}`;
+            sqEl.className = `square board-square ${isLight ? 'light' : 'dark'}`;
 
             // Piece
             const piece = board[sq];
@@ -458,7 +458,7 @@ class UIManager {
             if (!sqEl) continue;
 
             const isLight = (file + rank) % 2 !== 0;
-            sqEl.className = `square ${isLight ? 'light' : 'dark'}`;
+            sqEl.className = `square board-square ${isLight ? 'light' : 'dark'}`;
 
             const piece = tempBoard[sq];
             let pieceHTML = '';

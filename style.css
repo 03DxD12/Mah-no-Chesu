@@ -545,6 +545,9 @@ body {
     position: relative;
     width: 100%;
     height: 100%;
+    aspect-ratio: 1 / 1;
+    min-width: 0;
+    min-height: 0;
     grid-column: 2;
     grid-row: 2;
     border: 2px solid var(--border-gold);
@@ -554,23 +557,34 @@ body {
     overflow: hidden;
     background: #090d15;
     contain: paint;
+    box-sizing: border-box;
 }
 
-/* 8x8 Chess Board Grid */
+/* 8x8 Chess Board Grid - Guaranteed 64 Equal Squares (Spec 1) */
 .chess-board {
     display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    grid-template-rows: repeat(8, 1fr);
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    grid-template-rows: repeat(8, minmax(0, 1fr));
     width: 100%;
     height: 100%;
+    aspect-ratio: 1 / 1;
+    min-width: 0;
+    min-height: 0;
     position: relative;
+    box-sizing: border-box;
     contain: layout paint;
     touch-action: manipulation;
 }
 
 /* Square State Overlays & Tactile Finishes - Hardware-Accelerated Fast Hover */
-.square {
+.square, .board-square {
     position: relative;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    aspect-ratio: 1 / 1;
+    box-sizing: border-box;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -3301,10 +3315,10 @@ body {
 @media (max-width: 900px) {
     :root {
         --mobile-board-size: min(
-            calc(100vw - 14px - var(--sal) - var(--sar)),
-            calc(100dvh - 240px - var(--sat) - var(--sab)),
-            calc(100svh - 240px - var(--sat) - var(--sab)),
-            410px
+            calc(100vw - 16px - var(--sal) - var(--sar)),
+            calc(100dvh - 225px - var(--sat) - var(--sab)),
+            calc(100vh - 225px),
+            440px
         );
     }
 
@@ -3424,18 +3438,20 @@ body {
         box-sizing: border-box !important;
     }
 
-    /* Streamlined 1-Row Inline Player Status Bars */
+    /* Streamlined 1-Row Inline Player Status Bars (Spec 3) */
     .player-card {
         width: var(--mobile-board-size) !important;
-        flex-direction: row !important;
+        max-width: calc(100vw - 16px - var(--sal) - var(--sar)) !important;
+        display: grid !important;
+        grid-template-columns: auto minmax(0, 1fr) auto auto !important;
         align-items: center !important;
         justify-content: space-between !important;
-        padding: 0.12rem 0.45rem !important;
+        padding: 0 0.5rem !important;
         gap: 0.35rem !important;
         border-radius: var(--radius-sm) !important;
         flex-shrink: 0 !important;
-        min-height: 30px !important;
-        height: 30px !important;
+        min-height: 32px !important;
+        height: 32px !important;
         box-sizing: border-box !important;
     }
 
@@ -3513,6 +3529,14 @@ body {
         opacity: 0.75;
     }
 
+    .player-clock {
+        min-width: 68px !important;
+        font-size: 0.76rem !important;
+        padding: 0.12rem 0.35rem !important;
+        letter-spacing: 0.04em !important;
+        flex: 0 0 auto !important;
+    }
+
     .turn-gem {
         width: 9px;
         height: 9px;
@@ -3557,13 +3581,50 @@ body {
         --border-w: 14px !important;
         width: var(--mobile-board-size) !important;
         height: var(--mobile-board-size) !important;
-        max-width: 100% !important;
-        max-height: 100% !important;
+        max-width: calc(100vw - 16px - var(--sal) - var(--sar)) !important;
+        max-height: calc(100dvh - 225px - var(--sat) - var(--sab)) !important;
         aspect-ratio: 1 / 1 !important;
+        min-width: 0 !important;
+        min-height: 0 !important;
         box-sizing: border-box !important;
         transform: translateZ(0);
         -webkit-transform: translateZ(0);
         contain: paint;
+        margin: 0 auto !important;
+    }
+
+    .board-wrapper {
+        position: relative !important;
+        width: 100% !important;
+        height: 100% !important;
+        aspect-ratio: 1 / 1 !important;
+        min-width: 0 !important;
+        min-height: 0 !important;
+        grid-column: 2 !important;
+        grid-row: 2 !important;
+        overflow: hidden !important;
+        box-sizing: border-box !important;
+    }
+
+    .chess-board {
+        display: grid !important;
+        grid-template-columns: repeat(8, minmax(0, 1fr)) !important;
+        grid-template-rows: repeat(8, minmax(0, 1fr)) !important;
+        width: 100% !important;
+        height: 100% !important;
+        aspect-ratio: 1 / 1 !important;
+        min-width: 0 !important;
+        min-height: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    .square, .board-square {
+        width: 100% !important;
+        height: 100% !important;
+        min-width: 0 !important;
+        min-height: 0 !important;
+        aspect-ratio: 1 / 1 !important;
+        box-sizing: border-box !important;
     }
 
     /* Disable continuous 90px box-shadow pulses on mobile to prevent GPU texture drops */
@@ -3587,11 +3648,11 @@ body {
         bottom: auto !important;
         left: auto !important;
         transform: none !important;
-        margin: 1px 0 0 0 !important;
-        padding: 0.1rem 0.45rem !important;
-        font-size: 0.62rem !important;
-        background: rgba(15, 23, 42, 0.92) !important;
-        border: 1px solid rgba(212, 175, 55, 0.3) !important;
+        margin: 3px 0 0 0 !important;
+        padding: 0.1rem 0.5rem !important;
+        font-size: 0.65rem !important;
+        background: rgba(15, 23, 42, 0.95) !important;
+        border: 1px solid rgba(212, 175, 55, 0.35) !important;
         border-radius: var(--radius-sm) !important;
         backdrop-filter: blur(8px) !important;
         z-index: 10 !important;
@@ -3602,7 +3663,7 @@ body {
         gap: 0.1rem !important;
         pointer-events: none !important;
         max-width: 95% !important;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5) !important;
     }
 
     .status-main-row {
@@ -3637,38 +3698,55 @@ body {
         max-width: 85%;
     }
 
-    /* Action Bar - Touch Friendly 6-Button Grid */
+    /* Action Bar - Touch Friendly 2-Row x 3-Column Grid (Spec 4) */
     .action-bar {
         display: grid !important;
-        grid-template-columns: repeat(6, 1fr) !important;
-        gap: 0.2rem !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        grid-template-rows: repeat(2, 34px) !important;
+        gap: 5px !important;
         width: 100% !important;
-        min-height: 34px !important;
-        height: 34px !important;
+        min-height: 73px !important;
+        height: auto !important;
         box-sizing: border-box !important;
     }
 
     .btn-action {
-        padding: 0.2rem 0.1rem !important;
-        min-height: 32px !important;
-        height: 32px !important;
+        padding: 0.15rem 0.25rem !important;
+        min-height: 34px !important;
+        height: 34px !important;
         display: flex !important;
-        flex-direction: column !important;
+        flex-direction: row !important;
         align-items: center !important;
         justify-content: center !important;
-        gap: 1px !important;
+        gap: 5px !important;
         border-radius: var(--radius-sm) !important;
         touch-action: manipulation !important;
         box-sizing: border-box !important;
     }
 
     .btn-action span {
-        display: block;
-        font-size: 0.58rem;
-        font-weight: 600;
-        line-height: 1;
-        letter-spacing: 0.02em;
+        display: inline-block !important;
+        font-size: 0.65rem !important;
+        font-weight: 700 !important;
+        line-height: 1 !important;
+        letter-spacing: 0.02em !important;
     }
+
+    .btn-svg {
+        width: 13px !important;
+        height: 13px !important;
+        flex-shrink: 0 !important;
+    }
+
+    /* Row 1: [ Undo ] [ Flip ] [ History ] */
+    #btn-undo { order: 1 !important; }
+    #btn-flip { order: 2 !important; }
+    #btn-history, .btn-history-toggle { order: 3 !important; display: flex !important; }
+
+    /* Row 2: [ Draw ] [ Resign ] [ Restart ] */
+    #btn-draw { order: 4 !important; }
+    #btn-resign { order: 5 !important; }
+    #btn-restart { order: 6 !important; }
 
     .btn-svg {
         width: 15px;
@@ -3832,12 +3910,13 @@ body {
     .loadout-card {
         width: min(calc(100vw - 12px - var(--sal) - var(--sar)), 960px) !important;
         max-width: 960px !important;
-        height: calc(100dvh - var(--sat) - var(--sab) - 10px) !important;
-        max-height: calc(100dvh - var(--sat) - var(--sab) - 10px) !important;
-        padding: 0.5rem 0.65rem max(0.35rem, var(--sab)) !important;
+        height: auto !important;
+        max-height: calc(100dvh - var(--sat) - var(--sab) - 16px) !important;
+        padding: 0.65rem 0.75rem max(0.5rem, var(--sab)) !important;
         display: flex !important;
         flex-direction: column !important;
-        overflow: hidden !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
         box-sizing: border-box !important;
     }
 
@@ -3845,6 +3924,14 @@ body {
         flex-shrink: 0 !important;
         margin-bottom: 0.2rem !important;
         padding-bottom: 0.25rem !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 6px !important;
+    }
+
+    .loadout-title-group {
+        text-align: center !important;
     }
 
     .loadout-title-group .modal-title {
@@ -3855,16 +3942,67 @@ body {
         font-size: 0.62rem !important;
     }
 
+    .loadout-header-actions {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr 40px !important;
+        gap: 6px !important;
+        width: 100% !important;
+        align-items: center !important;
+    }
+
+    .loadout-header-actions .btn-close {
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        font-size: 1.4rem !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
     .loadout-tabs-bar {
         flex-shrink: 0 !important;
         margin-top: 0.1rem !important;
         padding-bottom: 0.25rem !important;
-        gap: 0.3rem !important;
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 6px !important;
+        width: 100% !important;
     }
 
-    .loadout-tab-btn {
-        padding: 0.25rem 0.5rem !important;
-        font-size: 0.72rem !important;
+    .loadout-side-tabs {
+        display: contents !important;
+    }
+
+    .loadout-quick-actions {
+        display: contents !important;
+    }
+
+    .loadout-tab-btn, #btn-copy-p1-loadout {
+        width: 100% !important;
+        min-height: 36px !important;
+        padding: 0.2rem 0.35rem !important;
+        font-size: 0.7rem !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center !important;
+        box-sizing: border-box !important;
+    }
+
+    .loadout-army-name-banner {
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+        padding: 0.4rem 0.5rem !important;
+    }
+
+    .army-badge-pill {
+        white-space: normal !important;
+        overflow-wrap: anywhere !important;
+        word-break: break-word !important;
+        max-width: 100% !important;
+        text-align: center !important;
+        font-size: 0.62rem !important;
     }
 
     .btn-action-small {
@@ -4054,29 +4192,50 @@ body {
         padding: 0.1rem 0.35rem !important;
     }
 
-    /* Pinned Sticky Footer with Full Width START MATCH */
+    /* Pinned Sticky Footer with Full Width START MATCH (Specs 30 - 32) */
     .loadout-modal-footer {
         flex-shrink: 0 !important;
         display: flex !important;
         flex-direction: column !important;
-        gap: 0.3rem !important;
-        margin-top: 0.25rem !important;
-        padding-top: 0.25rem !important;
-        padding-bottom: max(0.25rem, var(--sab)) !important;
+        gap: 8px !important;
+        margin-top: 0.4rem !important;
+        padding-top: 0.4rem !important;
+        padding-bottom: max(0.4rem, var(--sab)) !important;
         border-top: 1px solid rgba(212, 175, 55, 0.25) !important;
+        box-sizing: border-box !important;
     }
 
     .footer-left-actions {
-        display: flex !important;
-        gap: 0.25rem !important;
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 6px !important;
         width: 100% !important;
+        box-sizing: border-box !important;
     }
 
     .footer-left-actions button {
-        flex: 1 !important;
-        padding: 0.3rem 0.1rem !important;
-        font-size: 0.64rem !important;
-        min-height: 30px !important;
+        padding: 0.35rem 0.2rem !important;
+        font-size: 0.68rem !important;
+        min-height: 34px !important;
+        box-sizing: border-box !important;
+    }
+
+    .dup-toggle-label {
+        grid-column: 1 / -1 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 6px 10px !important;
+        font-size: 0.72rem !important;
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-radius: var(--radius-sm) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        box-sizing: border-box !important;
+    }
+
+    #btn-loadout-save {
+        grid-column: 1 / -1 !important;
+        width: 100% !important;
     }
 
     .footer-right-actions {
@@ -4085,12 +4244,13 @@ body {
 
     .btn-start-match {
         width: 100% !important;
-        padding: 0.55rem 0.8rem !important;
-        font-size: 0.9rem !important;
+        padding: 0.6rem 0.8rem !important;
+        font-size: 0.92rem !important;
         font-weight: 800 !important;
         letter-spacing: 0.08em !important;
-        min-height: 40px !important;
+        min-height: 44px !important;
         box-shadow: 0 0 20px rgba(245, 158, 11, 0.4) !important;
+        box-sizing: border-box !important;
     }
 
     .guide-grid {

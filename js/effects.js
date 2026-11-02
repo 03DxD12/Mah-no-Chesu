@@ -44,6 +44,12 @@ class EffectsManager {
 
         this.initCanvasSize();
         window.addEventListener('resize', () => this.initCanvasSize());
+        if (typeof ResizeObserver !== 'undefined' && this.boardWrapper) {
+            this.resizeObserver = new ResizeObserver(() => {
+                this.initCanvasSize();
+            });
+            this.resizeObserver.observe(this.boardWrapper);
+        }
 
         this.initAmbientParticles();
         this.animate = this.animate.bind(this);
