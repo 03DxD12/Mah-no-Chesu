@@ -197,7 +197,32 @@ class UIManager {
             sqEl.setAttribute('role', 'gridcell');
             sqEl.setAttribute('tabindex', '-1');
 
-            sqEl.addEventListener('click', () => this.handleSquareClick(parseInt(sqEl.dataset.square, 10)));
+            // Zero-latency tap handling for Android & iOS (bypasses 300ms click delay)
+            let pointerDownPos = null;
+            sqEl.addEventListener('pointerdown', (e) => {
+                pointerDownPos = { x: e.clientX, y: e.clientY };
+            }, { passive: true });
+
+            sqEl.addEventListener('pointerup', (e) => {
+                if (!pointerDownPos) return;
+                const dx = Math.abs(e.clientX - pointerDownPos.x);
+                const dy = Math.abs(e.clientY - pointerDownPos.y);
+                pointerDownPos = null;
+                // If it's a tap (not a drag or scroll gesture)
+                if (dx < 12 && dy < 12) {
+                    sqEl._lastPointerTap = Date.now();
+                    this.handleSquareClick(parseInt(sqEl.dataset.square, 10));
+                }
+            }, { passive: true });
+
+            sqEl.addEventListener('click', (e) => {
+                // If pointerup already handled this tap, ignore duplicate synthetic click
+                if (sqEl._lastPointerTap && (Date.now() - sqEl._lastPointerTap < 400)) {
+                    return;
+                }
+                this.handleSquareClick(parseInt(sqEl.dataset.square, 10));
+            });
+
             this.boardEl.appendChild(sqEl);
         }
 

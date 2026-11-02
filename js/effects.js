@@ -51,26 +51,26 @@ class EffectsManager {
     }
 
     initCanvasSize() {
+        const isMobile = (typeof window !== 'undefined') && (window.innerWidth <= 900 || ('ontouchstart' in window));
         if (this.boardCanvas && this.boardWrapper) {
             const rect = this.boardWrapper.getBoundingClientRect();
-            const dpr = Math.min(window.devicePixelRatio || 1, 2);
-            this.boardCanvas.width = rect.width * dpr;
-            this.boardCanvas.height = rect.height * dpr;
+            const dpr = isMobile ? Math.min(window.devicePixelRatio || 1, 1.5) : Math.min(window.devicePixelRatio || 1, 2);
+            this.boardCanvas.width = Math.round(rect.width * dpr);
+            this.boardCanvas.height = Math.round(rect.height * dpr);
             if (this.boardCtx) {
-                this.boardCtx.resetTransform?.();
-                this.boardCtx.scale(dpr, dpr);
+                this.boardCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
             }
             this.boardWidth = rect.width;
             this.boardHeight = rect.height;
         }
 
         if (this.ambientCanvas) {
-            const dpr = Math.min(window.devicePixelRatio || 1, 2);
-            this.ambientCanvas.width = window.innerWidth * dpr;
-            this.ambientCanvas.height = window.innerHeight * dpr;
+            // Ambient particle background should be strictly 1x on mobile to prevent GPU thermal throttle & battery drain
+            const dpr = isMobile ? 1 : Math.min(window.devicePixelRatio || 1, 2);
+            this.ambientCanvas.width = Math.round(window.innerWidth * dpr);
+            this.ambientCanvas.height = Math.round(window.innerHeight * dpr);
             if (this.ambientCtx) {
-                this.ambientCtx.resetTransform?.();
-                this.ambientCtx.scale(dpr, dpr);
+                this.ambientCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
             }
         }
     }
@@ -84,7 +84,8 @@ class EffectsManager {
     }
 
     initAmbientParticles() {
-        const count = 40;
+        const isMobile = (typeof window !== 'undefined') && (window.innerWidth <= 900 || ('ontouchstart' in window));
+        const count = isMobile ? 10 : 40;
         this.ambientParticles = [];
         for (let i = 0; i < count; i++) {
             this.ambientParticles.push({
