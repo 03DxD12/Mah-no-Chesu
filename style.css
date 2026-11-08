@@ -3336,6 +3336,42 @@ body {
         -webkit-tap-highlight-color: transparent;
     }
 
+    /* Avoid expensive live blur compositing over the animated board on phones. */
+    .game-status-bar,
+    .attack-banner,
+    .combo-banner {
+        -webkit-backdrop-filter: none !important;
+        backdrop-filter: none !important;
+    }
+
+    .ambient-canvas {
+        opacity: 0.55;
+    }
+
+    /* Keep the board in one stable software-composited layer. Some Android GPUs
+       drop the transformed board texture when canvas effects start. */
+    .board-frame {
+        transform: none !important;
+        -webkit-transform: none !important;
+        backface-visibility: visible !important;
+        -webkit-backface-visibility: visible !important;
+    }
+
+    .chess-board {
+        position: relative !important;
+        z-index: 1 !important;
+    }
+
+    .effects-canvas {
+        z-index: 2 !important;
+    }
+
+    .piece-svg-wrapper,
+    .floating-piece {
+        filter: none !important;
+        will-change: auto !important;
+    }
+
     .app-container {
         padding-top: max(4px, var(--sat));
         padding-bottom: max(4px, var(--sab));
@@ -3633,12 +3669,14 @@ body {
 
     .square.light {
         background-color: var(--sq-light-start, #2e3a4e) !important;
-        background: linear-gradient(135deg, var(--sq-light-start, #2e3a4e) 0%, var(--sq-light-end, #253143) 100%) !important;
+        background: var(--sq-light-start, #2e3a4e) !important;
+        box-shadow: none !important;
     }
 
     .square.dark {
         background-color: var(--sq-dark-start, #141b27) !important;
-        background: linear-gradient(135deg, var(--sq-dark-start, #141b27) 0%, var(--sq-dark-end, #0c111c) 100%) !important;
+        background: var(--sq-dark-start, #141b27) !important;
+        box-shadow: none !important;
     }
 
     /* Disable continuous 90px box-shadow pulses on mobile to prevent GPU texture drops */

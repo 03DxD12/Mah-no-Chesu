@@ -56,18 +56,23 @@ class MahoNoChesuApp {
         this.initLaboratoryModal();
         this.initDeveloperPanel();
         this.initGameLoop();
+
+        // Apply persisted settings immediately; the change hook only handles later edits.
+        this.applyRuntimeSettings(this.settings.settings);
     }
 
     initSettingsHooks() {
-        this.settings.onChange((s) => {
-            this.audio.setSfxEnabled(s.sfx);
-            this.audio.setMusicEnabled(s.music);
-            this.audio.setMasterVolume(s.volume);
-            this.effects.setQuality(s.particles);
-            this.effects.photosensitive = s.photosensitivity;
-            this.effects.screenShakeEnabled = s.screenShake;
-            this.ui.renderBoard();
-        });
+        this.settings.onChange((s) => this.applyRuntimeSettings(s));
+    }
+
+    applyRuntimeSettings(s) {
+        this.audio.setSfxEnabled(s.sfx);
+        this.audio.setMusicEnabled(s.music);
+        this.audio.setMasterVolume(s.volume);
+        this.effects.setQuality(s.particles);
+        this.effects.photosensitive = s.photosensitivity;
+        this.effects.screenShakeEnabled = s.screenShake;
+        this.ui.renderBoard();
     }
 
     initMenuModals() {
@@ -541,6 +546,13 @@ class MahoNoChesuApp {
         this.ui.renderMoveHistory(this.moveHistoryLog);
         this.ui.renderCapturedPieces();
         this.updateStatusDisplay();
+
+        // Mobile browsers can finalize viewport and modal geometry a frame late.
+        // Re-measure and repaint once layout is stable so the board never starts blank.
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+            this.ui.renderBoard();
+            this.effects.initCanvasSize();
+        }));
 
         // Initialize and start match presentation statistics & clocks (Spec 36, 41, 108)
         if (this.presentation) {

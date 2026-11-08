@@ -32,6 +32,15 @@ class EffectsManager {
         this.quality = 'high';
         this.photosensitive = false;
         this.screenShakeEnabled = true;
+        this.isMobile = window.matchMedia?.('(max-width: 900px), (pointer: coarse)').matches
+            || ('ontouchstart' in window);
+        this.isLowPowerDevice = this.isMobile && (
+            (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4)
+            || (navigator.deviceMemory && navigator.deviceMemory <= 4)
+        );
+        this.particleSampleCounter = 0;
+        this.lastAmbientFrame = 0;
+        this.boardCanvasDirty = true;
 
         // Combos
         this.comboCount = 0;
@@ -57,7 +66,8 @@ class EffectsManager {
     }
 
     initCanvasSize() {
-        const isMobile = (typeof window !== 'undefined') && (window.innerWidth <= 900 || ('ontouchstart' in window));
+        const isMobile = this.isMobile;
+        this.boardCanvasDirty = true;
         if (this.boardCanvas && this.boardWrapper) {
             const rect = this.boardWrapper.getBoundingClientRect();
             const dpr = isMobile ? Math.min(window.devicePixelRatio || 1, 1.5) : Math.min(window.devicePixelRatio || 1, 2);
@@ -83,14 +93,19 @@ class EffectsManager {
 
     setQuality(level) {
         this.quality = level;
-        if (level === 'off') this.particleCap = 0;
-        else if (level === 'low') this.particleCap = 50;
-        else if (level === 'medium') this.particleCap = 100;
-        else this.particleCap = 200;
+        const desktopCaps = { off: 0, low: 50, medium: 100, high: 200 };
+        const mobileCaps = this.isLowPowerDevice
+            ? { off: 0, low: 24, medium: 40, high: 56 }
+            : { off: 0, low: 32, medium: 52, high: 72 };
+        this.particleCap = (this.isMobile ? mobileCaps : desktopCaps)[level] ?? (this.isMobile ? 52 : 100);
+        if (this.particles.length > this.particleCap) {
+            this.particles.splice(0, this.particles.length - this.particleCap);
+        }
+        this.boardCanvasDirty = true;
     }
 
     initAmbientParticles() {
-        const isMobile = (typeof window !== 'undefined') && (window.innerWidth <= 900 || ('ontouchstart' in window));
+        const isMobile = this.isMobile;
         const count = isMobile ? 10 : 40;
         this.ambientParticles = [];
         for (let i = 0; i < count; i++) {
@@ -237,6 +252,9 @@ class EffectsManager {
     }
 
     spawnParticle(config) {
+        if (this.particleCap <= 0) return;
+        // Mobile effects remain visually full, but use fewer individual canvas draws.
+        if (this.isMobile && (++this.particleSampleCounter % (this.isLowPowerDevice ? 3 : 2)) !== 0) return;
         if (this.particles.length >= this.particleCap) {
             this.particles.shift();
         }
@@ -255,6 +273,7 @@ class EffectsManager {
             rotation: config.rotation || 0,
             vRot: (Math.random() - 0.5) * 0.25
         });
+        this.boardCanvasDirty = true;
     }
 
     addShockwave(x, y, maxRadius, color, lineWidth = 3.5) {
@@ -1930,7 +1949,9 @@ class EffectsManager {
         }
 
         // 1. Ambient Background Particles - Zero save/restore allocation overhead
-        if (this.ambientCtx && this.ambientParticles.length > 0) {
+        const drawAmbient = !this.isMobile || (timestamp - this.lastAmbientFrame >= 50);
+        if (drawAmbient && this.ambientCtx && this.ambientParticles.length > 0 && !document.hidden) {
+            this.lastAmbientFrame = timestamp;
             this.ambientCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
             for (let i = 0; i < this.ambientParticles.length; i++) {
                 const p = this.ambientParticles[i];
@@ -1954,8 +1975,14 @@ class EffectsManager {
         }
 
         // 2. Board Battlefield FX Canvas
-        if (this.boardCtx && this.boardWidth) {
+        const hasBoardEffects = this.particles.length > 0
+            || this.activeLightningArcs.length > 0 || this.activeMagicRings.length > 0
+            || this.activeShockwaves.length > 0 || this.activeFissures.length > 0
+            || this.activeProjectiles.length > 0 || this.activeBeams.length > 0
+            || this.activeStoneSpikes.length > 0;
+        if (this.boardCtx && this.boardWidth && (hasBoardEffects || this.boardCanvasDirty)) {
             this.boardCtx.clearRect(0, 0, this.boardWidth, this.boardHeight);
+            this.boardCanvasDirty = hasBoardEffects;
 
             // A. Celestial Light Beams (King)
             for (let i = this.activeBeams.length - 1; i >= 0; i--) {

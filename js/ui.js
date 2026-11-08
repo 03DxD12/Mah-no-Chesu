@@ -200,10 +200,12 @@ class UIManager {
             // Zero-latency tap handling for Android & iOS (bypasses 300ms click delay)
             let pointerDownPos = null;
             sqEl.addEventListener('pointerdown', (e) => {
+                if (!e.isPrimary || e.button > 0) return;
                 pointerDownPos = { x: e.clientX, y: e.clientY };
             }, { passive: true });
 
             sqEl.addEventListener('pointerup', (e) => {
+                if (!e.isPrimary) return;
                 if (!pointerDownPos) return;
                 const dx = Math.abs(e.clientX - pointerDownPos.x);
                 const dy = Math.abs(e.clientY - pointerDownPos.y);
@@ -213,6 +215,10 @@ class UIManager {
                     sqEl._lastPointerTap = Date.now();
                     this.handleSquareClick(parseInt(sqEl.dataset.square, 10));
                 }
+            }, { passive: true });
+
+            sqEl.addEventListener('pointercancel', () => {
+                pointerDownPos = null;
             }, { passive: true });
 
             sqEl.addEventListener('click', (e) => {
