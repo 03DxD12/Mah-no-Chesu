@@ -16,7 +16,7 @@
     <!-- Icons for Apple & Android -->
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><polygon points='50,5 95,25 95,75 50,95 5,75 5,25' fill='%23121927' stroke='%23d4af37' stroke-width='6'/><circle cx='50' cy='50' r='24' fill='none' stroke='%2338bdf8' stroke-width='4'/><path d='M50 26 L50 74 M26 50 L74 50' stroke='%23f97316' stroke-width='4'/></svg>">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><polygon points='50,5 95,25 95,75 50,95 5,75 5,25' fill='%23121927' stroke='%23d4af37' stroke-width='6'/><circle cx='50' cy='50' r='24' fill='none' stroke='%2338bdf8' stroke-width='4'/><path d='M50 26 L50 74 M26 50 L74 50' stroke='%23f97316' stroke-width='4'/></svg>">
-    <link rel="stylesheet" href="./style.css?v=2.2.3">
+    <link rel="stylesheet" href="./style.css?v=2.2.4">
 </head>
 <body class="theme-dark">
     <!-- Ambient Canvas for Background Particles -->
@@ -1200,8 +1200,43 @@
                         <h3 class="sub-drawer-title" id="drawer-custom-title">CUSTOMIZE KNIGHT</h3>
                         <span class="sub-drawer-subtitle" id="drawer-custom-subtitle">Select elemental mastery for this piece</span>
                     </div>
-                    <button type="button" id="btn-close-custom-drawer" class="btn-drawer-close">&times;</button>
+                    <button type="button" id="btn-close-custom-drawer" class="btn-drawer-close" aria-label="Close Customization">&times;</button>
                 </div>
+
+                <!-- Fast Piece Navigation Switcher (Pawn, Knight, Bishop, Rook, Queen, King) -->
+                <nav class="drawer-piece-nav-bar" id="drawer-piece-nav-bar" aria-label="Piece Selection Tabs">
+                    <button type="button" class="drawer-piece-tab" data-piece="p" title="Pawn">
+                        <span class="drawer-tab-symbol">♙</span>
+                        <span class="drawer-tab-name">Pawn</span>
+                        <span class="drawer-tab-dot" id="tab-dot-p"></span>
+                    </button>
+                    <button type="button" class="drawer-piece-tab" data-piece="n" title="Knight">
+                        <span class="drawer-tab-symbol">♘</span>
+                        <span class="drawer-tab-name">Knight</span>
+                        <span class="drawer-tab-dot" id="tab-dot-n"></span>
+                    </button>
+                    <button type="button" class="drawer-piece-tab" data-piece="b" title="Bishop">
+                        <span class="drawer-tab-symbol">♗</span>
+                        <span class="drawer-tab-name">Bishop</span>
+                        <span class="drawer-tab-dot" id="tab-dot-b"></span>
+                    </button>
+                    <button type="button" class="drawer-piece-tab" data-piece="r" title="Rook">
+                        <span class="drawer-tab-symbol">♖</span>
+                        <span class="drawer-tab-name">Rook</span>
+                        <span class="drawer-tab-dot" id="tab-dot-r"></span>
+                    </button>
+                    <button type="button" class="drawer-piece-tab" data-piece="q" title="Queen">
+                        <span class="drawer-tab-symbol">♕</span>
+                        <span class="drawer-tab-name">Queen</span>
+                        <span class="drawer-tab-dot" id="tab-dot-q"></span>
+                    </button>
+                    <button type="button" class="drawer-piece-tab" data-piece="k" title="King">
+                        <span class="drawer-tab-symbol">♔</span>
+                        <span class="drawer-tab-name">King</span>
+                        <span class="drawer-tab-dot" id="tab-dot-k"></span>
+                    </button>
+                </nav>
+
                 <div class="sub-drawer-body customize-drawer-layout">
                     <!-- Left Column: 10 Element Selection Palette -->
                     <div class="customize-palette-pane">
@@ -1277,11 +1312,14 @@
             <!-- 2. Dedicated Live Preview Stage Drawer (Sections 4 - 6) -->
             <div id="drawer-live-preview" class="loadout-sub-drawer hidden">
                 <div class="sub-drawer-header">
+                    <button type="button" id="btn-preview-back-to-custom" class="btn-drawer-back" aria-label="Back to Customization">
+                        <span>← Back</span>
+                    </button>
                     <div class="sub-drawer-title-group">
                         <h3 class="sub-drawer-title" id="drawer-preview-title">ELEMENT PREVIEW</h3>
                         <span class="sub-drawer-subtitle" id="drawer-preview-subtitle">Knight &bull; Lightning &bull; Thunder Strike</span>
                     </div>
-                    <button type="button" id="btn-close-preview-drawer" class="btn-drawer-close">&times;</button>
+                    <button type="button" id="btn-close-preview-drawer" class="btn-drawer-close" aria-label="Close Preview">&times;</button>
                 </div>
                 <div class="sub-drawer-body">
                     <div class="preview-stage-box" id="preview-stage-box">
@@ -1884,6 +1922,6 @@
     <script src="./js/ai.js?v=2.2.0"></script>
     <script src="./js/progression.js?v=2.2.0"></script>
     <script src="./js/match-presentation.js?v=2.2.0"></script>
-    <script src="./js/main.js?v=2.2.3"></script>
+    <script src="./js/main.js?v=2.2.4"></script>
 </body>
 </html>

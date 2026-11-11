@@ -785,6 +785,14 @@ class MahoNoChesuApp {
             this.resetDedicatedPreview();
         });
 
+        // Back to Customization from Live Preview
+        document.getElementById('btn-preview-back-to-custom')?.addEventListener('click', () => {
+            this.audio.playUiClick();
+            previewDrawer?.classList.add('hidden');
+            this.resetDedicatedPreview();
+            this.openCustomizationDrawer(this.previewActivePiece || 'n');
+        });
+
         document.getElementById('btn-preview-play')?.addEventListener('click', () => {
             this.audio.playUiClick();
             this.runDedicatedPreview(this.previewActivePiece || 'n');
@@ -1005,6 +1013,34 @@ class MahoNoChesuApp {
         const subtitleEl = document.getElementById('drawer-custom-subtitle');
         if (titleEl) titleEl.textContent = `CUSTOMIZE ${pieceNames[pieceType].toUpperCase()}`;
         if (subtitleEl) subtitleEl.textContent = `Select elemental mastery and review combat dossier for this piece`;
+
+        // Update In-Drawer Piece Navigation Switcher (Pawn, Knight, Bishop, Rook, Queen, King)
+        const pieceTabs = document.querySelectorAll('.drawer-piece-tab');
+        pieceTabs.forEach(tab => {
+            const tabPiece = tab.dataset.piece;
+            const isCurrentPiece = tabPiece === pieceType;
+            tab.classList.toggle('active', isCurrentPiece);
+            tab.setAttribute('aria-selected', isCurrentPiece ? 'true' : 'false');
+
+            // Set glowing element dot based on assigned element
+            const assignedElem = activeLoadout[tabPiece] || 'fire';
+            const tabMeta = this.loadout.getElementMeta(assignedElem);
+            const dot = tab.querySelector('.drawer-tab-dot');
+            if (dot) {
+                dot.style.background = tabMeta.color;
+                dot.style.boxShadow = `0 0 6px ${tabMeta.color}`;
+            }
+
+            // Wire click navigation
+            if (!tab._navWired) {
+                tab._navWired = true;
+                tab.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.audio.playUiClick();
+                    this.openCustomizationDrawer(tab.dataset.piece);
+                });
+            }
+        });
 
         // 2. Element Picker Buttons (Left Column)
         const grid = document.getElementById('elements-picker-palette') || document.getElementById('custom-elem-options-grid');
