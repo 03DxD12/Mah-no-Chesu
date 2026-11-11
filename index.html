@@ -16,7 +16,7 @@
     <!-- Icons for Apple & Android -->
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><polygon points='50,5 95,25 95,75 50,95 5,75 5,25' fill='%23121927' stroke='%23d4af37' stroke-width='6'/><circle cx='50' cy='50' r='24' fill='none' stroke='%2338bdf8' stroke-width='4'/><path d='M50 26 L50 74 M26 50 L74 50' stroke='%23f97316' stroke-width='4'/></svg>">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><polygon points='50,5 95,25 95,75 50,95 5,75 5,25' fill='%23121927' stroke='%23d4af37' stroke-width='6'/><circle cx='50' cy='50' r='24' fill='none' stroke='%2338bdf8' stroke-width='4'/><path d='M50 26 L50 74 M26 50 L74 50' stroke='%23f97316' stroke-width='4'/></svg>">
-    <link rel="stylesheet" href="./style.css?v=2.2.2">
+    <link rel="stylesheet" href="./style.css?v=2.2.3">
 </head>
 <body class="theme-dark">
     <!-- Ambient Canvas for Background Particles -->
@@ -1202,9 +1202,74 @@
                     </div>
                     <button type="button" id="btn-close-custom-drawer" class="btn-drawer-close">&times;</button>
                 </div>
-                <div class="sub-drawer-body">
-                    <div class="elements-picker-palette" id="elements-picker-palette">
-                        <!-- Injected 10 Element Selection Buttons -->
+                <div class="sub-drawer-body customize-drawer-layout">
+                    <!-- Left Column: 10 Element Selection Palette -->
+                    <div class="customize-palette-pane">
+                        <div class="customize-pane-heading">
+                            <span>ELEMENTAL MASTERY</span>
+                        </div>
+                        <div class="custom-elem-options-grid" id="elements-picker-palette">
+                            <!-- Injected 10 Element Selection Buttons -->
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Piece Combat Dossier & Live Showcase -->
+                    <div class="customize-dossier-pane" id="customize-dossier-pane">
+                        <!-- Hero Piece Showcase Card -->
+                        <div class="dossier-hero-card" id="dossier-hero-card">
+                            <div class="dossier-hero-svg-box">
+                                <div class="dossier-aura-glow" id="dossier-aura-glow"></div>
+                                <div class="dossier-piece-svg" id="customize-target-piece-svg"></div>
+                            </div>
+                            <div class="dossier-hero-info">
+                                <div class="dossier-hero-header-row">
+                                    <h4 class="dossier-piece-name" id="dossier-piece-name">ROOK</h4>
+                                    <div class="dossier-elem-badge" id="dossier-elem-badge">
+                                        <span class="dossier-elem-icon" id="dossier-elem-icon"></span>
+                                        <span class="dossier-elem-label" id="dossier-elem-label">EARTH</span>
+                                    </div>
+                                </div>
+                                <p class="dossier-piece-role" id="dossier-piece-role">The Unshakable Fortress Breaker</p>
+                            </div>
+                        </div>
+
+                        <!-- Elemental Combat Specs Card -->
+                        <div class="dossier-combat-card">
+                            <div class="dossier-attack-header">
+                                <span class="dossier-section-tag">SIGNATURE COMBAT ABILITY</span>
+                                <h5 class="dossier-attack-name" id="dossier-attack-name">EARTHQUAKE CHARGE</h5>
+                            </div>
+                            <p class="dossier-attack-desc" id="dossier-attack-desc">Channels seismic tremors through horizontal and vertical ranks, pulverizing enemy armor.</p>
+
+                            <div class="dossier-specs-grid">
+                                <div class="dossier-spec-item">
+                                    <span class="dossier-spec-label">MOVEMENT TRAIL</span>
+                                    <span class="dossier-spec-val" id="dossier-move-trail">Rising Stone Spikes</span>
+                                </div>
+                                <div class="dossier-spec-item">
+                                    <span class="dossier-spec-label">CAPTURE IMPACT</span>
+                                    <span class="dossier-spec-val" id="dossier-capture-impact">Seismic Crater</span>
+                                </div>
+                                <div class="dossier-spec-item">
+                                    <span class="dossier-spec-label">COMBAT STYLE</span>
+                                    <span class="dossier-spec-val" id="dossier-combat-style">Heavy Linear Impact</span>
+                                </div>
+                                <div class="dossier-spec-item">
+                                    <span class="dossier-spec-label">ARMY SYNERGY</span>
+                                    <span class="dossier-spec-val" id="dossier-synergy-val">Earth: 3 / 6 Assigned</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Controls -->
+                        <div class="dossier-actions-bar">
+                            <button type="button" id="btn-custom-preview-action" class="btn-primary btn-dossier-preview">
+                                <span>▶ WATCH COMBAT PREVIEW</span>
+                            </button>
+                            <button type="button" id="btn-custom-confirm-action" class="btn-secondary btn-dossier-confirm">
+                                <span>✓ CONFIRM &amp; RETURN</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1819,6 +1884,6 @@
     <script src="./js/ai.js?v=2.2.0"></script>
     <script src="./js/progression.js?v=2.2.0"></script>
     <script src="./js/match-presentation.js?v=2.2.0"></script>
-    <script src="./js/main.js?v=2.2.2"></script>
+    <script src="./js/main.js?v=2.2.3"></script>
 </body>
 </html>

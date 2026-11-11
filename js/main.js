@@ -994,17 +994,20 @@ class MahoNoChesuApp {
         const drawer = document.getElementById('drawer-piece-customize');
         if (!drawer) return;
 
+        this.customizingPiece = pieceType;
         const pieceNames = { p: 'Pawn', n: 'Knight', b: 'Bishop', r: 'Rook', q: 'Queen', k: 'King' };
         const color = this.loadoutActiveSide === 'white' ? 'w' : 'b';
         const activeLoadout = this.loadoutActiveSide === 'white' ? this.loadout.whiteLoadout : this.loadout.blackLoadout;
+        const currentElem = activeLoadout[pieceType] || 'fire';
 
-        const nameEl = document.getElementById('drawer-custom-title') || document.getElementById('customize-target-piece-name');
-        const svgEl = document.getElementById('customize-target-piece-svg');
+        // 1. Header & Subtitle
+        const titleEl = document.getElementById('drawer-custom-title');
+        const subtitleEl = document.getElementById('drawer-custom-subtitle');
+        if (titleEl) titleEl.textContent = `CUSTOMIZE ${pieceNames[pieceType].toUpperCase()}`;
+        if (subtitleEl) subtitleEl.textContent = `Select elemental mastery and review combat dossier for this piece`;
+
+        // 2. Element Picker Buttons (Left Column)
         const grid = document.getElementById('elements-picker-palette') || document.getElementById('custom-elem-options-grid');
-
-        if (nameEl) nameEl.textContent = `CUSTOMIZE ${pieceNames[pieceType].toUpperCase()}`;
-        if (svgEl) svgEl.innerHTML = this.ui.getPieceSVG(pieceType, color);
-
         if (grid) {
             grid.innerHTML = '';
             Object.values(ELEMENTS).forEach(elem => {
@@ -1015,8 +1018,8 @@ class MahoNoChesuApp {
                 btn.style.color = elem.color;
 
                 btn.innerHTML = `
-                    <div style="width: 22px; height: 22px;">${elem.svg}</div>
-                    <span style="font-size: 0.68rem; font-weight: 700;">${elem.name}</span>
+                    <div class="custom-elem-icon-wrap" style="width: 22px; height: 22px;">${elem.svg}</div>
+                    <span class="custom-elem-name">${elem.name}</span>
                 `;
 
                 btn.addEventListener('click', () => {
@@ -1029,6 +1032,102 @@ class MahoNoChesuApp {
 
                 grid.appendChild(btn);
             });
+        }
+
+        // 3. Piece Combat Dossier (Right Column)
+        const elemMeta = this.loadout.getElementMeta(currentElem);
+        const ability = this.loadout.getAbilityDetails(pieceType, currentElem);
+
+        const heroSvgBox = document.getElementById('customize-target-piece-svg');
+        const auraGlow = document.getElementById('dossier-aura-glow');
+        const heroName = document.getElementById('dossier-piece-name');
+        const elemBadge = document.getElementById('dossier-elem-badge');
+        const elemIcon = document.getElementById('dossier-elem-icon');
+        const elemLabel = document.getElementById('dossier-elem-label');
+        const roleEl = document.getElementById('dossier-piece-role');
+        const attackNameEl = document.getElementById('dossier-attack-name');
+        const attackDescEl = document.getElementById('dossier-attack-desc');
+        const moveTrailEl = document.getElementById('dossier-move-trail');
+        const captureImpactEl = document.getElementById('dossier-capture-impact');
+        const combatStyleEl = document.getElementById('dossier-combat-style');
+        const synergyValEl = document.getElementById('dossier-synergy-val');
+
+        if (heroSvgBox) {
+            heroSvgBox.innerHTML = `<div class="piece-svg-wrapper piece-${pieceType} aura-${currentElem}">${this.ui.getPieceSVG(pieceType, color)}</div>`;
+        }
+        if (auraGlow) {
+            auraGlow.style.background = `radial-gradient(circle, ${elemMeta.color} 0%, transparent 70%)`;
+        }
+        if (heroName) {
+            heroName.textContent = pieceNames[pieceType].toUpperCase();
+        }
+        if (elemBadge) {
+            elemBadge.style.color = elemMeta.color;
+            elemBadge.style.borderColor = elemMeta.color;
+            elemBadge.style.boxShadow = `0 0 12px ${elemMeta.color}`;
+        }
+        if (elemIcon) {
+            elemIcon.innerHTML = elemMeta.svg;
+        }
+        if (elemLabel) {
+            elemLabel.textContent = elemMeta.name.toUpperCase();
+        }
+
+        const roleTitles = {
+            p: { fire: 'Blazing Vanguard', lightning: 'Volt Skirmisher', wind: 'Zephyr Scout', earth: 'Stone Sentinel', ice: 'Frost Watcher', water: 'Tide Skirmisher', light: 'Solar Initiate', shadow: 'Umbral Stalker', nature: 'Bramble Ranger', arcane: 'Astral Sentry' },
+            n: { fire: 'Inferno Raider', lightning: 'Thunder Cavalier', wind: 'Gale Flanker', earth: 'Crag Charger', ice: 'Glacial Steed', water: 'Torrent Outrider', light: 'Radiant Paladin', shadow: 'Void Harbinger', nature: 'Wildfang Huntress', arcane: 'Warp Infiltrator' },
+            b: { fire: 'Pyretic Inquisitor', lightning: 'Tempest Oracle', wind: 'Breeze Channeler', earth: 'Monolith Hierophant', ice: 'Frost Cleric', water: 'Deepsea Seer', light: 'Luminous Archon', shadow: 'Eclipse Occultist', nature: 'Elder Botanist', arcane: 'Cosmic Diviner' },
+            r: { fire: 'Magma Catapult', lightning: 'Static Bastion', wind: 'Sky Spire Siege', earth: 'Mountain Fortress Breaker', ice: 'Glacial Citadel', water: 'Maelstrom Rampart', light: 'Dawn Fortress', shadow: 'Abyssal Obelisk', nature: 'Ironwood Bulwark', arcane: 'Dimensional Monolith' },
+            q: { fire: 'Infernal Empress', lightning: 'Tempest Sovereign', wind: 'Hurricane Valkyrie', earth: 'Terra Archon', ice: 'Permafrost Tsarina', water: 'Abyssal Leviathan', light: 'Solar Supreme', shadow: 'Nightfall Matron', nature: 'Gaia Prime', arcane: 'Cosmic Dominator' },
+            k: { fire: 'Sunfire Sovereign', lightning: 'High Storm Monarch', wind: 'Skyborn Overlord', earth: 'Grounded Emperor', ice: 'Winter Crown King', water: 'Oceanic Regent', light: 'Radiant Supreme Monarch', shadow: 'Void King', nature: 'Verdant Majesty', arcane: 'Aether Sovereign' }
+        };
+
+        if (roleEl) {
+            roleEl.textContent = (roleTitles[pieceType] && roleTitles[pieceType][currentElem]) || `Elemental ${pieceNames[pieceType]}`;
+        }
+        if (attackNameEl) {
+            attackNameEl.textContent = ability.name.toUpperCase();
+            attackNameEl.style.color = elemMeta.color;
+            attackNameEl.style.textShadow = `0 0 14px ${elemMeta.color}`;
+        }
+        if (attackDescEl) {
+            attackDescEl.textContent = ability.desc;
+        }
+        if (moveTrailEl) {
+            moveTrailEl.textContent = ability.motionTrail || elemMeta.trailName || 'Standard Glide';
+        }
+        if (captureImpactEl) {
+            captureImpactEl.textContent = ability.impact || 'Elemental Nova';
+        }
+        if (combatStyleEl) {
+            combatStyleEl.textContent = ability.style ? ability.style.toUpperCase() : 'PROJECTILE';
+        }
+
+        // Calculate count of this element in active loadout
+        const pieces = ['p', 'n', 'b', 'r', 'q', 'k'];
+        const count = pieces.filter(p => activeLoadout[p] === currentElem).length;
+        if (synergyValEl) {
+            synergyValEl.textContent = `${elemMeta.name}: ${count} / 6 Pieces Assigned`;
+            synergyValEl.style.color = elemMeta.color;
+        }
+
+        // 4. Action Buttons
+        const previewBtn = document.getElementById('btn-custom-preview-action');
+        if (previewBtn) {
+            previewBtn.onclick = () => {
+                this.audio.playUiClick();
+                this.openLivePreviewDrawer(pieceType);
+            };
+        }
+
+        const confirmBtn = document.getElementById('btn-custom-confirm-action');
+        if (confirmBtn) {
+            confirmBtn.onclick = () => {
+                this.audio.playUiClick();
+                drawer.classList.add('hidden');
+                this.loadout.saveLoadouts();
+                this.renderLoadoutAll();
+            };
         }
 
         drawer.classList.remove('hidden');
