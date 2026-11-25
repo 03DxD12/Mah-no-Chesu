@@ -1194,7 +1194,7 @@
             <!-- ================= SUB-DRAWERS INSIDE LOADOUT ================= -->
 
             <!-- 1. Piece Customization Panel Drawer (Section 3) -->
-            <div id="drawer-piece-customize" class="loadout-sub-drawer hidden">
+            <div id="drawer-piece-customize" class="loadout-sub-drawer hidden" role="dialog" aria-modal="true" aria-labelledby="drawer-custom-title">
                 <div class="sub-drawer-header">
                     <div class="sub-drawer-title-group">
                         <h3 class="sub-drawer-title" id="drawer-custom-title">CUSTOMIZE KNIGHT</h3>
@@ -1204,34 +1204,34 @@
                 </div>
 
                 <!-- Fast Piece Navigation Switcher (Pawn, Knight, Bishop, Rook, Queen, King) -->
-                <nav class="drawer-piece-nav-bar" id="drawer-piece-nav-bar" aria-label="Piece Selection Tabs">
-                    <button type="button" class="drawer-piece-tab" data-piece="p" title="Pawn">
-                        <span class="drawer-tab-symbol">♙</span>
+                <nav class="drawer-piece-nav-bar" id="drawer-piece-nav-bar" role="tablist" aria-label="Piece Selection Tabs">
+                    <button type="button" class="drawer-piece-tab" data-piece="p" role="tab" aria-selected="false" title="Pawn">
+                        <span class="drawer-tab-symbol" aria-hidden="true">♙</span>
                         <span class="drawer-tab-name">Pawn</span>
                         <span class="drawer-tab-dot" id="tab-dot-p"></span>
                     </button>
-                    <button type="button" class="drawer-piece-tab" data-piece="n" title="Knight">
-                        <span class="drawer-tab-symbol">♘</span>
+                    <button type="button" class="drawer-piece-tab" data-piece="n" role="tab" aria-selected="false" title="Knight">
+                        <span class="drawer-tab-symbol" aria-hidden="true">♘</span>
                         <span class="drawer-tab-name">Knight</span>
                         <span class="drawer-tab-dot" id="tab-dot-n"></span>
                     </button>
-                    <button type="button" class="drawer-piece-tab" data-piece="b" title="Bishop">
-                        <span class="drawer-tab-symbol">♗</span>
+                    <button type="button" class="drawer-piece-tab" data-piece="b" role="tab" aria-selected="false" title="Bishop">
+                        <span class="drawer-tab-symbol" aria-hidden="true">♗</span>
                         <span class="drawer-tab-name">Bishop</span>
                         <span class="drawer-tab-dot" id="tab-dot-b"></span>
                     </button>
-                    <button type="button" class="drawer-piece-tab" data-piece="r" title="Rook">
-                        <span class="drawer-tab-symbol">♖</span>
+                    <button type="button" class="drawer-piece-tab" data-piece="r" role="tab" aria-selected="false" title="Rook">
+                        <span class="drawer-tab-symbol" aria-hidden="true">♖</span>
                         <span class="drawer-tab-name">Rook</span>
                         <span class="drawer-tab-dot" id="tab-dot-r"></span>
                     </button>
-                    <button type="button" class="drawer-piece-tab" data-piece="q" title="Queen">
-                        <span class="drawer-tab-symbol">♕</span>
+                    <button type="button" class="drawer-piece-tab" data-piece="q" role="tab" aria-selected="false" title="Queen">
+                        <span class="drawer-tab-symbol" aria-hidden="true">♕</span>
                         <span class="drawer-tab-name">Queen</span>
                         <span class="drawer-tab-dot" id="tab-dot-q"></span>
                     </button>
-                    <button type="button" class="drawer-piece-tab" data-piece="k" title="King">
-                        <span class="drawer-tab-symbol">♔</span>
+                    <button type="button" class="drawer-piece-tab" data-piece="k" role="tab" aria-selected="false" title="King">
+                        <span class="drawer-tab-symbol" aria-hidden="true">♔</span>
                         <span class="drawer-tab-name">King</span>
                         <span class="drawer-tab-dot" id="tab-dot-k"></span>
                     </button>
@@ -1310,7 +1310,7 @@
             </div>
 
             <!-- 2. Dedicated Live Preview Stage Drawer (Sections 4 - 6) -->
-            <div id="drawer-live-preview" class="loadout-sub-drawer hidden">
+            <div id="drawer-live-preview" class="loadout-sub-drawer hidden" role="dialog" aria-modal="true" aria-labelledby="drawer-preview-title">
                 <div class="sub-drawer-header">
                     <button type="button" id="btn-preview-back-to-custom" class="btn-drawer-back" aria-label="Back to Customization">
                         <span>← Back</span>

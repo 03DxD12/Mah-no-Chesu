@@ -5716,6 +5716,7 @@ body {
     margin: 0;
     letter-spacing: 0.05em;
     text-shadow: 0 0 12px rgba(212, 175, 55, 0.35);
+    text-wrap: balance;
 }
 
 .sub-drawer-subtitle {
@@ -5744,7 +5745,7 @@ body {
     font-size: 1.5rem;
     line-height: 1;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
     padding: 0;
@@ -5757,6 +5758,8 @@ body {
     border-color: var(--border-gold);
     transform: scale(1.08);
     box-shadow: 0 0 14px rgba(212, 175, 55, 0.45);
+    outline: 2px solid var(--text-gold);
+    outline-offset: 2px;
 }
 
 .btn-drawer-close:active {
@@ -5779,7 +5782,7 @@ body {
     font-weight: 700;
     letter-spacing: 0.05em;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
     flex-shrink: 0;
@@ -5790,6 +5793,8 @@ body {
     background: rgba(212, 175, 55, 0.25);
     border-color: var(--border-gold);
     box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+    outline: 2px solid var(--text-gold);
+    outline-offset: 2px;
 }
 
 .btn-drawer-back:active {
@@ -5801,10 +5806,10 @@ body {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
     gap: 0.35rem;
-    padding: 0.3rem;
+    padding: 4px;
     background: rgba(5, 8, 14, 0.75);
     border: 1px solid rgba(212, 175, 55, 0.25);
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
     margin-bottom: 0.85rem;
     flex-shrink: 0;
 }
@@ -5817,12 +5822,12 @@ body {
     gap: 0.15rem;
     padding: 0.35rem 0.2rem;
     min-height: 44px;
-    border-radius: var(--radius-xs);
+    border-radius: calc(var(--radius-md) - 4px);
     border: 1px solid transparent;
     background: transparent;
     color: var(--text-secondary);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
     position: relative;
@@ -5833,6 +5838,11 @@ body {
     background: rgba(255, 255, 255, 0.06);
     color: var(--text-primary);
     border-color: rgba(212, 175, 55, 0.25);
+}
+
+.drawer-piece-tab:focus-visible {
+    outline: 2px solid var(--text-gold);
+    outline-offset: 2px;
 }
 
 .drawer-piece-tab.active {
@@ -5861,7 +5871,7 @@ body {
     height: 6px;
     border-radius: 50%;
     background: var(--text-muted);
-    transition: all 0.3s ease;
+    transition: background-color 0.25s ease, box-shadow 0.25s ease;
     box-shadow: 0 0 6px currentColor;
     margin-top: 1px;
 }
@@ -5885,12 +5895,21 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: var(--radius-sm);
     padding: 0.55rem 0.35rem;
+    min-height: 44px;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 0.25rem;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: transform 0.15s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.custom-elem-btn:focus-visible {
+    outline: 2px solid var(--text-gold);
+    outline-offset: 2px;
 }
 
 .custom-elem-btn:hover {
@@ -5998,7 +6017,7 @@ body {
     opacity: 0.55;
     filter: blur(16px);
     pointer-events: none;
-    transition: all 0.3s ease;
+    transition: opacity 0.25s ease, background 0.25s ease;
 }
 
 .dossier-piece-svg {
@@ -6035,6 +6054,7 @@ body {
     color: var(--text-gold);
     letter-spacing: 0.08em;
     margin: 0;
+    text-wrap: balance;
 }
 
 .dossier-elem-badge {
@@ -6049,7 +6069,7 @@ body {
     border: 1px solid currentColor;
     background: rgba(255, 255, 255, 0.06);
     box-shadow: 0 0 12px currentColor;
-    transition: all 0.3s ease;
+    transition: color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
 .dossier-elem-icon {
@@ -6107,6 +6127,7 @@ body {
     letter-spacing: 0.06em;
     margin: 0;
     text-shadow: 0 0 14px rgba(212, 175, 55, 0.4);
+    text-wrap: balance;
 }
 
 .dossier-attack-desc {
@@ -6146,6 +6167,7 @@ body {
     font-size: 0.78rem;
     font-weight: 700;
     color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
 }
 
 /* Action Bar in Drawer */
@@ -6247,7 +6269,7 @@ body {
     }
     .drawer-piece-tab {
         padding: 0.25rem 0.1rem !important;
-        min-height: 40px !important;
+        min-height: 44px !important;
     }
     .drawer-tab-symbol {
         font-size: 1rem !important;
@@ -6266,7 +6288,7 @@ body {
     }
     .custom-elem-btn {
         padding: 0.3rem 0.15rem !important;
-        min-height: 40px !important;
+        min-height: 44px !important;
     }
     .custom-elem-icon-wrap {
         width: 18px !important;

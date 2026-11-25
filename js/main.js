@@ -1031,7 +1031,7 @@ class MahoNoChesuApp {
                 dot.style.boxShadow = `0 0 6px ${tabMeta.color}`;
             }
 
-            // Wire click navigation
+            // Wire click and keyboard navigation
             if (!tab._navWired) {
                 tab._navWired = true;
                 tab.addEventListener('click', (e) => {
@@ -1039,8 +1039,34 @@ class MahoNoChesuApp {
                     this.audio.playUiClick();
                     this.openCustomizationDrawer(tab.dataset.piece);
                 });
+                tab.addEventListener('keydown', (e) => {
+                    const order = ['p', 'n', 'b', 'r', 'q', 'k'];
+                    const idx = order.indexOf(tab.dataset.piece);
+                    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+                        e.preventDefault();
+                        const nextIdx = (idx + (e.key === 'ArrowRight' ? 1 : -1) + order.length) % order.length;
+                        const nextPiece = order[nextIdx];
+                        this.audio.playUiClick();
+                        this.openCustomizationDrawer(nextPiece);
+                        document.querySelector(`.drawer-piece-tab[data-piece="${nextPiece}"]`)?.focus();
+                    }
+                });
             }
         });
+
+        if (!drawer._escWired) {
+            drawer._escWired = true;
+            document.addEventListener('keydown', (e) => {
+                if (e.key !== 'Escape') return;
+                const previewDrawer = document.getElementById('drawer-live-preview');
+                if (previewDrawer && !previewDrawer.classList.contains('hidden')) {
+                    previewDrawer.classList.add('hidden');
+                    this.resetDedicatedPreview();
+                } else if (!drawer.classList.contains('hidden')) {
+                    drawer.classList.add('hidden');
+                }
+            });
+        }
 
         // 2. Element Picker Buttons (Left Column)
         const grid = document.getElementById('elements-picker-palette') || document.getElementById('custom-elem-options-grid');
