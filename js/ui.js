@@ -1174,8 +1174,10 @@ class UIManager {
      */
     initKeyboardControls() {
         window.addEventListener('keydown', (e) => {
-            // Ignore keystrokes inside inputs
+            // Ignore keystrokes inside inputs or while any modal dialog is open
             if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
+            if (document.querySelector('.modal-overlay.active')) return;
+            if ((e.key === 'Enter' || e.key === ' ') && document.activeElement?.closest('button, a, [role="tab"]')) return;
 
             switch (e.key) {
                 case 'ArrowRight': {

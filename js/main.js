@@ -85,6 +85,30 @@ class MahoNoChesuApp {
         const modalAbout = document.getElementById('modal-about');
         const aiSubConfig = document.getElementById('ai-sub-config');
 
+        // Dismiss open sub-drawers or dismissible modals on Escape
+        if (!this._modalEscWired) {
+            this._modalEscWired = true;
+            document.addEventListener('keydown', (e) => {
+                if (e.key !== 'Escape') return;
+                const previewDrawer = document.getElementById('drawer-live-preview');
+                if (previewDrawer && !previewDrawer.classList.contains('hidden')) {
+                    previewDrawer.classList.add('hidden');
+                    this.resetDedicatedPreview();
+                    return;
+                }
+                const customDrawer = document.getElementById('drawer-piece-customize');
+                if (customDrawer && !customDrawer.classList.contains('hidden')) {
+                    customDrawer.classList.add('hidden');
+                    return;
+                }
+                const locked = new Set(['modal-main-menu', 'modal-promotion', 'modal-draw-offer', 'modal-match-results']);
+                const activeModals = Array.from(document.querySelectorAll('.modal-overlay.active')).filter(m => !locked.has(m.id));
+                if (activeModals.length > 0) {
+                    activeModals[activeModals.length - 1].classList.remove('active');
+                }
+            });
+        }
+
         document.getElementById('btn-home')?.addEventListener('click', () => {
             this.audio.playUiClick();
             if (this.ai) this.ai.cancelPendingSearch();
@@ -1053,20 +1077,6 @@ class MahoNoChesuApp {
                 });
             }
         });
-
-        if (!drawer._escWired) {
-            drawer._escWired = true;
-            document.addEventListener('keydown', (e) => {
-                if (e.key !== 'Escape') return;
-                const previewDrawer = document.getElementById('drawer-live-preview');
-                if (previewDrawer && !previewDrawer.classList.contains('hidden')) {
-                    previewDrawer.classList.add('hidden');
-                    this.resetDedicatedPreview();
-                } else if (!drawer.classList.contains('hidden')) {
-                    drawer.classList.add('hidden');
-                }
-            });
-        }
 
         // 2. Element Picker Buttons (Left Column)
         const grid = document.getElementById('elements-picker-palette') || document.getElementById('custom-elem-options-grid');
