@@ -19,6 +19,9 @@ class MahoNoChesuApp {
         this.playerColor = 'w'; // 'w' | 'b' in PvC
         this.moveHistoryLog = []; // { san, move }
         this.isAnimating = false;
+        this.matchId = 0;
+        this.aiMoveTimer = null;
+        this.isAITurnPending = false;
         this.consecutiveCaptures = 0;
         this.comboTracker = { player: null, lastElement: null, streak: 0, sameStreak: 0 };
 
@@ -425,10 +428,13 @@ class MahoNoChesuApp {
         this.ui.onUndoRequest = () => {
             if (this.isAnimating) return;
             this.audio.playUiClick();
+            this.matchId++;
+            this.clearAIMoveTimer();
+            this.isAITurnPending = false;
             if (this.ai) this.ai.cancelPendingSearch();
 
             if (this.gameMode === 'pvc') {
-                // In PvC mode, undo 2 plies (AI move + Player move)
+                // In PvC mode, undo 2 plies (AI move + Player move) when possible
                 if (this.engine.history.length >= 2) {
                     this.engine.unmakeMove();
                     this.engine.unmakeMove();
@@ -451,6 +457,11 @@ class MahoNoChesuApp {
             this.ui.renderMoveHistory(this.moveHistoryLog);
             this.ui.renderCapturedPieces();
             this.updateStatusDisplay();
+
+            // If after undoing in PvC mode it is AI's turn (e.g., player is Black at move 1), trigger AI
+            if (this.gameMode === 'pvc' && this.engine.turn !== this.playerColor && !this.engine.getGameStatus().gameOver) {
+                this.scheduleAIMove(250);
+            }
         };
 
         this.ui.onRestartRequest = () => {
@@ -526,6 +537,9 @@ class MahoNoChesuApp {
     }
 
     startNewMatch(mode = 'pvp') {
+        this.matchId++;
+        this.clearAIMoveTimer();
+        this.isAITurnPending = false;
         if (this.ai) this.ai.cancelPendingSearch();
         this.gameMode = mode;
         this.engine.reset();
@@ -588,7 +602,7 @@ class MahoNoChesuApp {
 
         // If PvC and AI plays White, trigger AI first move
         if (this.gameMode === 'pvc' && this.playerColor === 'b') {
-            setTimeout(() => this.triggerAIMove(), 600);
+            this.scheduleAIMove(600);
         }
     }
 
@@ -644,17 +658,56 @@ class MahoNoChesuApp {
         }
     }
 
+    clearAIMoveTimer() {
+        if (this.aiMoveTimer !== null) {
+            clearTimeout(this.aiMoveTimer);
+            this.aiMoveTimer = null;
+        }
+    }
+
+    scheduleAIMove(delayMs = 80) {
+        this.clearAIMoveTimer();
+        const expectedMatchId = this.matchId;
+        this.aiMoveTimer = setTimeout(() => {
+            this.aiMoveTimer = null;
+            this.triggerAIMove(expectedMatchId);
+        }, delayMs);
+    }
+
     /**
      * AI Move Trigger
      */
-    async triggerAIMove() {
-        if (this.isAnimating || this.engine.getGameStatus().gameOver) return;
+    async triggerAIMove(expectedMatchId = this.matchId) {
+        if (expectedMatchId !== this.matchId) return;
+        if (this.gameMode !== 'pvc') return;
 
+        const aiColor = this.playerColor === 'w' ? 'b' : 'w';
+        if (this.isAnimating || this.isAITurnPending || this.engine.turn !== aiColor || this.engine.getGameStatus().gameOver) {
+            return;
+        }
+
+        this.isAITurnPending = true;
         this.ui.setStatus('Arcane AI is calculating...', true);
-        const bestMove = await this.ai.getBestMove(this.engine, this.aiDifficulty, this.selectedPersonality);
+        try {
+            const bestMove = await this.ai.getBestMove(this.engine, this.aiDifficulty, this.selectedPersonality);
 
-        if (bestMove) {
-            await this.processMoveSequence(bestMove);
+            // Re-verify match state, turn, and piece color after async search
+            if (
+                expectedMatchId !== this.matchId ||
+                this.gameMode !== 'pvc' ||
+                this.engine.turn !== aiColor ||
+                this.isAnimating ||
+                this.engine.getGameStatus().gameOver
+            ) {
+                return;
+            }
+
+            const movingPiece = bestMove ? this.engine.getPieceAt(bestMove.from) : null;
+            if (bestMove && movingPiece && movingPiece.color === aiColor) {
+                await this.processMoveSequence(bestMove);
+            }
+        } finally {
+            this.isAITurnPending = false;
         }
     }
 

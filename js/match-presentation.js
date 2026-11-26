@@ -563,7 +563,11 @@ class MatchPresentationController {
 
                 // Trigger AI reply if it's computer's turn in PvC
                 if (this.app.gameMode === 'pvc' && this.app.engine.turn !== this.app.playerColor) {
-                    setTimeout(() => this.app.triggerAIMove(), 80);
+                    if (this.app.scheduleAIMove) {
+                        this.app.scheduleAIMove(80);
+                    } else {
+                        setTimeout(() => this.app.triggerAIMove(), 80);
+                    }
                 }
             }
 

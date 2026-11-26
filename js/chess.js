@@ -4,8 +4,11 @@
  */
 
 class ChessEngine {
-    constructor() {
+    constructor(fen = null) {
         this.reset();
+        if (typeof fen === 'string' && fen.trim()) {
+            this.loadFEN(fen);
+        }
     }
 
     reset() {

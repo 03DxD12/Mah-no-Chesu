@@ -143,15 +143,16 @@ function sortMoves(moves, engine, pvMove, killer1, killer2) {
     return indices.map(i => moves[i]);
 }
 
-// Quiescence Search for Tactical Captures
-function quiescence(engine, alpha, beta, isMaximizing, deadline, state) {
+// Quiescence Search for Tactical Captures (depth-capped to prevent search explosions)
+function quiescence(engine, alpha, beta, isMaximizing, deadline, state, qDepth = 0) {
     state.nodes++;
-    if ((state.nodes & 511) === 0 && Date.now() >= deadline) {
+    if ((state.nodes & 127) === 0 && Date.now() >= deadline) {
         state.timeout = true;
         return isMaximizing ? alpha : beta;
     }
 
     const standPat = evaluateBoard(engine);
+    if (qDepth >= 6) return standPat;
 
     if (isMaximizing) {
         if (standPat >= beta) return beta;
@@ -171,7 +172,7 @@ function quiescence(engine, alpha, beta, isMaximizing, deadline, state) {
         for (let i = 0; i < ordered.length; i++) {
             const m = ordered[i];
             const searchState = engine.makeSearchMove(m);
-            const score = quiescence(engine, alpha, beta, false, deadline, state);
+            const score = quiescence(engine, alpha, beta, false, deadline, state, qDepth + 1);
             engine.unmakeSearchMove(searchState);
 
             if (state.timeout) return alpha;
@@ -183,7 +184,7 @@ function quiescence(engine, alpha, beta, isMaximizing, deadline, state) {
         for (let i = 0; i < ordered.length; i++) {
             const m = ordered[i];
             const searchState = engine.makeSearchMove(m);
-            const score = quiescence(engine, alpha, beta, true, deadline, state);
+            const score = quiescence(engine, alpha, beta, true, deadline, state, qDepth + 1);
             engine.unmakeSearchMove(searchState);
 
             if (state.timeout) return beta;
@@ -197,13 +198,13 @@ function quiescence(engine, alpha, beta, isMaximizing, deadline, state) {
 // Alpha-Beta Minimax Search with Killer Moves
 function search(engine, depth, ply, alpha, beta, isMaximizing, deadline, state, killers, pvMove) {
     state.nodes++;
-    if ((state.nodes & 511) === 0 && Date.now() >= deadline) {
+    if ((state.nodes & 127) === 0 && Date.now() >= deadline) {
         state.timeout = true;
         return isMaximizing ? alpha : beta;
     }
 
     if (depth <= 0) {
-        return quiescence(engine, alpha, beta, isMaximizing, deadline, state);
+        return quiescence(engine, alpha, beta, isMaximizing, deadline, state, 0);
     }
 
     const moves = engine.generateLegalMoves(engine.turn);
@@ -312,18 +313,18 @@ function findBestMove(fen, options = {}) {
         }
     }
 
-    // Time budget by difficulty (Specs: Easy 400ms, Normal 1200ms, Hard/Arcane 3000ms max)
-    let timeBudget = 1200;
+    // Time budget by difficulty (Easy 250ms, Normal 700ms, Hard/Arcane 1400ms max)
+    let timeBudget = 700;
     let maxSearchDepth = 4;
     if (difficulty === 'easy') {
-        timeBudget = 350;
+        timeBudget = 250;
         maxSearchDepth = 2;
     } else if (difficulty === 'normal') {
-        timeBudget = 1200;
+        timeBudget = 700;
         maxSearchDepth = 4;
     } else if (difficulty === 'hard' || difficulty === 'arcane') {
-        timeBudget = 2800; // Hard ceiling 3.0s, giving ample safety on mobile
-        maxSearchDepth = 6;
+        timeBudget = 1400;
+        maxSearchDepth = 5;
     }
 
     const startTime = Date.now();

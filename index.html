@@ -466,11 +466,11 @@
     </div>
 
     <!-- Element Guide Modal -->
-    <div id="modal-element-guide" class="modal-overlay">
+    <div id="modal-element-guide" class="modal-overlay" role="dialog" aria-modal="true">
         <div class="modal-card guide-card">
             <div class="modal-header">
                 <h2 class="modal-title">ELEMENTAL CODEX</h2>
-                <button class="btn-close modal-close">&times;</button>
+                <button type="button" class="btn-close modal-close" aria-label="Close modal">&times;</button>
             </div>
             
             <div class="guide-grid">
@@ -584,11 +584,11 @@
     </div>
 
     <!-- How To Play Modal -->
-    <div id="modal-how-to-play" class="modal-overlay">
+    <div id="modal-how-to-play" class="modal-overlay" role="dialog" aria-modal="true">
         <div class="modal-card info-card">
             <div class="modal-header">
                 <h2 class="modal-title">RULES OF COMBAT</h2>
-                <button class="btn-close modal-close">&times;</button>
+                <button type="button" class="btn-close modal-close" aria-label="Close modal">&times;</button>
             </div>
 
             <div class="info-content">
@@ -618,7 +618,7 @@
         <div class="modal-card settings-card">
             <div class="modal-header">
                 <h2 class="modal-title">SYSTEM SETTINGS</h2>
-                <button class="btn-close modal-close">&times;</button>
+                <button type="button" class="btn-close modal-close" aria-label="Close modal">&times;</button>
             </div>
 
             <div class="settings-form">
@@ -768,11 +768,11 @@
     </div>
 
     <!-- About Modal -->
-    <div id="modal-about" class="modal-overlay">
+    <div id="modal-about" class="modal-overlay" role="dialog" aria-modal="true">
         <div class="modal-card info-card">
             <div class="modal-header">
                 <h2 class="modal-title">ABOUT MAHŌ NO CHESU</h2>
-                <button class="btn-close modal-close">&times;</button>
+                <button type="button" class="btn-close modal-close" aria-label="Close modal">&times;</button>
             </div>
             <div class="info-content">
                 <p><strong>Mahō no Chesu (魔法のチェス) &bull; Elemental Chess</strong></p>
@@ -881,7 +881,7 @@
     </div>
 
     <!-- Draw Offer Modal -->
-    <div id="modal-draw-offer" class="modal-overlay">
+    <div id="modal-draw-offer" class="modal-overlay" role="dialog" aria-modal="true">
         <div class="modal-card prompt-card">
             <h2 class="modal-title">DRAW PROPOSAL</h2>
             <p id="draw-offer-text">Your opponent has proposed a peaceful truce. Do you accept?</p>
@@ -893,7 +893,7 @@
     </div>
 
     <!-- Match Results & Comprehensive Statistics Modal (Spec 26, 50, 51) -->
-    <div id="modal-match-results" class="modal-overlay">
+    <div id="modal-match-results" class="modal-overlay" role="dialog" aria-modal="true">
         <div class="modal-card match-results-card">
             <div class="results-header">
                 <div class="results-crown">👑</div>
@@ -951,7 +951,7 @@
     </div>
 
     <!-- Interactive Replay Modal (Spec 53 - 64) -->
-    <div id="modal-replay" class="modal-overlay modal-replay-overlay">
+    <div id="modal-replay" class="modal-overlay modal-replay-overlay" role="dialog" aria-modal="true">
         <div class="modal-card replay-card">
             <div class="replay-header">
                 <div class="replay-title-wrap">
@@ -1013,14 +1013,14 @@
     </div>
 
     <!-- Match History & Lifetime Profile Modal (Spec 77 - 83) -->
-    <div id="modal-match-history" class="modal-overlay">
+    <div id="modal-match-history" class="modal-overlay" role="dialog" aria-modal="true">
         <div class="modal-card history-card">
             <div class="modal-header">
                 <div class="loadout-title-group">
                     <h2 class="modal-title">WAR CHRONICLES &amp; STATS</h2>
                     <span class="loadout-subtitle">Recent Matches &bull; Player Performance &bull; Lifetime Milestones</span>
                 </div>
-                <button type="button" class="btn-close modal-close">&times;</button>
+                <button type="button" class="btn-close modal-close" aria-label="Close modal">&times;</button>
             </div>
 
             <!-- Lifetime Profile Stats Banner -->
@@ -1091,7 +1091,7 @@
                     <button type="button" id="btn-loadout-open-lab" class="btn-action-small" title="Open Element Laboratory Sandbox">
                         <span>⚗️ Element Lab</span>
                     </button>
-                    <button class="btn-close modal-close">&times;</button>
+                    <button type="button" class="btn-close modal-close" aria-label="Close modal">&times;</button>
                 </div>
             </div>
 
@@ -1400,7 +1400,7 @@
                     <button type="button" id="btn-lab-toggle-dev" class="btn-action-small" title="Toggle Developer HUD">
                         <span>🛠️ Dev HUD</span>
                     </button>
-                    <button class="btn-close modal-close">&times;</button>
+                    <button type="button" class="btn-close modal-close" aria-label="Close modal">&times;</button>
                 </div>
             </div>
 
@@ -1682,7 +1682,7 @@
     <!-- ================= LEARNING & PROGRESSION MODALS ================= -->
 
     <!-- Training Academy Modal (Spec 4-7) -->
-    <div id="modal-academy" class="modal-overlay">
+    <div id="modal-academy" class="modal-overlay" role="dialog" aria-modal="true">
         <div class="modal-card modal-large academy-card">
             <div class="modal-header">
                 <div class="modal-header-titles">
@@ -1724,7 +1724,7 @@
     </div>
 
     <!-- Chess Puzzles Modal (Spec 30-43) -->
-    <div id="modal-puzzles" class="modal-overlay">
+    <div id="modal-puzzles" class="modal-overlay" role="dialog" aria-modal="true">
         <div class="modal-card modal-large puzzles-card">
             <div class="modal-header">
                 <div class="modal-header-titles">
@@ -1769,7 +1769,7 @@
     </div>
 
     <!-- Daily Challenges Modal (Spec 44-48) -->
-    <div id="modal-challenges" class="modal-overlay">
+    <div id="modal-challenges" class="modal-overlay" role="dialog" aria-modal="true">
         <div class="modal-card challenges-card">
             <div class="modal-header">
                 <div class="modal-header-titles">
@@ -1795,7 +1795,7 @@
     </div>
 
     <!-- Achievements Modal (Spec 66-73) -->
-    <div id="modal-achievements" class="modal-overlay">
+    <div id="modal-achievements" class="modal-overlay" role="dialog" aria-modal="true">
         <div class="modal-card modal-large achievements-card">
             <div class="modal-header">
                 <div class="modal-header-titles">
@@ -1827,7 +1827,7 @@
     </div>
 
     <!-- Player Profile & Mastery Modal (Spec 74-82, 102-106) -->
-    <div id="modal-profile" class="modal-overlay">
+    <div id="modal-profile" class="modal-overlay" role="dialog" aria-modal="true">
         <div class="modal-card modal-large profile-card">
             <div class="modal-header">
                 <div class="modal-header-titles">

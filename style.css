@@ -410,7 +410,8 @@ body {
     border-radius: 50%;
     background: #334155;
     border: 1px solid #475569;
-    transition: all var(--transition-normal);
+    transition: var(--transition-normal);
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .turn-gem.active {
@@ -974,7 +975,8 @@ body {
     z-index: 25;
     opacity: 0;
     white-space: nowrap;
-    transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .attack-banner.active {
@@ -1301,7 +1303,8 @@ body {
     letter-spacing: 0.1em;
     cursor: pointer;
     overflow: hidden;
-    transition: all var(--transition-fast);
+    transition: var(--transition-fast);
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .btn-menu:hover {
@@ -1332,7 +1335,8 @@ body {
     border-radius: var(--radius-sm);
     cursor: pointer;
     font-size: 0.9rem;
-    transition: all var(--transition-fast);
+    transition: var(--transition-fast);
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .btn-secondary:hover {
@@ -1363,7 +1367,8 @@ body {
     padding: 1rem;
     cursor: pointer;
     text-align: left;
-    transition: all var(--transition-fast);
+    transition: var(--transition-fast);
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .mode-card-btn:hover {
@@ -1415,7 +1420,8 @@ body {
     padding: 0.5rem;
     font-size: 0.75rem;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: var(--transition-fast);
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .btn-diff.active, .btn-side.active {
@@ -1691,7 +1697,8 @@ body {
     border-radius: var(--radius-md);
     padding: 0.75rem 0.4rem;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: var(--transition-fast);
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
     position: relative;
     user-select: none;
 }
@@ -1755,7 +1762,8 @@ body {
     font-size: 0.75rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: var(--transition-fast);
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .btn-ascension-quick:hover {
@@ -1780,7 +1788,8 @@ body {
     border-radius: var(--radius-sm);
     padding: 0.5rem 0.25rem;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: var(--transition-fast);
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
     user-select: none;
 }
 
@@ -1829,7 +1838,8 @@ body {
     border-radius: var(--radius-sm);
     padding: 0.5rem 0.6rem;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: var(--transition-fast);
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
     text-align: left;
 }
 
@@ -2006,7 +2016,8 @@ body {
     font-size: 0.78rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: var(--transition-fast);
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .btn-ascension-secondary:hover {
@@ -2029,7 +2040,8 @@ body {
     letter-spacing: 0.08em;
     cursor: pointer;
     box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
-    transition: all var(--transition-fast);
+    transition: var(--transition-fast);
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .btn-ascension-primary:hover {
@@ -2391,7 +2403,8 @@ body {
     font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: var(--transition-fast);
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .loadout-tab-btn .tab-piece {
@@ -2419,7 +2432,8 @@ body {
     border-radius: var(--radius-sm);
     color: var(--text-secondary);
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: var(--transition-fast);
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .btn-action-small:hover {
@@ -2516,7 +2530,8 @@ body {
     border-radius: var(--radius-full);
     color: var(--text-secondary);
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: var(--transition-fast);
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .preset-chip-btn:hover {
@@ -2583,7 +2598,8 @@ body {
     border: 1.5px solid var(--border-subtle);
     border-radius: var(--radius-sm);
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: var(--transition-fast);
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .piece-roster-btn:hover {
@@ -2694,7 +2710,8 @@ body {
     border: 1.5px solid var(--border-subtle);
     border-radius: var(--radius-md);
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: var(--transition-fast);
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
     position: relative;
     overflow: hidden;
 }
@@ -2901,7 +2918,8 @@ body {
     background: rgba(0, 0, 0, 0.4);
     border: 1px solid var(--border-gold);
     border-radius: 999px;
-    transition: all 0.25s ease;
+    transition: 0.25s ease;
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .synergy-title-text {
@@ -4755,7 +4773,8 @@ body {
     font-size: 0.72rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: var(--transition-fast);
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .btn-timer-chip:hover {
@@ -4855,7 +4874,8 @@ body {
     letter-spacing: 0.05em;
     cursor: pointer;
     box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
-    transition: all var(--transition-fast);
+    transition: var(--transition-fast);
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .btn-preview-live-test:hover {
@@ -4931,7 +4951,8 @@ body {
     font-size: 0.82rem;
     font-weight: 700;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: var(--transition-fast);
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .lab-tab-btn:hover {
@@ -5063,7 +5084,8 @@ body {
     letter-spacing: 0.08em;
     cursor: pointer;
     box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
-    transition: all var(--transition-fast);
+    transition: var(--transition-fast);
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .btn-lab-primary:hover {
@@ -5084,7 +5106,8 @@ body {
     font-size: 0.78rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: var(--transition-fast);
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .btn-lab-secondary:hover {
@@ -5163,7 +5186,8 @@ body {
     align-items: center;
     gap: 0.2rem;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: var(--transition-fast);
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .lab-piece-btn:hover {
@@ -5204,7 +5228,8 @@ body {
     align-items: center;
     gap: 0.15rem;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: var(--transition-fast);
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .lab-elem-btn:hover {
@@ -5311,7 +5336,8 @@ body {
     font-weight: 600;
     padding: 0.2rem 0.65rem;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: var(--transition-fast);
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .gallery-chip:hover {
@@ -5339,7 +5365,8 @@ body {
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
-    transition: all var(--transition-fast);
+    transition: var(--transition-fast);
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .gallery-card:hover {
@@ -5405,7 +5432,8 @@ body {
     font-weight: 700;
     padding: 0.25rem 0.5rem;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: var(--transition-fast);
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .btn-gallery-test:hover {
@@ -5524,7 +5552,8 @@ body {
     padding: 0.35rem 0.65rem;
     border-radius: var(--radius-sm);
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: var(--transition-fast);
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .btn-banner-action:hover {
@@ -5660,7 +5689,8 @@ body {
     font-size: 0.66rem;
     font-weight: 700;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: var(--transition-fast);
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .btn-card-change-elem:hover {
@@ -5677,7 +5707,8 @@ body {
     font-size: 0.66rem;
     font-weight: 700;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: var(--transition-fast);
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .btn-card-preview:hover {
@@ -6475,7 +6506,8 @@ body {
     font-size: 0.74rem;
     font-weight: 700;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: var(--transition-fast);
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .btn-preview-ctl:hover {
@@ -6576,7 +6608,8 @@ body {
     font-weight: 700;
     color: var(--text-primary);
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: var(--transition-fast);
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .btn-army-action:hover {
@@ -6613,7 +6646,8 @@ body {
     padding: 0.35rem 0.65rem;
     cursor: pointer;
     white-space: nowrap;
-    transition: all var(--transition-fast);
+    transition: var(--transition-fast);
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .btn-lab-action:hover {
@@ -6697,7 +6731,8 @@ body {
     padding: 0.35rem 0.65rem;
     cursor: pointer;
     white-space: nowrap;
-    transition: all var(--transition-fast);
+    transition: var(--transition-fast);
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .btn-promo-chip:hover {
@@ -6977,7 +7012,8 @@ body {
     font-weight: 700;
     letter-spacing: 0.04em;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: 0.2s ease;
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
     text-align: center;
 }
 
@@ -7013,7 +7049,8 @@ body {
     border-radius: var(--radius-md);
     padding: 0.5rem 0.65rem;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: 0.2s ease;
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
     text-align: left;
 }
 
@@ -7137,7 +7174,8 @@ body {
     font-weight: 700;
     border-radius: var(--radius-md);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: 0.2s ease;
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
     border: 1px solid transparent;
 }
 
@@ -7230,7 +7268,8 @@ body {
     color: var(--text-muted);
     cursor: pointer;
     white-space: nowrap;
-    transition: all 0.2s ease;
+    transition: 0.2s ease;
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .replay-san-chip:hover {
@@ -7262,7 +7301,8 @@ body {
     padding: 0.55rem 0.95rem;
     font-size: 0.95rem;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: 0.2s ease;
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .btn-replay-nav:hover {
@@ -7320,7 +7360,8 @@ body {
     font-size: 0.74rem;
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: 0.2s ease;
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .btn-skip-chip:hover {
@@ -7385,7 +7426,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    transition: all 0.2s ease;
+    transition: 0.2s ease;
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .match-history-entry:hover {
@@ -7446,7 +7488,8 @@ body {
     font-weight: 700;
     color: var(--text-light);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: 0.2s ease;
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .btn-pause-action:hover {
@@ -7580,7 +7623,8 @@ body.screenshot-clean-view #board-container {
     border: 1px solid rgba(255, 255, 255, 0.18);
     border-radius: var(--radius-sm, 4px);
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: 0.15s ease;
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .btn-hud-action:hover {
@@ -7621,7 +7665,8 @@ body.screenshot-clean-view #board-container {
     color: var(--text-primary);
     opacity: 0;
     transform: translateX(50px) scale(0.95);
-    transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    transition: 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
     pointer-events: auto;
 }
 
@@ -7722,7 +7767,8 @@ body.screenshot-clean-view #board-container {
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: var(--radius-full, 999px);
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: 0.15s ease;
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .academy-chip.active,
@@ -7752,7 +7798,8 @@ body.screenshot-clean-view #board-container {
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: var(--radius-md, 8px);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: 0.2s ease;
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .academy-lesson-card:hover:not(.locked) {
@@ -7880,7 +7927,8 @@ body.screenshot-clean-view #board-container {
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: var(--radius-md, 8px);
-    transition: all 0.2s ease;
+    transition: 0.2s ease;
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .puzzle-browser-card:hover {
@@ -7963,7 +8011,8 @@ body.screenshot-clean-view #board-container {
     color: var(--text-gold);
     border-radius: var(--radius-sm, 4px);
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: 0.15s ease;
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .btn-play-puzzle:hover {
@@ -8075,7 +8124,8 @@ body.screenshot-clean-view #board-container {
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: var(--radius-md, 8px);
     opacity: 0.65;
-    transition: all 0.2s ease;
+    transition: 0.2s ease;
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .achievement-card.unlocked {
@@ -8284,7 +8334,8 @@ body.screenshot-clean-view #board-container {
     border: none;
     cursor: pointer;
     border-radius: var(--radius-sm, 4px);
-    transition: all 0.15s ease;
+    transition: 0.15s ease;
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
 }
 
 .profile-tab-btn.active {

@@ -125,14 +125,19 @@ class ChessAI {
             return new Promise((resolve) => {
                 let resolved = false;
 
-                // Safety fallback timeout: 4.5s ceiling for mobile
+                // Safety fallback timeout: 2.5s ceiling so UI never stalls
                 const timeout = setTimeout(() => {
                     if (!resolved && requestId === this.currentRequestId) {
                         resolved = true;
-                        console.warn('AI worker search timed out, falling back to instant search');
-                        resolve(this.searchLocal(engineObj, difficulty));
+                        console.warn('AI worker search timed out, resetting worker and using fast fallback');
+                        if (this.worker) {
+                            try { this.worker.terminate(); } catch { /* ignore */ }
+                            this.worker = null;
+                            this.initWorker();
+                        }
+                        resolve(this.searchLocal(engineObj, 'easy'));
                     }
-                }, 4500);
+                }, 2500);
 
                 this.worker.onmessage = (e) => {
                     if (resolved) return;
@@ -229,14 +234,15 @@ class ChessAI {
         return indices.map(i => moves[i]);
     }
 
-    quiescence(engine, alpha, beta, isMaximizing, deadline, state) {
+    quiescence(engine, alpha, beta, isMaximizing, deadline, state, qDepth = 0) {
         state.nodes++;
-        if ((state.nodes & 511) === 0 && Date.now() >= deadline) {
+        if ((state.nodes & 127) === 0 && Date.now() >= deadline) {
             state.timeout = true;
             return isMaximizing ? alpha : beta;
         }
 
         const standPat = this.evaluateBoard(engine);
+        if (qDepth >= 6) return standPat;
 
         if (isMaximizing) {
             if (standPat >= beta) return beta;
@@ -256,7 +262,7 @@ class ChessAI {
             for (let i = 0; i < ordered.length; i++) {
                 const m = ordered[i];
                 const searchState = engine.makeSearchMove(m);
-                const score = this.quiescence(engine, alpha, beta, false, deadline, state);
+                const score = this.quiescence(engine, alpha, beta, false, deadline, state, qDepth + 1);
                 engine.unmakeSearchMove(searchState);
 
                 if (state.timeout) return alpha;
@@ -268,7 +274,7 @@ class ChessAI {
             for (let i = 0; i < ordered.length; i++) {
                 const m = ordered[i];
                 const searchState = engine.makeSearchMove(m);
-                const score = this.quiescence(engine, alpha, beta, true, deadline, state);
+                const score = this.quiescence(engine, alpha, beta, true, deadline, state, qDepth + 1);
                 engine.unmakeSearchMove(searchState);
 
                 if (state.timeout) return beta;
@@ -281,13 +287,13 @@ class ChessAI {
 
     search(engine, depth, ply, alpha, beta, isMaximizing, deadline, state, killers, pvMove) {
         state.nodes++;
-        if ((state.nodes & 511) === 0 && Date.now() >= deadline) {
+        if ((state.nodes & 127) === 0 && Date.now() >= deadline) {
             state.timeout = true;
             return isMaximizing ? alpha : beta;
         }
 
         if (depth <= 0) {
-            return this.quiescence(engine, alpha, beta, isMaximizing, deadline, state);
+            return this.quiescence(engine, alpha, beta, isMaximizing, deadline, state, 0);
         }
 
         const moves = engine.generateLegalMoves(engine.turn);
@@ -374,16 +380,16 @@ class ChessAI {
             if (isMate) return m;
         }
 
-        let timeBudget = 1200;
+        let timeBudget = 700;
         let maxSearchDepth = 4;
         if (difficulty === 'easy') {
-            timeBudget = 350;
+            timeBudget = 250;
             maxSearchDepth = 2;
         } else if (difficulty === 'normal') {
-            timeBudget = 1200;
+            timeBudget = 700;
             maxSearchDepth = 4;
         } else if (difficulty === 'hard' || difficulty === 'arcane') {
-            timeBudget = 2500;
+            timeBudget = 1400;
             maxSearchDepth = 5;
         }
 

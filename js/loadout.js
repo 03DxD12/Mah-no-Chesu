@@ -379,12 +379,20 @@ class LoadoutManager {
         this.blackLoadout = this.loadStoredLoadout(this.STORAGE_KEY_BLACK, { ...PRESETS.classic.loadout });
 
         // AI configuration: 'classic' | 'random' | 'match_player'
-        this.aiLoadoutType = localStorage.getItem(this.STORAGE_KEY_AI_CONFIG) || 'classic';
+        try {
+            this.aiLoadoutType = localStorage.getItem(this.STORAGE_KEY_AI_CONFIG) || 'classic';
+        } catch (e) {
+            this.aiLoadoutType = 'classic';
+        }
 
         // Custom Presets & Saved Armies
         this.customPresets = this.loadCustomPresets();
         this.savedArmies = this.loadSavedArmies();
-        this.favoriteArmyId = localStorage.getItem(this.STORAGE_KEY_FAVORITE_ARMY) || (this.savedArmies[0]?.id || 'army_inferno');
+        try {
+            this.favoriteArmyId = localStorage.getItem(this.STORAGE_KEY_FAVORITE_ARMY) || (this.savedArmies[0]?.id || 'army_inferno');
+        } catch (e) {
+            this.favoriteArmyId = this.savedArmies[0]?.id || 'army_inferno';
+        }
         this.customArmyNames = this.loadCustomArmyNames();
         this.favoriteEffects = this.loadFavoriteEffects();
         this.recentlyTested = this.loadRecentlyTested();
