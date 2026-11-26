@@ -1236,7 +1236,18 @@ body {
     font-size: 1.8rem;
     cursor: pointer;
     line-height: 1;
-    transition: color var(--transition-fast);
+    min-width: 40px;
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.btn-close:focus-visible {
+    outline: 2px solid var(--border-gold);
+    outline-offset: 2px;
 }
 
 .btn-close:hover {
@@ -4708,7 +4719,8 @@ body {
    ========================================================================== */
 .player-clock {
     margin-left: auto;
-    font-family: 'Courier New', Courier, monospace, monospace;
+    font-family: 'Courier New', Courier, monospace;
+    font-variant-numeric: tabular-nums;
     font-size: 1.05rem;
     font-weight: 800;
     padding: 0.2rem 0.55rem;
